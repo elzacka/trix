@@ -8,13 +8,16 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 use tauri::{
-    AppHandle, Emitter, Manager, RunEvent, WindowEvent,
+    AppHandle, Emitter, Manager, WindowEvent,
     image::Image,
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 use tauri_plugin_opener::OpenerExt;
+
+#[cfg(target_os = "macos")]
+use tauri::RunEvent;
 
 /// The lists Trix writes when a file is missing; after that the files are the user's.
 const FILES: [(&str, &str); 2] = [
@@ -260,9 +263,10 @@ fn main() {
         })
         .build(tauri::generate_context!())
         .expect("Trix starts")
-        .run(|app, event| {
-            if let RunEvent::Reopen { .. } = event {
-                show(app);
+        .run(|_app, _event| {
+            #[cfg(target_os = "macos")]
+            if let RunEvent::Reopen { .. } = _event {
+                show(_app);
             }
         });
 }
