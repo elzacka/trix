@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dev_only/
+src-tauri/target/
+src-tauri/gen/
+.DS_Store
+.obsidian/

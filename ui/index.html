@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trix</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <img src="icon.svg" alt="" class="logo">
+    <div class="tabs" role="tablist" aria-label="Lister">
+      <button role="tab" id="tab-0" aria-controls="view" aria-selected="true">Hurtigtaster</button>
+      <button role="tab" id="tab-1" aria-controls="view" aria-selected="false" tabindex="-1">Jukselapp</button>
+    </div>
+    <button id="edit" class="icon-button" aria-label="Rediger" title="Rediger">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/></svg>
+    </button>
+    <div class="menu-anchor">
+      <button id="more" class="icon-button" aria-label="Flere valg" title="Flere valg" aria-haspopup="menu" aria-expanded="false" aria-controls="menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg>
+      </button>
+      <div id="menu" role="menu" hidden>
+        <button role="menuitem" id="open-file">Åpne i annen app</button>
+        <button role="menuitem" id="reveal-file">Vis mappa</button>
+        <button role="menuitem" id="hotkey"></button>
+        <hr>
+        <button role="menuitem" id="quit">Avslutt Trix</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="view" role="tabpanel" aria-labelledby="tab-0">
+    <div class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
+      <input id="query" type="search" autocomplete="off" spellcheck="false" aria-label="Søk">
+      <button id="clear" class="icon-button" aria-label="Tøm søk" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p id="error" role="alert" hidden></p>
+    <div id="tools"></div>
+    <p id="status" class="sr-only" aria-live="polite"></p>
+    <div id="list"></div>
+  </main>
+
+  <section id="editor" hidden aria-labelledby="editor-title">
+    <div class="editor-bar">
+      <h1 id="editor-title"></h1>
+      <button id="cancel" class="button">Avbryt</button>
+      <button id="save" class="button primary">Lagre</button>
+    </div>
+    <p id="editor-error" role="alert" hidden></p>
+    <textarea id="text" spellcheck="false" aria-labelledby="editor-title"></textarea>
+  </section>
+</body>
+</html>
