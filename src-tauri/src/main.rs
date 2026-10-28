@@ -4,11 +4,13 @@ use std::{
     fs,
     io::ErrorKind,
     path::{Path, PathBuf},
+    sync::Mutex,
+    time::{Duration, Instant},
 };
 
 use serde::{Deserialize, Serialize};
 use tauri::{
-    AppHandle, Emitter, Manager, WindowEvent,
+    AppHandle, Emitter, Manager, Monitor, PhysicalPosition, WebviewWindow, WindowEvent,
     image::Image,
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -176,8 +178,69 @@ fn set_hotkey(app: AppHandle, hotkey: String) -> Result<(), String> {
     fs::write(&path, json + "\n").map_err(|e| io_error(&path, e))
 }
 
+/// When the panel last hid because it lost focus, so the tray click that caused it does not reopen it.
+struct LastHidden(Mutex<Option<Instant>>);
+
+/// Under the icon at the top of the screen (macOS menu bar), above it at the bottom (Windows tray).
+fn place(app: &AppHandle, window: &WebviewWindow) {
+    let scale = window.scale_factor().unwrap_or(1.0);
+    let Ok(panel) = window.outer_size() else { return };
+    // Right after launch the icon is not laid out yet and reports no height.
+    let icon = app
+        .tray_by_id("tray")
+        .and_then(|tray| tray.rect().ok().flatten())
+        .map(|rect| (rect.position.to_physical::<f64>(scale), rect.size.to_physical::<f64>(scale)))
+        .filter(|(_, size)| size.height > 0.0);
+    let monitors = window.available_monitors().unwrap_or_default();
+    let contains = |monitor: &&Monitor, x: f64, y: f64| {
+        let (p, s) = (monitor.position(), monitor.size());
+        (f64::from(p.x)..f64::from(p.x) + f64::from(s.width)).contains(&x)
+            && (f64::from(p.y)..f64::from(p.y) + f64::from(s.height)).contains(&y)
+    };
+    let monitor = icon
+        .and_then(|(at, _)| monitors.iter().find(|m| contains(m, at.x, at.y)).cloned())
+        .or_else(|| window.primary_monitor().ok().flatten());
+    let Some(monitor) = monitor else { return };
+    let area = monitor.work_area();
+    let (left, top) = (f64::from(area.position.x), f64::from(area.position.y));
+    let (right, bottom) = (left + f64::from(area.size.width), top + f64::from(area.size.height));
+    let (width, height) = (f64::from(panel.width), f64::from(panel.height));
+    let gap = 6.0 * scale;
+    // Without the icon: the corner where it sits.
+    let (x, y, icon_width, icon_height) = match icon {
+        Some((at, size)) => (at.x, at.y, size.width, size.height),
+        None if cfg!(target_os = "macos") => (right, top - 1.0, 0.0, 0.0),
+        None => (right, bottom, 0.0, 0.0),
+    };
+    let below = y < (top + bottom) / 2.0;
+    let x = (x + icon_width / 2.0 - width / 2.0).min(right - width - gap).max(left + gap);
+    let y = if below { y + icon_height + gap } else { y - height - gap };
+    let y = y.min(bottom - height).max(top);
+    #[allow(clippy::cast_possible_truncation)]
+    let _ = window.set_position(PhysicalPosition::new(x.round() as i32, y.round() as i32));
+}
+
+/// Rounded like other Mac windows: a borderless window has square corners of its own.
+#[cfg(target_os = "macos")]
+fn round_corners(window: &WebviewWindow) {
+    use objc2_app_kit::{NSColor, NSWindow};
+    let Ok(pointer) = window.ns_window() else { return };
+    // SAFETY: Tauri's live NSWindow, used on the main thread during setup.
+    let ns_window = unsafe { &*pointer.cast::<NSWindow>() };
+    ns_window.setOpaque(false);
+    ns_window.setBackgroundColor(Some(&NSColor::clearColor()));
+    let Some(view) = ns_window.contentView() else { return };
+    view.setWantsLayer(true);
+    if let Some(layer) = view.layer() {
+        layer.setCornerRadius(16.0);
+        layer.setMasksToBounds(true);
+    }
+    ns_window.invalidateShadow();
+}
+
 fn show(app: &AppHandle) {
     let Some(window) = app.get_webview_window("main") else { return };
+    place(app, &window);
     #[cfg(target_os = "macos")]
     let _ = app.show();
     let _ = window.unminimize();
@@ -199,6 +262,10 @@ fn hide(app: AppHandle) {
 
 fn toggle(app: &AppHandle) {
     let Some(window) = app.get_webview_window("main") else { return };
+    let hidden = *app.state::<LastHidden>().0.lock().expect("lock");
+    if hidden.is_some_and(|at| at.elapsed() < Duration::from_millis(400)) {
+        return;
+    }
     if window.is_visible().unwrap_or(false) && window.is_focused().unwrap_or(false) {
         hide(app.clone());
     } else {
@@ -219,9 +286,15 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             load, save, open_file, reveal_file, open_url, set_hotkey, hide, quit
         ])
+        .manage(LastHidden(Mutex::new(None)))
         .setup(|app| {
             #[cfg(target_os = "macos")]
-            app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+            {
+                app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+                if let Some(window) = app.get_webview_window("main") {
+                    round_corners(&window);
+                }
+            }
 
             let _ = register(app.handle(), &current_hotkey());
 
@@ -255,11 +328,17 @@ fn main() {
             show(app.handle());
             Ok(())
         })
-        .on_window_event(|window, event| {
-            if let WindowEvent::CloseRequested { api, .. } = event {
+        .on_window_event(|window, event| match event {
+            WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
                 hide(window.app_handle().clone());
             }
+            // A panel, like a menu: it closes when the user clicks elsewhere.
+            WindowEvent::Focused(false) => {
+                *window.state::<LastHidden>().0.lock().expect("lock") = Some(Instant::now());
+                hide(window.app_handle().clone());
+            }
+            _ => {}
         })
         .build(tauri::generate_context!())
         .expect("Trix starts")
