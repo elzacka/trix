@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Hurtigtaster: groups, Windows and Mac keys per line, search, lookup by key press or typed combination
+- Hurtigtaster: groups, Windows and Mac keys per line, search, lookup by key press or typed combination; `\|` for a | in a name
 - Jukselapp: groups or A–Å, search, tags, aliases, links
 - Ctrl+Tab switches tabs
 - Built-in editor; menu: open in another app, show folder, hotkey, quit

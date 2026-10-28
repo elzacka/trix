@@ -136,7 +136,8 @@ export function parseShortcuts(text, os) {
     }
     const item = line.match(/^[-*]\s+(.*)$/)
     if (!item) continue
-    const [title, first = '', second] = item[1].split(/\s*\|\s*/)
+    // `\|` is the character itself, as in Markdown tables
+    const [title, first = '', second] = item[1].split(/\s*(?<!\\)\|\s*/).map(part => part.replace(/\\\|/g, '|'))
     const keys = second === undefined ? first : os === 'mac' ? second : first
     if (second !== undefined && !keys) continue
     if (!sections.length) sections.push({ title: '', items: [] })

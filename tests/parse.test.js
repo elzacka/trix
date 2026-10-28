@@ -29,6 +29,8 @@ test('one or two key columns, in file order', () => {
     { title: 'B', items: [{ title: 'Lim inn', keys: ['⌃V'], combos: ['ctrl V'] }] },
   ])
   assert.equal(parseShortcuts(text, 'windows')[0].items[1].keys[0], 'Win+D')
+  const pipe = parseShortcuts('- Loddrett strek \\| | | ⌥7\n- Omvendt skråstrek \\ | | ⌥⇧7', 'mac')[0].items
+  assert.deepEqual(pipe.map(i => [i.title, i.keys[0]]), [['Loddrett strek |', '⌥7'], ['Omvendt skråstrek \\', '⌥⇧7']])
 })
 
 test('search matches group, name and keys', () => {

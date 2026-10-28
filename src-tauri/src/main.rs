@@ -262,10 +262,6 @@ fn hide(app: AppHandle) {
 
 fn toggle(app: &AppHandle) {
     let Some(window) = app.get_webview_window("main") else { return };
-    let hidden = *app.state::<LastHidden>().0.lock().expect("lock");
-    if hidden.is_some_and(|at| at.elapsed() < Duration::from_millis(400)) {
-        return;
-    }
     if window.is_visible().unwrap_or(false) && window.is_focused().unwrap_or(false) {
         hide(app.clone());
     } else {
@@ -321,7 +317,11 @@ fn main() {
                         button: MouseButton::Left, button_state: MouseButtonState::Up, ..
                     } = event
                     {
-                        toggle(tray.app_handle());
+                        let app = tray.app_handle();
+                        let hidden = *app.state::<LastHidden>().0.lock().expect("lock");
+                        if !hidden.is_some_and(|at| at.elapsed() < Duration::from_millis(400)) {
+                            toggle(app);
+                        }
                     }
                 })
                 .build(app)?;
