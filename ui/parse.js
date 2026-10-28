@@ -24,7 +24,7 @@ const ALIASES = {
 const NAMES = {
   mac: {
     ctrl: '⌃', shift: '⇧', alt: '⌥', cmd: '⌘', win: 'Win', fn: 'fn', space: 'Mellomrom', enter: '↩',
-    tab: '⇥', esc: '⎋', backspace: '⌫', delete: '⌦', left: '←', right: '→', up: '↑', down: '↓',
+    tab: '⇥', esc: 'Esc', backspace: '⌫', delete: '⌦', left: '←', right: '→', up: '↑', down: '↓',
   },
   windows: {
     ctrl: 'Ctrl', shift: 'Shift', alt: 'Alt', cmd: '⌘', win: 'Win', fn: 'Fn', space: 'Mellomrom',

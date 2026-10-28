@@ -10,6 +10,7 @@ test('keys as symbols on a Mac and words on Windows', () => {
   assert.deepEqual(formatKeys('ctrl+shift+s', 'mac'), ['⌃⇧S'])
   assert.deepEqual(formatKeys('⌘⇧4', 'mac'), ['⌘⇧4'])
   assert.deepEqual(formatKeys('⌃⌘ mellomrom eller fn E', 'mac'), ['⌃⌘ Mellomrom', 'fn E'])
+  assert.deepEqual(formatKeys('⌘⌥ esc', 'mac'), ['⌘⌥ Esc'])
   assert.deepEqual(formatKeys('win .', 'windows'), ['Win+.'])
   assert.deepEqual(formatKeys('ctrl +', 'windows'), ['Ctrl++'])
   assert.deepEqual(formatKeys('CommandOrControl+Alt+KeyT', 'mac'), ['⌘⌥T'])
