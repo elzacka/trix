@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  formatKeys, parseShortcuts, filterShortcuts, parseCheatSheet, alphabetical, searchCheatSheet, inline,
+  formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseCheatSheet, alphabetical, searchCheatSheet, inline,
 } from '../ui/parse.js'
 
 test('keys as symbols on a Mac and words on Windows', () => {
@@ -23,8 +23,10 @@ test('one or two key columns, in file order', () => {
     '- Bare Windows | win D |', '- Felles | F1', 'Notat', '## Tom', '## B', '* Lim inn | ctrl V',
   ].join('\r\n')
   assert.deepEqual(parseShortcuts(text, 'mac'), [
-    { title: 'A', items: [{ title: 'Kopier', keys: ['⌘C'] }, { title: 'Felles', keys: ['F1'] }] },
-    { title: 'B', items: [{ title: 'Lim inn', keys: ['⌃V'] }] },
+    { title: 'A', items: [
+      { title: 'Kopier', keys: ['⌘C'], combos: ['cmd C'] }, { title: 'Felles', keys: ['F1'], combos: ['F1'] },
+    ] },
+    { title: 'B', items: [{ title: 'Lim inn', keys: ['⌃V'], combos: ['ctrl V'] }] },
   ])
   assert.equal(parseShortcuts(text, 'windows')[0].items[1].keys[0], 'Win+D')
 })
@@ -34,6 +36,31 @@ test('search matches group, name and keys', () => {
   assert.equal(filterShortcuts(sections, 'redigering lim')[0].items.length, 1)
   assert.equal(filterShortcuts(sections, 'ctrl+c')[0].items[0].title, 'Kopier')
   assert.deepEqual(filterShortcuts(sections, 'finnes ikke'), [])
+})
+
+test('a combination is the same however it is written', () => {
+  assert.equal(comboId('⌘⇧4', 'mac'), 'shift cmd 4')
+  assert.equal(comboId('shift cmd 4', 'mac'), 'shift cmd 4')
+  assert.equal(comboId('Ctrl+Shift+S', 'windows'), comboId('shift ctrl s', 'windows'))
+  assert.equal(comboId('mod c', 'mac'), 'cmd C')
+  assert.equal(comboId('kopier', 'mac'), null)
+})
+
+test('a search reads as a lookup only when it is a combination', () => {
+  assert.equal(lookupId('cmd shift 4', 'mac'), 'shift cmd 4')
+  assert.equal(lookupId('F11', 'windows'), 'F11')
+  assert.equal(lookupId('lim', 'mac'), null)
+  assert.equal(lookupId('tab', 'mac'), null)
+  assert.equal(lookupId('shift', 'mac'), null)
+  assert.equal(lookupId('', 'mac'), null)
+  assert.equal(lookupId('ctrl +', 'windows'), 'ctrl +')
+})
+
+test('lookup finds every line that uses the combination, alternatives included', () => {
+  const sections = parseShortcuts('## A\n- Emoji | win . | ⌃⌘ mellomrom eller fn E\n- Søk | win S | ⌘ mellomrom', 'mac')
+  assert.deepEqual(lookupShortcuts(sections, lookupId('fn e', 'mac'))[0].items.map(i => i.title), ['Emoji'])
+  assert.deepEqual(lookupShortcuts(sections, lookupId('cmd mellomrom', 'mac'))[0].items.map(i => i.title), ['Søk'])
+  assert.deepEqual(lookupShortcuts(sections, lookupId('cmd X', 'mac')), [])
 })
 
 const sheet = [

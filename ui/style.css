@@ -178,7 +178,15 @@ main {
 
 #query::-webkit-search-cancel-button { display: none; }
 
-#clear { position: absolute; right: 4px; }
+#clear { position: absolute; right: 34px; }
+
+#capture { position: absolute; right: 4px; }
+
+#capture[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+
+.search:has(#capture:not([hidden])) #query { padding-right: 66px; }
+
+.search:has(#capture[hidden]) #clear { right: 4px; }
 
 #error, #editor-error {
   margin: 10px 0 0;

@@ -37,7 +37,7 @@ const MAC_SYMBOLS = '⌘⇧⌥⌃'
 
 function tokens(combo) {
   const out = []
-  for (const chunk of combo.trim().split(/\s+/)) {
+  for (const chunk of combo.trim().split(/\s+/).filter(Boolean)) {
     const parts = chunk === '+' ? ['+'] : chunk.split(/\+(?=.)/).map(p => (p === '' ? '+' : p))
     for (let part of parts) {
       while (part.length > 1 && MAC_SYMBOLS.includes(part[0])) {
@@ -60,10 +60,11 @@ function keyName(token, os) {
   return token.length === 1 || /^f\d+$/i.test(token) ? token.toUpperCase() : token
 }
 
+const alternatives = text => text.split(/\s+eller\s+/i)
+
 /** «ctrl shift S eller F1» → ['Ctrl+Shift+S', 'F1'] on Windows, ['⌃⇧S', 'F1'] on a Mac. */
 export function formatKeys(text, os) {
-  return text
-    .split(/\s+eller\s+/i)
+  return alternatives(text)
     .map(combo => tokens(combo).map(t => keyName(t, os)))
     .filter(names => names.length)
     .map(names => {
@@ -74,6 +75,42 @@ export function formatKeys(text, os) {
         return i && (word(name) || word(names[i - 1])) ? `${all} ${name}` : all + name
       }, '')
     })
+}
+
+const MODIFIERS = ['ctrl', 'alt', 'shift', 'cmd', 'win', 'fn']
+
+function keyId(token, os) {
+  let id = ALIASES[token.toLowerCase()]
+  if (id === 'mod' || token.toLowerCase() === 'mod') id = os === 'mac' ? 'cmd' : 'ctrl'
+  if (id) return id
+  const code = token.match(/^(?:key|digit)(\w)$/i)
+  if (code) return code[1].toUpperCase()
+  return token.length === 1 || /^f\d{1,2}$/i.test(token) ? token.toUpperCase() : null
+}
+
+/** One combination in a fixed order, so «⌘⇧4» and «shift cmd 4» are the same; null if it holds an unknown word. */
+export function comboId(text, os) {
+  const ids = tokens(text).map(t => keyId(t, os))
+  if (!ids.length || ids.includes(null)) return null
+  const keys = ids.filter(id => !MODIFIERS.includes(id))
+  if (keys.length > 1) return null
+  return [...MODIFIERS.filter(m => ids.includes(m)), ...keys].join(' ')
+}
+
+/** A search that reads as a combination: a modifier and one key, or an F key. */
+export function lookupId(query, os) {
+  const id = comboId(query, os)
+  if (!id) return null
+  const parts = id.split(' ')
+  const key = parts.at(-1)
+  return (parts.length > 1 && !MODIFIERS.includes(key)) || /^F\d+$/.test(id) ? id : null
+}
+
+/** The lines that use the combination. */
+export function lookupShortcuts(sections, id) {
+  return sections
+    .map(s => ({ ...s, items: s.items.filter(item => item.combos.includes(id)) }))
+    .filter(s => s.items.length)
 }
 
 function comments(lines) {
@@ -103,7 +140,11 @@ export function parseShortcuts(text, os) {
     const keys = second === undefined ? first : os === 'mac' ? second : first
     if (second !== undefined && !keys) continue
     if (!sections.length) sections.push({ title: '', items: [] })
-    sections.at(-1).items.push({ title: title.trim(), keys: formatKeys(keys, os) })
+    sections.at(-1).items.push({
+      title: title.trim(),
+      keys: formatKeys(keys, os),
+      combos: alternatives(keys).map(k => comboId(k, os)).filter(Boolean),
+    })
   }
   return sections.filter(s => s.items.length)
 }

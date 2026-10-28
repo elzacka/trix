@@ -9,7 +9,8 @@ sheet, read from two Markdown files next to the app. No installer, no network.
 | Format | Comment at the top of each file |
 | Edit | Pencil or Ctrl+E / ⌘E; menu: «Åpne i annen app» |
 | Open | Tray or menu bar icon; Ctrl+Alt+T / ⌘⌥T (menu: change or remove) |
-| Keys | Ctrl/⌘+1, 2: tabs. Esc: close, clear, hide |
+| Lookup | Keyboard button, then the keys; or type them («cmd shift 4», «ctrl+c») |
+| Keys | Ctrl/⌘+1, 2 or Ctrl+Tab: tabs. Esc: close, clear, hide |
 | Written elsewhere | WebView cache: `%LOCALAPPDATA%\no.tazk.trix-universal` (Windows), `~/Library/WebKit/` and `~/Library/Caches/no.tazk.trix-universal` (macOS) |
 
 ## Run

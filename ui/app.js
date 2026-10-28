@@ -1,5 +1,6 @@
 import {
-  parseShortcuts, filterShortcuts, parseCheatSheet, alphabetical, searchCheatSheet, formatKeys, inline, plain,
+  parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseCheatSheet, alphabetical, searchCheatSheet,
+  formatKeys, inline, plain,
 } from './parse.js'
 
 const { invoke } = window.__TAURI__.core
@@ -22,6 +23,7 @@ const state = {
   editing: false,
   discarding: false,
   recording: false,
+  capturing: false,
   error: '',
 }
 
@@ -69,9 +71,13 @@ function render() {
     button.tabIndex = i === state.tab ? 0 : -1
   })
   $('view').setAttribute('aria-labelledby', `tab-${state.tab}`)
-  $('query').placeholder = TABS[state.tab].search
+  const switchKeys = i => `${formatKeys(`mod ${i + 1}`, state.os)[0]} eller ${formatKeys('ctrl tab', state.os)[0]}`
+  TABS.forEach((_, i) => { $(`tab-${i}`).title = switchKeys(i) })
+  $('query').placeholder = state.capturing ? 'Trykk hurtigtasten …' : TABS[state.tab].search
   if ($('query').value !== state.queries[state.tab]) $('query').value = state.queries[state.tab]
   $('clear').hidden = !state.queries[state.tab]
+  $('capture').hidden = state.tab !== 0
+  $('capture').setAttribute('aria-pressed', state.capturing)
   $('error').hidden = !state.error
   $('error').textContent = state.error
   $('hotkey').textContent = state.recording ? 'Trykk ny hurtigtast …' : `Hurtigtast som åpner Trix: ${hotkeyName()}`
@@ -85,10 +91,19 @@ function emptyState(text) {
 
 function renderShortcuts() {
   const query = state.queries[0].trim()
-  const sections = filterShortcuts(parseShortcuts(state.files[0], state.os), query)
-  $('tools').replaceChildren()
+  const parsed = parseShortcuts(state.files[0], state.os)
+  const id = lookupId(query, state.os)
+  const combo = id && formatKeys(query, state.os)[0]
+  let sections = filterShortcuts(parsed, query)
+  if (id) {
+    sections = lookupShortcuts(parsed, id)
+    if (state.hotkey && comboId(state.hotkey, state.os) === id) {
+      sections.push({ title: 'Trix', items: [{ title: 'Åpner Trix', keys: [hotkeyName()] }] })
+    }
+  }
   const count = sections.reduce((n, s) => n + s.items.length, 0)
-  $('status').textContent = query ? `${count} treff` : ''
+  $('tools').replaceChildren(...(id && count ? [h('span', {}, `${combo}: ${count} treff`)] : []))
+  $('status').textContent = id ? (count ? `${combo}: ${count} treff` : `${combo} er ikke i lista`) : query ? `${count} treff` : ''
   $('list').replaceChildren(
     ...(sections.length
       ? sections.map(s => h('section', {},
@@ -98,7 +113,8 @@ function renderShortcuts() {
             h('span', { class: 'name' }, item.title),
             h('span', { class: 'keys' }, item.keys.flatMap((k, i) =>
               [i > 0 && h('span', { class: 'or' }, 'eller'), h('kbd', {}, k)])))))))
-      : [query ? emptyState(`Ingen treff på «${query}»`) : h('p', { class: 'empty' }, 'Lista er tom')]),
+      : [id ? emptyState(`${combo} er ikke i lista`)
+        : query ? emptyState(`Ingen treff på «${query}»`) : h('p', { class: 'empty' }, 'Lista er tom')]),
   )
 }
 
@@ -259,6 +275,50 @@ function toggleMenu() {
 
 const MODIFIERS = ['Meta', 'Control', 'Alt', 'Shift']
 
+// Lookup by key press
+
+const NAMED_KEYS = {
+  Space: 'mellomrom', Enter: 'retur', Tab: 'tab', Escape: 'esc', Backspace: 'slett', Delete: 'delete',
+  ArrowLeft: 'venstre', ArrowRight: 'høyre', ArrowUp: 'opp', ArrowDown: 'ned',
+}
+// With ⇧ or ⌥ the character changes, so the key's place decides
+const PUNCTUATION = {
+  Period: '.', Comma: ',', Minus: '-', Equal: '=', Slash: '/', Backslash: '\\', Semicolon: ';', Quote: "'",
+  BracketLeft: '[', BracketRight: ']', Backquote: '`', IntlBackslash: '<',
+}
+
+function eventKey(e) {
+  if (/^(Key[A-Z]|Digit\d)$/.test(e.code)) return e.code.at(-1)
+  if (/^F\d+$/.test(e.code)) return e.code
+  if (NAMED_KEYS[e.code]) return NAMED_KEYS[e.code]
+  if (e.key.length === 1 && !e.shiftKey && !e.altKey) return e.key
+  return PUNCTUATION[e.code] ?? null
+}
+
+function startCapture() {
+  state.capturing = !state.capturing
+  render()
+}
+
+function captureKey(e) {
+  e.preventDefault()
+  if (MODIFIERS.includes(e.key)) return
+  const plain = !(e.metaKey || e.ctrlKey || e.altKey || e.shiftKey)
+  if (e.key === 'Escape' && plain) {
+    state.capturing = false
+    return render()
+  }
+  const key = eventKey(e)
+  if (!key) return
+  // The order Trix and macOS menus use: ⌘⌃⌥⇧, and Win+Ctrl+Alt+Shift on Windows
+  const meta = e.metaKey && (state.os === 'mac' ? 'cmd' : 'win')
+  const text = [meta, e.ctrlKey && 'ctrl', e.altKey && 'alt', e.shiftKey && 'shift', key].filter(Boolean).join(' ')
+  state.queries[0] = formatKeys(text, state.os)[0]
+  state.capturing = false
+  render()
+  $('query').focus()
+}
+
 function recordHotkey(e) {
   e.preventDefault()
   if (e.key === 'Escape') return closeMenu()
@@ -289,6 +349,7 @@ $('query').addEventListener('input', e => {
   render()
 })
 $('clear').addEventListener('click', clearAll)
+$('capture').addEventListener('click', startCapture)
 $('edit').addEventListener('click', openEditor)
 $('more').addEventListener('click', toggleMenu)
 $('open-file').addEventListener('click', () => { closeMenu(); invoke('open_file', { name: TABS[state.tab].file }) })
@@ -306,12 +367,14 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   const mod = state.os === 'mac' ? e.metaKey : e.ctrlKey
   if (state.recording) return recordHotkey(e)
+  if (state.capturing) return captureKey(e)
   if (state.editing) {
     if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); saveEdit() }
     else if (e.key === 'Escape') { e.preventDefault(); cancelEdit() }
     return
   }
   if (mod && (e.key === '1' || e.key === '2')) { e.preventDefault(); selectTab(Number(e.key) - 1) }
+  else if (e.ctrlKey && e.key === 'Tab') { e.preventDefault(); selectTab(1 - state.tab) }
   else if (mod && e.key.toLowerCase() === 'e') { e.preventDefault(); openEditor() }
   else if (mod && e.key.toLowerCase() === 'f') { e.preventDefault(); $('query').select() }
   else if (e.key === 'Escape') {
