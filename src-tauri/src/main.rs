@@ -123,6 +123,8 @@ fn load(app: AppHandle) -> Result<Loaded, String> {
 #[tauri::command]
 fn save(name: String, original: String, text: String) -> Result<String, String> {
     let path = file_path(&name)?;
+    // Through a symbolic link: replace the file it points to, so the link stays.
+    let path = if path.is_symlink() { fs::canonicalize(&path).unwrap_or(path) } else { path };
     let current = fs::read_to_string(&path).map_err(|e| io_error(&path, e))?;
     if current != original {
         return Err("changed".into());
@@ -276,9 +278,7 @@ fn build_panel(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     let (navigating, opening) = (app.clone(), app.clone());
     WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?
         .on_navigation(move |url| {
-            let own = url.scheme() == "tauri"
-                || url.host_str() == Some("tauri.localhost")
-                || dev.as_ref().is_some_and(|dev| dev.origin() == url.origin());
+            let own = own_page(url) || dev.as_ref().is_some_and(|dev| dev.origin() == url.origin());
             if !own {
                 to_browser(&navigating, url);
             }
@@ -289,6 +289,12 @@ fn build_panel(app: &AppHandle) -> tauri::Result<WebviewWindow> {
             NewWindowResponse::Deny
         })
         .build()
+}
+
+/// The origin Tauri serves the app from; any other port or scheme on that host is a local server.
+fn own_page(url: &Url) -> bool {
+    let (scheme, host) = if cfg!(windows) { ("http", "tauri.localhost") } else { ("tauri", "localhost") };
+    url.scheme() == scheme && url.host_str() == Some(host) && url.port().is_none()
 }
 
 fn to_browser(app: &AppHandle, url: &Url) {
