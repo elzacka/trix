@@ -7,5 +7,5 @@ npm test
 mkdir -p dist
 
 npx tauri build --target universal-apple-darwin --bundles app
-ditto -c -k --keepParent src-tauri/target/universal-apple-darwin/release/bundle/macos/"Trix Universal.app" dist/Trix-macOS.zip
+ditto -c -k --keepParent src-tauri/target/universal-apple-darwin/release/bundle/macos/Trix.app dist/Trix-macOS.zip
 ls -lh dist

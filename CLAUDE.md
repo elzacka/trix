@@ -1,10 +1,9 @@
-# Trix (universal)
+# Trix
 
 Portable Tauri 2 app (Windows, macOS): Hurtigtaster and Jukselapp from Markdown files next to the app. Overview: `README.md`.
 
 - Verify: `npm test`, then `npm run build:mac` and open the app. Windows: CI only (`build.yml`), no device here.
 - Version: `src-tauri/Cargo.toml`; Tauri reads it.
-- macOS bundle `Trix Universal.app` (`productName`), so it does not replace the original Trix (`~/dev/trix`, `Trix.app`). The app calls itself «Trix».
 - Frontend: plain ES modules in `ui/`, no bundler, no npm runtime dependencies. Parsers in `ui/parse.js`, pure, tested with `node --test`.
 - Files are the user's: Trix writes them only when missing (`seed/`) and on «Lagre» in the editor; `save` refuses when the file changed on disk since it was read.
 - The data folder is the app's folder (`data_dir` in `main.rs`); `TRIX_DATA_DIR` overrides it. A translocated macOS app stops with a message instead.
