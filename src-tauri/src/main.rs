@@ -10,10 +10,12 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 use tauri::{
-    AppHandle, Emitter, Manager, Monitor, PhysicalPosition, WebviewWindow, WindowEvent,
+    AppHandle, Emitter, Manager, Monitor, PhysicalPosition, WebviewWindow, WebviewWindowBuilder,
+    WindowEvent,
     image::Image,
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    webview::{NewWindowResponse, Url},
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 use tauri_plugin_opener::OpenerExt;
@@ -268,6 +270,33 @@ fn quit(app: AppHandle) {
     app.exit(0);
 }
 
+/// The panel shows only Trix; links that would open in it go to the browser.
+fn build_panel(app: &AppHandle) -> tauri::Result<WebviewWindow> {
+    let dev = app.config().build.dev_url.clone();
+    let (navigating, opening) = (app.clone(), app.clone());
+    WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?
+        .on_navigation(move |url| {
+            let own = url.scheme() == "tauri"
+                || url.host_str() == Some("tauri.localhost")
+                || dev.as_ref().is_some_and(|dev| dev.origin() == url.origin());
+            if !own {
+                to_browser(&navigating, url);
+            }
+            own
+        })
+        .on_new_window(move |url, _| {
+            to_browser(&opening, &url);
+            NewWindowResponse::Deny
+        })
+        .build()
+}
+
+fn to_browser(app: &AppHandle, url: &Url) {
+    if matches!(url.scheme(), "http" | "https") {
+        let _ = app.opener().open_url(url.as_str(), None::<&str>);
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _, _| show(app)))
@@ -278,6 +307,7 @@ fn main() {
         ])
         .manage(LastHidden(Mutex::new(None)))
         .setup(|app| {
+            build_panel(app.handle())?;
             #[cfg(target_os = "macos")]
             {
                 app.set_activation_policy(tauri::ActivationPolicy::Accessory);
