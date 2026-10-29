@@ -145,7 +145,7 @@ function renderCheatSheet() {
       : []),
     h('span', { class: 'spacer' }),
     !query && h('div', { class: 'segmented', role: 'group', 'aria-label': 'Rekkefølge' },
-      orderButton('file', 'Som i fila'), orderButton('az', 'A–Å')),
+      orderButton('file', 'Som kildefila'), orderButton('az', 'A–Å')),
   ].filter(Boolean))
 
   $('list').replaceChildren(
