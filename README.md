@@ -29,7 +29,7 @@ npm run dev         # files land in src-tauri/target/debug/
 npm run build:mac   # dist/Trix-macOS.zip, universal
 ```
 
-Windows: [build.yml](.github/workflows/build.yml) on `windows-latest`,
-artifact `Trix-Windows`.
+CI: [build.yml](.github/workflows/build.yml) on each push to `main`, artifacts
+`Trix-Windows` and `Trix-macOS.zip`.
 
-Credits: [TREDJEPART.md](TREDJEPART.md).
+Credits: [TREDJEPART.md](TREDJEPART.md). Security: [SECURITY.md](SECURITY.md).
