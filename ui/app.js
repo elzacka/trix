@@ -80,7 +80,7 @@ function render() {
   $('capture').setAttribute('aria-pressed', state.capturing)
   $('error').hidden = !state.error
   $('error').textContent = state.error
-  $('hotkey').textContent = state.recording ? 'Trykk ny hurtigtast …' : `Hurtigtast som åpner Trix: ${hotkeyName()}`
+  $('hotkey').textContent = state.recording ? 'Trykk ny hurtigtast …' : `Hurtigåpner: ${hotkeyName()}`
   if (state.tab === 0) renderShortcuts()
   else renderCheatSheet()
 }
@@ -352,7 +352,6 @@ $('clear').addEventListener('click', clearAll)
 $('capture').addEventListener('click', startCapture)
 $('edit').addEventListener('click', openEditor)
 $('more').addEventListener('click', toggleMenu)
-$('open-file').addEventListener('click', () => { closeMenu(); invoke('open_file', { name: TABS[state.tab].file }) })
 $('reveal-file').addEventListener('click', () => { closeMenu(); invoke('reveal_file', { name: TABS[state.tab].file }) })
 $('hotkey').addEventListener('click', () => { state.recording = true; render() })
 $('quit').addEventListener('click', () => invoke('quit'))

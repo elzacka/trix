@@ -7,7 +7,7 @@ sheet, read from two Markdown files next to the app. No installer, no network.
 |---|---|
 | Files | `Hurtigtaster.md`, `Jukselapp.md`, `innstillinger.json` next to `Trix.exe` or `Trix Universal.app`; created on first launch from [seed/](seed/) |
 | Format | Comment at the top of each file |
-| Edit | Pencil or Ctrl+E / ⌘E; menu: «Åpne i annen app» |
+| Edit | Pencil or Ctrl+E / ⌘E |
 | Open | Tray or menu bar icon; Ctrl+Alt+T / ⌘⌥T (menu: change or remove) |
 | Lookup | Keyboard button, then the keys; or type them («cmd shift 4», «ctrl+c») |
 | Keys | Ctrl/⌘+1, 2 or Ctrl+Tab: tabs. Esc: close, clear, hide |

@@ -133,12 +133,6 @@ fn save(name: String, original: String, text: String) -> Result<String, String> 
 }
 
 #[tauri::command]
-fn open_file(app: AppHandle, name: String) -> Result<(), String> {
-    let path = file_path(&name)?;
-    app.opener().open_path(path.to_string_lossy(), None::<&str>).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
 fn reveal_file(app: AppHandle, name: String) -> Result<(), String> {
     app.opener().reveal_item_in_dir(file_path(&name)?).map_err(|e| e.to_string())
 }
@@ -280,7 +274,7 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            load, save, open_file, reveal_file, open_url, set_hotkey, hide, quit
+            load, save, reveal_file, open_url, set_hotkey, hide, quit
         ])
         .manage(LastHidden(Mutex::new(None)))
         .setup(|app| {
