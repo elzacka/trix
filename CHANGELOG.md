@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0 - 2026-10-30
 
 - Hurtigtaster: groups, Windows and Mac keys per line, search, lookup by key press or typed combination; `\|` for a | in a name
 - Jukselapp: groups or A–Å, search, tags, aliases, links that open in the browser

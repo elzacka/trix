@@ -36,4 +36,20 @@ npm run build:mac   # dist/Trix-macOS.zip, universal
 CI: [build.yml](.github/workflows/build.yml) on each push to `main`, artifacts
 `Trix-Windows` and `Trix-macOS.zip`.
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io),
+certificate by [SignPath Foundation](https://signpath.org). Applied for:
+`Trix.exe` is unsigned until SignPath approves the project. The macOS app is
+signed with an Apple Developer ID and notarized.
+
+| Role | Who |
+|---|---|
+| Committers and reviewers | [elzacka](https://github.com/elzacka) |
+| Approvers | [elzacka](https://github.com/elzacka) |
+
+Privacy: This program will not transfer any information to other networked
+systems unless specifically requested by the user or the person installing or
+operating it.
+
 Credits: [TREDJEPART.md](TREDJEPART.md). Security: [SECURITY.md](SECURITY.md).
