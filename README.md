@@ -15,8 +15,9 @@ sheet, read from two Markdown files next to the app. No installer, no network.
 
 ## Run
 
-- macOS: unzip, move `Trix.app` to any folder in Finder, open. Unsigned: first
-  launch needs System Settings → Privacy & Security → Open Anyway.
+- macOS: unzip, move `Trix.app` to any folder in Finder, open. The CI build is
+  ad hoc signed: first launch needs System Settings → Privacy & Security → Open
+  Anyway.
 - Windows: unzip, run `Trix\Trix.exe`. Unsigned: SmartScreen → More info → Run
   anyway. Needs WebView2, built into Windows 10 and 11.
 
@@ -28,6 +29,9 @@ npm test            # parsers
 npm run dev         # files land in src-tauri/target/debug/
 npm run build:mac   # dist/Trix-macOS.zip, universal
 ```
+
+`build:mac` signs with the Developer ID in the keychain and notarizes with the
+`notarytool` profile `trix`; without a Developer ID it signs ad hoc.
 
 CI: [build.yml](.github/workflows/build.yml) on each push to `main`, artifacts
 `Trix-Windows` and `Trix-macOS.zip`.

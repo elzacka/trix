@@ -6,4 +6,5 @@
 - Jukselapp: groups or A–Å, search, tags, aliases, links that open in the browser
 - Ctrl+Tab switches tabs
 - Built-in editor; menu: show source folder, hotkey, quit. A list that is a symbolic link stays one when saved
+- macOS: signed with Developer ID and notarized; opens without "Open Anyway"
 - Opens as a panel under the menu bar icon (above the tray icon on Windows) or with a global hotkey; closes on click elsewhere
