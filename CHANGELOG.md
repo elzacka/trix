@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Hurtigtaster for new users lists Trix's own keys
+
 ## 0.1.0 - 2026-10-30
 
 - Hurtigtaster: groups, Windows and Mac keys per line, search, lookup by key press or typed combination; `\|` for a | in a name

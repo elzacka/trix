@@ -36,3 +36,14 @@ Trix viser denne fila. Endre den som du vil.
 - Søk på maskinen | win S | ⌘ mellomrom
 - Skjermbilde av et utsnitt | win shift S | ⌘⇧4
 - Lås skjermen | win L | ⌃⌘Q
+
+## Trix
+
+- Vis Hurtigtaster | ctrl 1 | ⌘1
+- Vis Jukselapp | ctrl 2 | ⌘2
+- Bytt liste | ctrl tab
+- Søk | ctrl F | ⌘F
+- Rediger lista | ctrl E | ⌘E
+- Lagre i redigering | ctrl S | ⌘S
+- Avbryt redigering | esc
+- Lukk, tøm søket eller skjul Trix | esc

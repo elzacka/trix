@@ -104,7 +104,7 @@ test('inline Markdown', () => {
 test('the seed files parse', () => {
   const shortcuts = readFileSync(new URL('../seed/Hurtigtaster.md', import.meta.url), 'utf8')
   const cheat = readFileSync(new URL('../seed/Jukselapp.md', import.meta.url), 'utf8')
-  assert.equal(parseShortcuts(shortcuts, 'windows').length, 2)
+  assert.equal(parseShortcuts(shortcuts, 'windows').length, 3)
   assert.equal(parseShortcuts(shortcuts, 'mac').flatMap(s => s.items).every(i => i.keys.length), true)
   assert.equal(parseCheatSheet(cheat).flatMap(s => s.entries).length, 6)
 })
