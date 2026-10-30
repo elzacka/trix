@@ -18,8 +18,11 @@ sheet, read from two Markdown files next to the app. No installer, no network.
 - macOS: unzip, move `Trix.app` to any folder in Finder, open. The CI build is
   ad hoc signed: first launch needs System Settings → Privacy & Security → Open
   Anyway.
-- Windows: unzip, run `Trix\Trix.exe`. Unsigned: SmartScreen → More info → Run
-  anyway. Needs WebView2, built into Windows 10 and 11.
+- Windows: `winget install elzacka.Trix`, then start with `trix` (Win+R). The
+  lists sit in winget's package folder (menu: show source folder); `winget
+  uninstall --purge` deletes them. Or unzip and run `Trix\Trix.exe`: unsigned,
+  so SmartScreen → More info → Run anyway. Needs WebView2, built into Windows
+  10 and 11.
 
 ## Build
 
@@ -34,22 +37,13 @@ npm run build:mac   # dist/Trix-macOS.zip, universal
 `notarytool` profile `trix`; without a Developer ID it signs ad hoc.
 
 CI: [build.yml](.github/workflows/build.yml) on each push to `main`, artifacts
-`Trix-Windows` and `Trix-macOS.zip`.
+`Trix-Windows.zip` and `Trix-macOS.zip`. winget manifests for a release:
+`scripts/winget.sh <version>`.
 
-## Code signing policy
+## Code signing
 
-Free code signing provided by [SignPath.io](https://about.signpath.io),
-certificate by [SignPath Foundation](https://signpath.org). Applied for:
-`Trix.exe` is unsigned until SignPath approves the project. The macOS app is
-signed with an Apple Developer ID and notarized.
-
-| Role | Who |
-|---|---|
-| Committers and reviewers | [elzacka](https://github.com/elzacka) |
-| Approvers | [elzacka](https://github.com/elzacka) |
-
-Privacy: This program will not transfer any information to other networked
-systems unless specifically requested by the user or the person installing or
-operating it.
+- macOS: Apple Developer ID, notarized.
+- Windows: `Trix.exe` unsigned. winget checks the zip's SHA-256; each release
+  lists its checksums.
 
 Credits: [TREDJEPART.md](TREDJEPART.md). Security: [SECURITY.md](SECURITY.md).

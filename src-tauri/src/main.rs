@@ -55,6 +55,11 @@ fn data_dir() -> PathBuf {
         return dir.into();
     }
     let exe = std::env::current_exe().expect("path of the running app");
+    // winget starts Trix through a link in its Links folder; the lists belong next to the real Trix.exe.
+    let exe = match fs::read_link(&exe) {
+        Ok(target) => exe.parent().expect("folder of the link").join(target),
+        Err(_) => exe,
+    };
     let bundle = exe.ancestors().find(|p| p.extension().is_some_and(|e| e == "app"));
     bundle.unwrap_or(&exe).parent().expect("folder of the app").to_path_buf()
 }

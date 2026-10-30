@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 - 2026-10-30
 
 - Hurtigtaster for new users lists Trix's own keys
+- Windows: `winget install elzacka.Trix`; started through winget's `trix` link, Trix keeps the lists next to the real `Trix.exe`
+- Windows zip holds only `Trix\Trix.exe`
 
 ## 0.1.0 - 2026-10-30
 
