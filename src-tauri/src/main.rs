@@ -42,6 +42,7 @@ struct Settings {
 #[serde(rename_all = "camelCase")]
 struct Loaded {
     os: &'static str,
+    version: &'static str,
     folder: String,
     files: Vec<String>,
     hotkey: String,
@@ -112,6 +113,7 @@ fn load(app: AppHandle) -> Result<Loaded, String> {
         && !app.global_shortcut().is_registered(hotkey.as_str());
     Ok(Loaded {
         os: if cfg!(target_os = "macos") { "mac" } else { "windows" },
+        version: env!("CARGO_PKG_VERSION"),
         folder: dir.display().to_string(),
         files,
         hotkey,

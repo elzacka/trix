@@ -53,6 +53,7 @@ async function load() {
   try {
     const loaded = await invoke('load')
     Object.assign(state, { os: loaded.os, files: loaded.files, hotkey: loaded.hotkey, error: '' })
+    $('version').textContent = `v${loaded.version} | elzacka`
     if (loaded.hotkeyTaken) state.error = `En annen app bruker ${hotkeyName()}`
   } catch (error) {
     state.error = String(error)
@@ -361,6 +362,11 @@ $('text').addEventListener('input', () => { state.discarding = false; $('cancel'
 
 document.addEventListener('click', e => {
   if (!$('menu').hidden && !e.target.closest('.menu-anchor')) closeMenu()
+})
+
+// The web engine's own menu (Reload, Open Link) is not Trix's; text fields keep copy and paste.
+document.addEventListener('contextmenu', e => {
+  if (!e.target.closest('input, textarea')) e.preventDefault()
 })
 
 document.addEventListener('keydown', e => {
