@@ -34,6 +34,8 @@ const FILES: [(&str, &str); 2] = [
     ("Jukselapp.md", include_str!("../../seed/Jukselapp.md")),
 ];
 const SETTINGS: &str = "innstillinger.json";
+/// A folder by this name next to the app holds the lists instead, so they travel with it.
+const PORTABLE: &str = "Trix-data";
 const DEFAULT_HOTKEY: &str = "CommandOrControl+Alt+T";
 
 #[derive(Serialize, Deserialize, Default)]
@@ -63,11 +65,8 @@ struct Loaded {
     system_error: String,
 }
 
-/// The folder Trix sits in, so the lists travel with it: next to Trix.exe, or next to Trix.app.
-fn data_dir() -> PathBuf {
-    if let Some(dir) = std::env::var_os("TRIX_DATA_DIR") {
-        return dir.into();
-    }
+/// The folder Trix sits in: next to Trix.exe, or next to Trix.app.
+fn app_dir() -> PathBuf {
     let exe = std::env::current_exe().expect("path of the running app");
     // winget starts Trix through a link in its Links folder; the lists belong next to the real Trix.exe.
     let exe = match fs::read_link(&exe) {
@@ -76,6 +75,45 @@ fn data_dir() -> PathBuf {
     };
     let bundle = exe.ancestors().find(|p| p.extension().is_some_and(|e| e == "app"));
     bundle.unwrap_or(&exe).parent().expect("folder of the app").to_path_buf()
+}
+
+/// The user's app data folder, which needs no permission prompt and no cloud sync.
+fn user_dir() -> PathBuf {
+    if cfg!(target_os = "macos") {
+        PathBuf::from(std::env::var_os("HOME").expect("HOME")).join("Library/Application Support/Trix")
+    } else {
+        PathBuf::from(std::env::var_os("APPDATA").expect("APPDATA")).join("Trix")
+    }
+}
+
+fn data_dir() -> PathBuf {
+    if let Some(dir) = std::env::var_os("TRIX_DATA_DIR") {
+        return dir.into();
+    }
+    let portable = app_dir().join(PORTABLE);
+    if portable.is_dir() { portable } else { user_dir() }
+}
+
+/// Lists that Trix 0.2 and earlier kept next to the app move to the user's folder, once.
+fn move_old_lists() {
+    let dir = data_dir();
+    if dir == user_dir() {
+        move_lists(&app_dir(), &dir);
+    }
+}
+
+fn move_lists(old: &Path, dir: &Path) {
+    let names = FILES.iter().map(|(name, _)| *name).chain([SETTINGS]);
+    if names.clone().any(|name| dir.join(name).exists()) {
+        return;
+    }
+    let _ = fs::create_dir_all(dir);
+    for name in names.filter(|name| old.join(name).is_file()) {
+        // Another volume, or no right to remove the old file: a copy, and the old file stays.
+        if fs::rename(old.join(name), dir.join(name)).is_err() {
+            let _ = fs::copy(old.join(name), dir.join(name));
+        }
+    }
 }
 
 fn file_path(name: &str) -> Result<PathBuf, String> {
@@ -129,10 +167,7 @@ fn current_view() -> String {
 #[tauri::command]
 fn load(app: AppHandle) -> Result<Loaded, String> {
     let dir = data_dir();
-    // A downloaded app that macOS runs from a hidden, read-only copy cannot see its own folder.
-    if dir.to_string_lossy().contains("/AppTranslocation/") {
-        return Err("Flytt Trix til en annen mappe i Finder, og åpne Trix på nytt".into());
-    }
+    fs::create_dir_all(&dir).map_err(|e| io_error(&dir, e))?;
     let files = FILES
         .iter()
         .map(|(name, seed)| read_or_seed(&dir.join(name), seed))
@@ -382,6 +417,7 @@ fn main() {
         .manage(LastHidden(Mutex::new(None)))
         .manage(Holding(AtomicBool::new(false)))
         .setup(|app| {
+            move_old_lists();
             build_panel(app.handle())?;
             #[cfg(target_os = "macos")]
             {
@@ -451,4 +487,31 @@ fn main() {
                 show(_app);
             }
         });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn folder(name: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("trix-test-{}-{name}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        dir
+    }
+
+    #[test]
+    fn old_lists_move_once_and_never_over_the_users() {
+        let (old, dir) = (folder("old"), folder("dir"));
+        fs::create_dir_all(&old).unwrap();
+        fs::write(old.join("Hurtigtaster.md"), "mine").unwrap();
+        fs::write(old.join(SETTINGS), "{}").unwrap();
+        move_lists(&old, &dir);
+        assert_eq!(fs::read_to_string(dir.join("Hurtigtaster.md")).unwrap(), "mine");
+        assert!(dir.join(SETTINGS).is_file() && !old.join("Hurtigtaster.md").exists());
+
+        fs::write(old.join("Jukselapp.md"), "gammel").unwrap();
+        move_lists(&old, &dir);
+        assert!(old.join("Jukselapp.md").is_file() && !dir.join("Jukselapp.md").exists());
+        let _ = (fs::remove_dir_all(&old), fs::remove_dir_all(&dir));
+    }
 }

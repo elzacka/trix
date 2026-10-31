@@ -57,7 +57,7 @@ PackageName: Trix
 PackageUrl: https://github.com/elzacka/trix
 License: MIT
 LicenseUrl: https://github.com/elzacka/trix/blob/main/LICENSE
-ShortDescription: Tray app with your own keyboard shortcuts and a cheat sheet, read from Markdown files next to the app. No network.
+ShortDescription: Tray app with your own keyboard shortcuts and a cheat sheet, read from Markdown files you edit. No network.
 Moniker: trix
 Tags:
 - cheat-sheet

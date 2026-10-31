@@ -1,11 +1,12 @@
 # Trix
 
-Portable desktop app for Windows and macOS: own keyboard shortcuts and a cheat
-sheet, read from two Markdown files next to the app. No installer, no network.
+Desktop app for Windows and macOS: own keyboard shortcuts and a cheat sheet,
+read from two Markdown files you edit. No installer, no network.
 
 | | |
 |---|---|
-| Files | `Hurtigtaster.md`, `Jukselapp.md`, `innstillinger.json` next to `Trix.exe` or `Trix.app`; created on first launch from [seed/](seed/) |
+| Files | `Hurtigtaster.md`, `Jukselapp.md`, `innstillinger.json` in `~/Library/Application Support/Trix` (macOS) or `%APPDATA%\Trix` (Windows), menu: «Vis kildemappa»; created on first launch from [seed/](seed/). Lists next to the app (0.2 and earlier) move there on first launch |
+| Portable | A folder `Trix-data` next to `Trix.exe` or `Trix.app` holds the files instead |
 | Format | Comment at the top of each file |
 | Edit | Pencil or Ctrl+E / ⌘E |
 | Open | Tray or menu bar icon; Ctrl+Alt+T / ⌘⌥T (menu: «Endre hurtigåpner»; Backspace removes) |
@@ -17,14 +18,12 @@ sheet, read from two Markdown files next to the app. No installer, no network.
 
 ## Run
 
-- macOS 15 or later: unzip, move `Trix.app` to any folder in Finder, open. The CI build is
-  ad hoc signed: first launch needs System Settings → Privacy & Security → Open
-  Anyway.
-- Windows: `winget install elzacka.Trix`, then start with `trix` (Win+R). The
-  lists sit in winget's package folder (menu: show source folder); `winget
-  uninstall --purge` deletes them. Or unzip and run `Trix\Trix.exe`: unsigned,
-  so SmartScreen → More info → Run anyway. Needs WebView2, built into Windows
-  10 and 11.
+- macOS 15 or later: unzip, move `Trix.app` to Applications, open. The CI build
+  is ad hoc signed: first launch needs System Settings → Privacy & Security →
+  Open Anyway.
+- Windows: `winget install elzacka.Trix`, then start with `trix` (Win+R). Or
+  unzip and run `Trix\Trix.exe`: unsigned, so SmartScreen → More info → Run
+  anyway. Needs WebView2, built into Windows 10 and 11.
 
 ## Build
 
