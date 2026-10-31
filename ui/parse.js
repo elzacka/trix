@@ -61,7 +61,20 @@ function keyName(token, os) {
 }
 
 const alternatives = text => text.split(/\s+eller\s+/i)
-const HOLD = /^hold inne\s+/i
+const QUOTED = /"([^"]+)"|«([^»]+)»/g
+
+/** «"hold inne" ⌘W» → [{ text: 'hold inne' }, { keys: '⌘W' }]: quoted words stay text, the rest are keys. */
+function keyParts(alternative, os) {
+  const parts = []
+  let at = 0
+  for (const match of [...alternative.matchAll(QUOTED), { index: alternative.length, 0: '' }]) {
+    const [keys] = formatKeys(alternative.slice(at, match.index), os)
+    if (keys) parts.push({ keys })
+    if (match[0]) parts.push({ text: match[1] ?? match[2] })
+    at = match.index + match[0].length
+  }
+  return parts
+}
 
 /** «ctrl shift S eller F1» → ['Ctrl+Shift+S', 'F1'] on Windows, ['⌃⇧S', 'F1'] on a Mac. */
 export function formatKeys(text, os) {
@@ -142,11 +155,10 @@ export function parseShortcuts(text, os) {
     const keys = second === undefined ? first : os === 'mac' ? second : first
     if (second !== undefined && !keys) continue
     if (!sections.length) sections.push({ title: '', items: [] })
-    const combos = alternatives(keys).map(k => ({ hold: HOLD.test(k), text: k.replace(HOLD, '') }))
     sections.at(-1).items.push({
       title: title.trim(),
-      keys: combos.map(k => ({ hold: k.hold, text: formatKeys(k.text, os)[0] })).filter(k => k.text),
-      combos: combos.map(k => comboId(k.text, os)).filter(Boolean),
+      keys: alternatives(keys).map(k => keyParts(k, os)).filter(parts => parts.length),
+      combos: alternatives(keys).map(k => comboId(k.replace(QUOTED, ' '), os)).filter(Boolean),
     })
   }
   return sections.filter(s => s.items.length)
@@ -160,7 +172,7 @@ export function filterShortcuts(sections, query) {
     .map(s => ({
       ...s,
       items: s.items.filter(item => {
-        const text = [s.title, item.title, ...item.keys.map(k => k.text)].join(' ').toLocaleLowerCase('nb')
+        const text = [s.title, item.title, ...item.keys.flat().map(p => p.keys ?? p.text)].join(' ').toLocaleLowerCase('nb')
         return words.every(w => text.includes(w))
       }),
     }))

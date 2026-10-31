@@ -133,7 +133,7 @@ function renderShortcuts() {
     return { title, sections: id ? lookupShortcuts(parsed, id) : filterShortcuts(parsed, query) }
   })
   if (id && state.hotkey && comboId(state.hotkey, state.os) === id) {
-    lists[0].sections.push({ title: 'Trix', items: [{ title: 'Åpner Trix', keys: [{ text: hotkeyName() }] }] })
+    lists[0].sections.push({ title: 'Trix', items: [{ title: 'Åpner Trix', keys: [[{ keys: hotkeyName() }]] }] })
   }
   const sections = lists.flatMap(l => l.sections)
   const count = sections.reduce((n, s) => n + s.items.length, 0)
@@ -145,7 +145,7 @@ function renderShortcuts() {
       h('div', { class: 'shortcut' },
         h('span', { class: 'name' }, item.title),
         h('span', { class: 'keys' }, item.keys.flatMap((k, i) =>
-          [i > 0 && h('span', { class: 'or' }, 'eller'), k.hold && h('span', { class: 'or' }, 'hold inne'), h('kbd', {}, k.text)]))))))
+          [i > 0 && h('span', { class: 'or' }, 'eller'), ...k.map(p => (p.keys ? h('kbd', {}, p.keys) : h('span', { class: 'or' }, p.text)))]))))))
   $('list').replaceChildren(
     ...(sections.length
       ? lists.length > 1

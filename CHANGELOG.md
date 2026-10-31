@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- «hold inne» before the keys shows as a word, like «eller»; lookup finds the keys
+- Hurtigtaster: text in quotes in the keys field shows as text, like «eller» ("hold inne" ⌘W); lookup finds the keys
 - Lists and settings in `~/Library/Application Support/Trix` (macOS) or `%APPDATA%\Trix` (Windows); lists next to the app move there on first launch. Portable: a `Trix-data` folder next to the app
 - Menu «Vis»: own shortcuts, the system's, or both. macOS: System Settings' shortcuts as set on this Mac, App Shortcuts included. Windows: Windows 11, Norwegian Office and browsers
 - Menu «Vis» on Jukselapp: file order or A–Å

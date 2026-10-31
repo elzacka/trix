@@ -4,6 +4,7 @@ set -eu
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.cargo/bin:$PATH"
 npm test
+cargo test --manifest-path src-tauri/Cargo.toml --locked --quiet
 mkdir -p dist
 
 # A Developer ID in the keychain: signed and notarized (notarytool profile «trix»). Without one, as in CI: ad hoc.

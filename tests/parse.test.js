@@ -25,17 +25,17 @@ test('one or two key columns, in file order', () => {
   ].join('\r\n')
   assert.deepEqual(parseShortcuts(text, 'mac'), [
     { title: 'A', items: [
-      { title: 'Kopier', keys: [{ hold: false, text: '⌘C' }], combos: ['cmd C'] },
-      { title: 'Felles', keys: [{ hold: false, text: 'F1' }], combos: ['F1'] },
+      { title: 'Kopier', keys: [[{ keys: '⌘C' }]], combos: ['cmd C'] },
+      { title: 'Felles', keys: [[{ keys: 'F1' }]], combos: ['F1'] },
     ] },
-    { title: 'B', items: [{ title: 'Lim inn', keys: [{ hold: false, text: '⌃V' }], combos: ['ctrl V'] }] },
+    { title: 'B', items: [{ title: 'Lim inn', keys: [[{ keys: '⌃V' }]], combos: ['ctrl V'] }] },
   ])
-  assert.equal(parseShortcuts(text, 'windows')[0].items[1].keys[0].text, 'Win+D')
+  assert.equal(parseShortcuts(text, 'windows')[0].items[1].keys[0][0].keys, 'Win+D')
   const pipe = parseShortcuts('- Loddrett strek \\| | | ⌥7\n- Omvendt skråstrek \\ | | ⌥⇧7', 'mac')[0].items
-  assert.deepEqual(pipe.map(i => [i.title, i.keys[0].text]), [['Loddrett strek |', '⌥7'], ['Omvendt skråstrek \\', '⌥⇧7']])
-  const [held] = parseShortcuts('- Lukk alle | | Hold inne ⌘W eller ⌘⇧W', 'mac')[0].items
-  assert.deepEqual(held.keys, [{ hold: true, text: '⌘W' }, { hold: false, text: '⌘⇧W' }])
-  assert.deepEqual(held.combos, ['cmd W', 'shift cmd W'])
+  assert.deepEqual(pipe.map(i => [i.title, i.keys[0][0].keys]), [['Loddrett strek |', '⌥7'], ['Omvendt skråstrek \\', '⌥⇧7']])
+  const [held] = parseShortcuts('- Lukk | "Hold inne" ctrl W eller ctrl K «så» ctrl W | ⌘W', 'windows')[0].items
+  assert.deepEqual(held.keys, [[{ text: 'Hold inne' }, { keys: 'Ctrl+W' }], [{ keys: 'Ctrl+K' }, { text: 'så' }, { keys: 'Ctrl+W' }]])
+  assert.deepEqual(held.combos, ['ctrl W'])
 })
 
 test('search matches group, name and keys', () => {

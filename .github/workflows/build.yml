@@ -22,6 +22,7 @@ jobs:
       - run: rustup toolchain install stable --profile minimal --component clippy
       - run: npm ci
       - run: npm test
+      - run: cargo test --manifest-path src-tauri/Cargo.toml --locked
       - run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked -- -D warnings
       - run: npx tauri build --no-bundle
       - name: Portable folder

@@ -7,7 +7,7 @@ Trix viser denne fila. Endre den som du vil.
 - - Navn | taster: Like taster på Windows og Mac
 - - Navn | Windows-taster | Mac-taster: Ulike taster. Tomt felt: Vises ikke på det systemet.
 - «eller» mellom to hurtigtaster for samme handling
-- «hold inne» foran tastene: Hold dem inne
+- "tekst" eller «tekst»: Vises som tekst, ikke som taster. Eksempel: "hold inne" ⌘W
 - \|: Tegnet | i et navn
 - Rekkefølgen i fila er rekkefølgen i Trix.
 - Taster: Symboler (⌘⇧S) eller ord (ctrl shift S, ctrl+shift+S)

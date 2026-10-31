@@ -2,7 +2,7 @@
 
 Tauri 2 tray app (Windows, macOS): Hurtigtaster and Jukselapp from Markdown files in the user's app data folder. Overview: `README.md`.
 
-- Verify: `npm test` (Node and Rust), then `npm run build:mac` and open the app. Windows: CI only (`build.yml`, which also builds macOS), no device here.
+- Verify: `npm test`, then `npm run build:mac` (also runs `cargo test`) and open the app. Windows: CI only (`build.yml`, which also builds macOS), no device here.
 - Version: `src-tauri/Cargo.toml`; Tauri reads it.
 - Frontend: plain ES modules in `ui/`, no bundler, no npm runtime dependencies. Parsers in `ui/parse.js`, pure, tested with `node --test`.
 - Files are the user's: Trix writes them only when missing (`seed/`) and on «Lagre» in the editor; `save` refuses when the file changed on disk since it was read. Import opens its result in the editor; export copies to Downloads, never over a file.
