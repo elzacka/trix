@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseCheatSheet, alphabetical, searchCheatSheet, inline,
-  mergeShortcuts,
+  mergeShortcuts, mergeCheatSheet,
 } from '../ui/parse.js'
 
 test('keys as symbols on a Mac and words on Windows', () => {
@@ -120,6 +120,16 @@ test('merge adds missing groups and lines, keeps the user\'s lines', () => {
   assert.equal(mergeShortcuts('', '- A | F1\n## B\n- C | F2'), '- A | F1\n\n## B\n\n- C | F2\n')
   assert.equal(mergeShortcuts('## B\n- C | F2', '- A | F1'), '- A | F1\n\n## B\n- C | F2\n')
   assert.equal(mergeShortcuts('- A | F1\n## B', '- D | F3'), '- A | F1\n- D | F3\n## B\n')
+})
+
+test('merge adds missing entries with all their lines, keeps the user\'s entries', () => {
+  const current = '# Jukselapp\n\n## A\n\n### Avvik\nTekst.\n\nMer.\n#tag\n\n## B\n\n### Bit\nEn.\n'
+  const imported = '## a\n### avvik\nAnnen.\n### Arkiv\nLagring.\n\nOgså: Lager\n\n# Slutt\nIkke med.\n## C\n### Cache\nMellomlager.\n'
+  assert.equal(mergeCheatSheet(current, imported), [
+    '# Jukselapp', '', '## A', '', '### Avvik', 'Tekst.', '', 'Mer.', '#tag', '', '### Arkiv', 'Lagring.', '', 'Også: Lager',
+    '', '## B', '', '### Bit', 'En.', '', '## C', '', '### Cache', 'Mellomlager.', '',
+  ].join('\n'))
+  assert.equal(mergeCheatSheet('## B\n### C\nc', '### A\na'), '### A\na\n\n## B\n### C\nc\n')
 })
 
 test('the Windows list parses whole', () => {

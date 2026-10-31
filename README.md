@@ -8,10 +8,10 @@ sheet, read from two Markdown files next to the app. No installer, no network.
 | Files | `Hurtigtaster.md`, `Jukselapp.md`, `innstillinger.json` next to `Trix.exe` or `Trix.app`; created on first launch from [seed/](seed/) |
 | Format | Comment at the top of each file |
 | Edit | Pencil or Ctrl+E / ⌘E |
-| Open | Tray or menu bar icon; Ctrl+Alt+T / ⌘⌥T (menu: change or remove) |
+| Open | Tray or menu bar icon; Ctrl+Alt+T / ⌘⌥T (menu: «Endre hurtigåpner»; Backspace removes) |
 | Lookup | Keyboard button, then the keys; or type them («cmd shift 4», «ctrl+c») |
-| Menu: Vis | Own list, the system's, or both (own first). macOS: read from System Settings → Keyboard Shortcuts and App Shortcuts each time Trix opens. Windows: [system/Windows.md](system/Windows.md), Windows 11 and Norwegian Office |
-| Menu: Import, export | Import a list: replace or merge (lines with a known name in the same group stay), result opens in the editor. Export: a copy in Downloads |
+| Menu: Vis | Hurtigtaster: own list, the system's, or both (own first); the system's on macOS read from System Settings → Keyboard Shortcuts and App Shortcuts each time Trix opens, on Windows [system/Windows.md](system/Windows.md), Windows 11 and Norwegian Office. Jukselapp: file order or A–Å |
+| Menu: Eksport og import | For the open tab. Import: replace or merge (lines or entries with a known name in the same group stay), result opens in the editor. Export: a copy in Downloads |
 | Keys | Ctrl/⌘+1, 2 or Ctrl+Tab: tabs. Esc: close, clear, hide |
 | Written elsewhere | WebView cache: `%LOCALAPPDATA%\no.tazk.trix` (Windows), `~/Library/WebKit/` and `~/Library/Caches/no.tazk.trix` (macOS) |
 

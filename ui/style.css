@@ -156,7 +156,20 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 
 #version { padding: 6px 10px; color: var(--muted); font-size: 0.85em; }
 
-.menu-label { padding: 6px 10px 2px; color: var(--muted); font-size: 12px; }
+#menu .submenu-toggle, #menu #hotkey { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+
+.menu-keys { color: var(--muted); }
+
+#menu .submenu-toggle svg { width: 16px; height: 16px; color: var(--muted); transition: transform 0.15s; }
+
+#menu .submenu-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
+
+/* Item text lines up with the radio items' text beside their check mark */
+#menu .submenu button { padding-left: 34px; }
+
+#menu .submenu [role="menuitemradio"] { padding-left: 12px; }
+
+@media (prefers-reduced-motion: reduce) { #menu .submenu-toggle svg { transition: none; } }
 
 #menu [role="menuitemradio"] { display: flex; align-items: center; gap: 6px; }
 
@@ -236,8 +249,6 @@ main {
 }
 
 #tools:empty { display: none; }
-
-#tools .spacer { flex: 1; }
 
 #list { margin-top: 14px; }
 
@@ -356,19 +367,6 @@ kbd {
 }
 
 .chip svg { width: 12px; height: 12px; }
-
-.segmented { display: inline-flex; padding: 2px; background: var(--key); border-radius: 7px; }
-
-.segmented button {
-  padding: 1px 8px;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--text); }
 
 /* Editor */
 

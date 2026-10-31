@@ -277,30 +277,55 @@ function shortcutBlocks(lines) {
     if (!item) return
     if (!groups.length) groups.push({ title: '', heading: -1, end: i, items: [] })
     const group = groups.at(-1)
-    group.items.push({ name: item[1].split(/\s*(?<!\\)\|/)[0].trim().toLocaleLowerCase('nb'), line })
+    group.items.push({ name: item[1].split(/\s*(?<!\\)\|/)[0].trim().toLocaleLowerCase('nb'), lines: [line] })
     group.end = i
   })
   return groups
 }
 
-/** The current list with the imported groups and lines it lacks; a line whose name is already in its group stays as it is. */
-export function mergeShortcuts(current, imported) {
+/** Groups and their entries with all their lines, like `shortcutBlocks`. */
+function cheatBlocks(lines) {
+  const groups = []
+  let entry = null
+  comments(lines).forEach((line, i) => {
+    if (line === null) return
+    if (/^#{1,3}\s/.test(line)) entry = null
+    if (/^##\s/.test(line)) groups.push({ title: line.slice(3).trim(), heading: i, end: i, items: [] })
+    else if (/^###\s/.test(line)) {
+      if (!groups.length) groups.push({ title: '', heading: -1, end: i, items: [] })
+      entry = { name: line.slice(4).trim().toLocaleLowerCase('nb'), lines: [] }
+      groups.at(-1).items.push(entry)
+    }
+    if (!entry) return
+    entry.lines.push(line)
+    if (line) groups.at(-1).end = i
+  })
+  for (const group of groups) for (const item of group.items) while (!item.lines.at(-1)) item.lines.pop()
+  return groups
+}
+
+/** The current list with the imported groups and items it lacks; an item whose name is already in its group stays as it is. */
+function merge(current, imported, blocks, gap) {
   const lines = current.replace(/\r\n/g, '\n').replace(/\n+$/, '').split('\n')
-  const groups = shortcutBlocks(lines)
+  const groups = blocks(lines)
   const after = new Map()
   const before = new Map()
   const added = []
-  for (const group of shortcutBlocks(imported.split(/\r?\n/))) {
+  for (const group of blocks(imported.split(/\r?\n/))) {
     const key = group.title.toLocaleLowerCase('nb')
     const target = groups.find(g => g.title.toLocaleLowerCase('nb') === key)
     const names = new Set(target?.items.map(i => i.name))
-    const fresh = group.items.filter(i => !names.has(i.name) && names.add(i.name))
+    const fresh = group.items.filter(i => !names.has(i.name) && names.add(i.name)).flatMap(i => [...gap, ...i.lines])
     if (!fresh.length) continue
-    if (target) after.set(target.end, [...(after.get(target.end) ?? []), ...fresh.map(i => i.line)])
-    // Lines without a group stay above the first group, where the parser reads them as ungrouped.
-    else if (!group.title && groups.length) before.set(groups[0].heading, [...fresh.map(i => i.line), ''])
-    else added.push('', ...(group.title ? [`## ${group.title}`, ''] : []), ...fresh.map(i => i.line))
+    if (target) after.set(target.end, [...(after.get(target.end) ?? []), ...fresh])
+    // Items without a group stay above the first group, where the parser reads them as ungrouped.
+    else if (!group.title && groups.length) before.set(groups[0].heading, [...fresh.slice(gap.length), ''])
+    else added.push('', ...(group.title ? [`## ${group.title}`, ''] : []), ...fresh.slice(gap.length))
   }
   const merged = lines.flatMap((line, i) => [...(before.get(i) ?? []), line, ...(after.get(i) ?? [])])
   return [...merged, ...added].join('\n').replace(/^\n+/, '') + '\n'
 }
+
+export const mergeShortcuts = (current, imported) => merge(current, imported, shortcutBlocks, [])
+
+export const mergeCheatSheet = (current, imported) => merge(current, imported, cheatBlocks, [''])

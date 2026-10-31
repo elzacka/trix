@@ -169,11 +169,12 @@ fn set_view(view: String) -> Result<(), String> {
 
 /// A copy of the user's list in Downloads, shown in Finder or Explorer; never over an existing file.
 #[tauri::command]
-fn export_list(app: AppHandle) -> Result<(), String> {
-    let source = file_path(FILES[0].0)?;
+fn export_list(app: AppHandle, name: String) -> Result<(), String> {
+    let source = file_path(&name)?;
+    let stem = name.trim_end_matches(".md");
     let folder = app.path().download_dir().map_err(|e| e.to_string())?;
     let target = (1..)
-        .map(|n| folder.join(if n == 1 { "Hurtigtaster.md".into() } else { format!("Hurtigtaster {n}.md") }))
+        .map(|n| folder.join(if n == 1 { name.clone() } else { format!("{stem} {n}.md") }))
         .find(|path| !path.exists())
         .expect("a free name");
     fs::copy(&source, &target).map_err(|e| io_error(&target, e))?;

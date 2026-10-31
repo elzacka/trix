@@ -3,7 +3,9 @@
 ## Unreleased
 
 - Menu «Vis»: own shortcuts, the system's, or both. macOS: System Settings' shortcuts as set on this Mac, App Shortcuts included. Windows: Windows 11, Norwegian Office and browsers
-- Import a list (replace or merge) and export own list to Downloads
+- Menu «Vis» on Jukselapp: file order or A–Å
+- Menu «Eksport og import» for both lists: import (replace or merge), export to Downloads
+- Menu «Endre hurtigåpner» shows the current hotkey
 - Hurtigtaster for new users: four examples and Trix's own keys
 - Focused buttons: one ring
 - macOS 15 or later, the versions Apple still patches

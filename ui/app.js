@@ -1,14 +1,20 @@
 import {
   parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseCheatSheet, alphabetical, searchCheatSheet,
-  formatKeys, inline, plain, mergeShortcuts,
+  formatKeys, inline, plain, mergeShortcuts, mergeCheatSheet,
 } from './parse.js'
 
 const { invoke } = window.__TAURI__.core
 const { listen } = window.__TAURI__.event
 
 const TABS = [
-  { file: 'Hurtigtaster.md', search: 'Søk i hurtigtaster' },
-  { file: 'Jukselapp.md', search: 'Søk i jukselappen' },
+  {
+    file: 'Hurtigtaster.md', search: 'Søk i hurtigtaster', export: 'Eksporter mine hurtigtaster', import: 'Importer hurtigtaster …',
+    empty: 'har ingen hurtigtaster', has: text => ['mac', 'windows'].some(os => parseShortcuts(text, os).length), merge: mergeShortcuts,
+  },
+  {
+    file: 'Jukselapp.md', search: 'Søk i jukselappen', export: 'Eksporter jukselappen', import: 'Importer oppslag …',
+    empty: 'har ingen oppslag', has: text => parseCheatSheet(text).length > 0, merge: mergeCheatSheet,
+  },
 ]
 
 const state = {
@@ -90,8 +96,18 @@ function render() {
   $('error').hidden = !state.error
   $('error').textContent = state.error
   $('system-name').textContent = systemName()
-  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-checked', b.dataset.view === state.view))
-  $('hotkey').textContent = state.recording ? 'Trykk ny hurtigtast …' : `Hurtigåpner: ${hotkeyName()}`
+  document.querySelectorAll('[data-view]').forEach(b => {
+    b.hidden = state.tab !== 0
+    b.setAttribute('aria-checked', b.dataset.view === state.view)
+  })
+  document.querySelectorAll('[data-order]').forEach(b => {
+    b.hidden = state.tab !== 1
+    b.setAttribute('aria-checked', b.dataset.order === state.order)
+  })
+  $('export').textContent = TABS[state.tab].export
+  $('import').textContent = TABS[state.tab].import
+  $('hotkey').replaceChildren(...(state.recording ? ['Trykk ny hurtigtast …']
+    : [state.hotkey ? 'Endre hurtigåpner' : 'Velg hurtigåpner', state.hotkey && h('span', { class: 'menu-keys' }, hotkeyName())].filter(Boolean)))
   if (state.tab === 0) renderShortcuts()
   else renderCheatSheet()
 }
@@ -156,20 +172,10 @@ function renderCheatSheet() {
   }
   const count = sections.reduce((n, s) => n + s.entries.length, 0)
   $('status').textContent = query || state.tags.length ? `${count} oppslag` : ''
-
-  const orderButton = (value, label) => h('button', {
-    'aria-pressed': state.order === value,
-    onclick: () => { state.order = value; render() },
-  }, label)
-  $('tools').replaceChildren(...[
-    ...(state.tags.length
-      ? [h('span', {}, `${count} merket`), ...state.tags.map(tag =>
-        h('button', { class: 'chip', 'aria-label': `Fjern ${tag}`, onclick: () => toggleTag(tag) }, tag, closeIcon()))]
-      : []),
-    h('span', { class: 'spacer' }),
-    !query && h('div', { class: 'segmented', role: 'group', 'aria-label': 'Rekkefølge' },
-      orderButton('file', 'Som kildefila'), orderButton('az', 'A–Å')),
-  ].filter(Boolean))
+  $('tools').replaceChildren(...(state.tags.length
+    ? [h('span', {}, `${count} merket`), ...state.tags.map(tag =>
+      h('button', { class: 'chip', 'aria-label': `Fjern ${tag}`, onclick: () => toggleTag(tag) }, tag, closeIcon()))]
+    : []))
 
   $('list').replaceChildren(
     ...(sections.length
@@ -283,7 +289,13 @@ async function saveEdit() {
 function closeMenu() {
   $('menu').hidden = true
   $('more').setAttribute('aria-expanded', 'false')
+  document.querySelectorAll('.submenu-toggle').forEach(b => setSubmenu(b, false))
   state.recording = false
+}
+
+function setSubmenu(toggle, open) {
+  toggle.setAttribute('aria-expanded', open)
+  $(toggle.getAttribute('aria-controls')).hidden = !open
 }
 
 function toggleMenu() {
@@ -311,7 +323,7 @@ async function setView(view) {
 async function exportList() {
   closeMenu()
   try {
-    await invoke('export_list')
+    await invoke('export_list', { name: TABS[state.tab].file })
   } catch (error) {
     state.error = String(error)
     render()
@@ -328,14 +340,14 @@ async function chooseImport() {
 }
 
 async function readImport(file) {
+  const tab = TABS[state.tab]
   const text = await file.text()
-  if (!['mac', 'windows'].some(os => parseShortcuts(text, os).length)) {
-    state.error = `${file.name} har ingen hurtigtaster`
+  if (!tab.has(text)) {
+    state.error = `${file.name} ${tab.empty}`
     return render()
   }
-  selectTab(0)
   // An empty list keeps its format comment.
-  if (!parseShortcuts(state.files[0], state.os).length) return openEditor(mergeShortcuts(state.files[0], text))
+  if (!tab.has(state.files[state.tab])) return openEditor(tab.merge(state.files[state.tab], text))
   state.importing = text
   $('import-dialog').returnValue = ''
   $('import-dialog').showModal()
@@ -343,7 +355,7 @@ async function readImport(file) {
 
 function finishImport() {
   const choice = $('import-dialog').returnValue
-  if (choice === 'merge') openEditor(mergeShortcuts(state.files[0], state.importing))
+  if (choice === 'merge') openEditor(TABS[state.tab].merge(state.files[state.tab], state.importing))
   else if (choice === 'replace') openEditor(state.importing)
   state.importing = ''
 }
@@ -427,7 +439,9 @@ $('clear').addEventListener('click', clearAll)
 $('capture').addEventListener('click', startCapture)
 $('edit').addEventListener('click', () => openEditor())
 $('more').addEventListener('click', toggleMenu)
+document.querySelectorAll('.submenu-toggle').forEach(b => b.addEventListener('click', () => setSubmenu(b, b.getAttribute('aria-expanded') !== 'true')))
 document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)))
+document.querySelectorAll('[data-order]').forEach(b => b.addEventListener('click', () => { state.order = b.dataset.order; closeMenu(); render() }))
 $('import').addEventListener('click', chooseImport)
 $('import-file').addEventListener('change', e => { if (e.target.files[0]) readImport(e.target.files[0]) })
 $('import-dialog').addEventListener('close', finishImport)
