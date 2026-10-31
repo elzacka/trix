@@ -12,7 +12,7 @@ const TABS = [
     empty: 'har ingen hurtigtaster', has: text => ['mac', 'windows'].some(os => parseShortcuts(text, os).length), merge: mergeShortcuts,
   },
   {
-    file: 'Jukselapp.md', search: 'Søk i jukselappen', export: 'Eksporter jukselappen', import: 'Importer oppslag …',
+    file: 'Jukselapp.md', search: 'Søk i jukselapp', export: 'Eksporter jukselapp', import: 'Importer jukselapp …',
     empty: 'har ingen oppslag', has: text => parseCheatSheet(text).length > 0, merge: mergeCheatSheet,
   },
 ]
