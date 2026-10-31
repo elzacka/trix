@@ -432,7 +432,6 @@ $('query').addEventListener('input', e => {
 })
 $('clear').addEventListener('click', clearAll)
 $('capture').addEventListener('click', startCapture)
-$('edit').addEventListener('click', () => openEditor())
 $('more').addEventListener('click', toggleMenu)
 document.querySelectorAll('.submenu-toggle').forEach(b => b.addEventListener('click', () => setSubmenu(b, b.getAttribute('aria-expanded') !== 'true')))
 document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)))

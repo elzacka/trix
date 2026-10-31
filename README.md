@@ -8,7 +8,7 @@ read from two Markdown files you edit. No installer, no network.
 | Files | `Hurtigtaster.md`, `Jukselapp.md`, `innstillinger.json` in `~/Library/Application Support/Trix` (macOS) or `%APPDATA%\Trix` (Windows), menu: «Åpne kildemappe»; created on first launch from [seed/](seed/). Lists next to the app (0.2 and earlier) move there on first launch |
 | Portable | A folder `Trix-data` next to `Trix.exe` or `Trix.app` holds the files instead |
 | Format | Comment at the top of each file |
-| Edit | Pencil or Ctrl+E / ⌘E |
+| Edit | Menu: «Se og endre i fila», or Ctrl+E / ⌘E |
 | Open | Tray or menu bar icon; Ctrl+Alt+T / ⌘⌥T (menu: «Endre hurtigåpner»; Backspace removes) |
 | Lookup | Keyboard button, then the keys; or type them («cmd shift 4», «ctrl+c») |
 | Menu: Visning | A–Å or file order; Hurtigtaster sorts groups and their lines. Hurtigtaster also: own list, the system's, or both (own first); the system's on macOS read from System Settings → Keyboard Shortcuts and App Shortcuts each time Trix opens, on Windows [system/Windows.md](system/Windows.md), Windows 11 and Norwegian Office |
