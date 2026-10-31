@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 0.3.0 - 2026-10-31
+## 1.0.0 - 2026-10-31
 
 - Hurtigtaster: text in quotes in the keys field shows as text, like «eller» ("hold inne" ⌘W); lookup finds the keys
 - Lists and settings in `~/Library/Application Support/Trix` (macOS) or `%APPDATA%\Trix` (Windows); lists next to the app move there on first launch. Portable: a `Trix-data` folder next to the app

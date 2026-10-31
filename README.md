@@ -21,9 +21,10 @@ read from two Markdown files you edit. No installer, no network.
 - macOS 15 or later: unzip, move `Trix.app` to Applications, open. The CI build
   is ad hoc signed: first launch needs System Settings → Privacy & Security →
   Open Anyway.
-- Windows: `winget install elzacka.Trix`, then start with `trix` (Win+R). Or
-  unzip and run `Trix\Trix.exe`: unsigned, so SmartScreen → More info → Run
-  anyway. Needs WebView2, built into Windows 10 and 11.
+- Windows: unzip and run `Trix\Trix.exe`: unsigned, so SmartScreen → More info
+  → Run anyway. winget: `winget install elzacka.Trix`, then `trix` (Win+R),
+  once the package passes winget's review. Needs WebView2, built into Windows
+  10 and 11.
 
 ## Build
 
