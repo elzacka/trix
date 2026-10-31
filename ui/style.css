@@ -162,7 +162,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 
 #menu .submenu-toggle svg { width: 16px; height: 16px; color: var(--muted); transition: transform 0.15s; }
 
-#menu .submenu-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
+#menu .submenu-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 
 /* Item text lines up with the radio items' text beside their check mark */
 #menu .submenu button { padding-left: 34px; }
