@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trix Ultra</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <img src="icon.svg" alt="" class="logo" id="logo">
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="menu-anchor">
+      <button id="more" class="icon-button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu">
+        <svg data-icon="meny" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg>
+      </button>
+      <div id="menu" role="menu" hidden>
+        <div data-item="visning" role="none">
+          <button role="menuitem" class="submenu-toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="view-menu"><span id="view-label"></span><svg data-icon="undermeny" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
+          <div id="view-menu" class="submenu" role="menu" aria-labelledby="view-label" hidden>
+            <div id="sources" role="group">
+              <button role="menuitemradio" data-view="mine" aria-checked="false"><svg data-icon="valgt" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg><span data-text="mine hurtigtaster"></span></button>
+              <button role="menuitemradio" data-view="system" aria-checked="false"><svg data-icon="valgt" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg><span id="system-name"></span></button>
+              <button role="menuitemradio" data-view="begge" aria-checked="false"><svg data-icon="valgt" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg><span data-text="begge"></span></button>
+              <hr>
+            </div>
+            <button role="menuitemradio" data-order="az" aria-checked="false"><svg data-icon="valgt" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg><span data-text="a–å"></span></button>
+            <button role="menuitemradio" data-order="file" aria-checked="false"><svg data-icon="valgt" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg><span data-text="filrekkefølge"></span></button>
+          </div>
+        </div>
+        <div data-item="kildedata" role="none">
+          <button role="menuitem" class="submenu-toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="source-menu"><span id="source-label"></span><svg data-icon="undermeny" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
+          <div id="source-menu" class="submenu" role="menu" aria-labelledby="source-label" hidden>
+            <button role="menuitem" id="edit-file" data-text="rediger"></button>
+            <button role="menuitem" id="export" data-text="eksporter"></button>
+            <button role="menuitem" id="import" data-text="importer"></button>
+            <button role="menuitem" id="reveal-file" data-text="åpne mappe"></button>
+          </div>
+        </div>
+        <button data-item="oppsett" role="menuitem" id="edit-setup" data-text="oppsett"></button>
+        <button data-item="hurtigåpner" role="menuitem" id="hotkey"></button>
+        <button data-item="avslutt" role="menuitem" id="quit"></button>
+        <div data-item="versjon" role="menuitem" aria-disabled="true" id="version"></div>
+      </div>
+    </div>
+  </header>
+
+  <main id="view" role="tabpanel">
+    <div class="search" id="search">
+      <svg data-icon="søk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
+      <input id="query" type="search" autocomplete="off" spellcheck="false">
+      <button id="clear" class="icon-button" hidden>
+        <svg data-icon="tøm" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>
+      </button>
+      <button id="capture" class="icon-button" aria-pressed="false">
+        <svg data-icon="tasteoppslag" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 8a2 2 0 0 1 2 -2h16a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-16a2 2 0 0 1 -2 -2l0 -8"/><path d="M6 10l0 .01"/><path d="M10 10l0 .01"/><path d="M14 10l0 .01"/><path d="M18 10l0 .01"/><path d="M6 14l0 .01"/><path d="M18 14l0 .01"/><path d="M10 14l4 .01"/></svg>
+      </button>
+    </div>
+    <div id="error" role="alert" hidden></div>
+    <div id="tools"></div>
+    <p id="status" class="sr-only" aria-live="polite"></p>
+    <div id="list"></div>
+  </main>
+
+  <section id="editor" hidden aria-labelledby="editor-title">
+    <div class="editor-bar">
+      <h1 id="editor-title"></h1>
+      <button id="cancel" class="button"></button>
+      <button id="save" class="button primary" data-text="lagre"></button>
+    </div>
+    <p id="editor-error" role="alert" hidden></p>
+    <textarea id="text" spellcheck="false" aria-labelledby="editor-title"></textarea>
+  </section>
+
+  <input id="import-file" type="file" accept=".md,.markdown,.txt" hidden>
+  <dialog id="import-dialog" aria-labelledby="import-question">
+    <form method="dialog">
+      <p id="import-question" data-text="importspørsmål"></p>
+      <div class="dialog-buttons">
+        <button class="button" value="cancel" data-text="avbryt"></button>
+        <button class="button" value="replace" data-text="erstatt"></button>
+        <button class="button primary" value="merge" autofocus data-text="slå sammen"></button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

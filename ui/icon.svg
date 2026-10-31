@@ -1,0 +1,8 @@
+<!-- "blocks" from Tabler Icons, MIT License, in Trix's colours -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="#edebe3"/>
+  <g transform="translate(512 512) scale(26) translate(-12 -12)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="#333336" d="M3 14h12a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h3a2 2 0 0 1 2 2v12"/>
+    <path stroke="#2973d9" d="M14 4a1 1 0 0 1 1 -1h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1l0 -5"/>
+  </g>
+</svg>
