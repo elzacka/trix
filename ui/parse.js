@@ -381,14 +381,14 @@ export const mergeEntries = (current, imported) => merge(current, imported, entr
 
 export const KINDS = ['hurtigtaster', 'oppslag', 'kort', 'artikler']
 
-const OPTIONS = {
+export const OPTIONS = {
   hurtigtaster: ['søk', 'tasteoppslag', 'system', 'a–å'],
   oppslag: ['søk', 'emneknagger', 'a–å'],
   kort: ['søk', 'emneknagger', 'a–å'],
   artikler: ['søk', 'emneknagger', 'a–å'],
 }
 
-const DEFAULT_OPTIONS = {
+export const DEFAULT_OPTIONS = {
   hurtigtaster: ['søk', 'tasteoppslag'],
   oppslag: ['søk', 'emneknagger'],
   kort: ['søk', 'emneknagger'],
@@ -408,17 +408,29 @@ export const MENU = ['visning', 'kildedata', 'oppsett', 'hurtigåpner', 'avslutt
 
 const DEFAULT_MENU = ['visning', 'kildedata', '---', 'oppsett', 'hurtigåpner', '---', 'avslutt', 'versjon']
 
-/** Icon names in the setup; `menylinje` is the tray icon, PNG only. */
-export const ICONS = ['logo', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'valgt', 'undermeny', 'fjern']
+/** Icon names in the setup; `menylinje` (tray) and `app` (window and taskbar) are PNG only. */
+export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'valgt', 'undermeny', 'fjern']
 
-/** An image file in the data folder, as `icon_path` in `main.rs` checks it. */
-export const iconName = (name, kind) => /^[^\\/:*?"<>|.][^\\/:*?"<>|]*\.(svg|png)$/i.test(name) && (kind !== 'menylinje' || /\.png$/i.test(name))
+export const PNG_ONLY = ['app', 'menylinje']
+
+/** An image file in the data folder, as `data_file` in `main.rs` checks it. */
+export const iconName = (name, kind) => /^[^\\/:*?"<>|.][^\\/:*?"<>|]*\.(svg|png)$/i.test(name) && (!PNG_ONLY.includes(kind) || /\.png$/i.test(name))
 
 export const COLORS = ['bakgrunn', 'flate', 'linje', 'tekst', 'dempet', 'aksent', 'på aksent']
 
-const WINDOW = { bredde: [320, 1200], høyde: [400, 1000] }
+/** The setup's colour names as the stylesheet's tokens. */
+export const TOKENS = {
+  bakgrunn: 'bg', flate: 'surface', linje: 'line', tekst: 'text', dempet: 'muted', aksent: 'accent', 'på aksent': 'on-accent',
+}
 
-const FONT_SIZE = [12, 20]
+export const WINDOW = { bredde: [320, 1200], høyde: [400, 1000] }
+
+export const FONT_PATTERN = /^[\p{L}\p{N} _-]+$/u
+
+/** Panel: opens at the tray icon and hides on a click elsewhere. Vindu: a normal window in the Dock or taskbar. */
+export const WINDOW_TYPES = ['panel', 'vindu']
+
+export const FONT_SIZE = [12, 20]
 
 export const TEXTS = {
   'navn': 'Trix Ultra',
@@ -516,6 +528,9 @@ export function parseSetup(text) {
       if (!COLORS.includes(name)) return problem(i, `«${parts[0]}» er ikke en farge i oppsettet`)
       if (!parts[1]) return problem(i, `Skriv en farge for ${name}`)
       setup.colors[name] = { light: parts[1], dark: parts[2] || parts[1], line: i + 1 }
+    } else if (section === 'vindu' && name === 'type') {
+      if (!WINDOW_TYPES.includes(key(parts[1] ?? ''))) return problem(i, 'Type må være panel eller vindu')
+      setup.window.type = key(parts[1])
     } else if (section === 'vindu' || (section === 'skrift' && name === 'størrelse')) {
       const [min, max] = section === 'vindu' ? WINDOW[name] ?? [] : FONT_SIZE
       if (min === undefined) return problem(i, `«${parts[0]}» er ikke et mål i oppsettet`)
@@ -526,12 +541,12 @@ export function parseSetup(text) {
       else setup.fonts[name] = value
     } else if (section === 'skrift') {
       if (!['tekst', 'taster'].includes(name)) return problem(i, `«${parts[0]}» er ikke en skrift i oppsettet`)
-      if (!/^[\p{L}\p{N} _-]+$/u.test(parts[1] ?? '')) return problem(i, 'Skriv navnet på skriften, bare bokstaver, tall, mellomrom og bindestrek')
+      if (!FONT_PATTERN.test(parts[1] ?? '')) return problem(i, 'Skriv navnet på skriften, bare bokstaver, tall, mellomrom og bindestrek')
       setup.fonts[name] = parts[1]
     } else if (section === 'ikoner') {
       if (!ICONS.includes(name)) return problem(i, `«${parts[0]}» er ikke et ikon i oppsettet`)
       if (!iconName(parts[1] ?? '', name)) {
-        return problem(i, name === 'menylinje' ? 'Skriv navnet på en .png-fil i samme mappe' : 'Skriv navnet på en .svg- eller .png-fil i samme mappe')
+        return problem(i, PNG_ONLY.includes(name) ? 'Skriv navnet på en .png-fil i samme mappe' : 'Skriv navnet på en .svg- eller .png-fil i samme mappe')
       }
       setup.icons[name] = { file: parts[1], color: key(parts[2] ?? '') === 'farge', line: i + 1 }
     } else if (section === 'tekster') {
@@ -543,6 +558,36 @@ export function parseSetup(text) {
   if (!seen.has('meny')) setup.menu = [...DEFAULT_MENU]
   if (!setup.views.length) setup.problems.push(`${SETUP_FILE} har ingen visninger`)
   return setup
+}
+
+const cell = text => String(text).replace(/\|/g, '\\|')
+
+/** The setup as `Oppsett.md`, below `header` (the title and format comment of the file it replaces). */
+export function formatSetup(setup, header) {
+  const lines = (title, items) => [`## ${title}`, '', ...items.map(item => `- ${item}`), ...(items.length ? [''] : [])]
+  const view = v => {
+    const parts = [v.name, v.kind, v.file, v.options.join(', ')]
+    if (v.placeholder) parts.push(v.placeholder)
+    return parts.map(cell).join(' | ')
+  }
+  const color = ([name, c]) => [name, c.light, ...(c.dark !== c.light ? [c.dark] : [])].join(' | ')
+  return [
+    header.trimEnd(), '',
+    ...lines('Visninger', setup.views.map(view)),
+    ...lines('Meny', setup.menu),
+    ...lines('Farger', Object.entries(setup.colors).map(color)),
+    ...lines('Skrift', Object.entries(setup.fonts).map(([name, value]) => `${name} | ${value}`)),
+    ...lines('Vindu', Object.entries(setup.window).map(([name, value]) => `${name} | ${value}`)),
+    ...lines('Ikoner', Object.entries(setup.icons).map(([name, i]) => [name, i.file, ...(i.color ? ['farge'] : [])].join(' | '))),
+    ...lines('Tekster', Object.entries(setup.texts).map(([name, text]) => `${name} | ${cell(text)}`)),
+  ].join('\n').trimEnd() + '\n'
+}
+
+/** The file's title and format comment: everything before its first `##` section outside a comment. */
+export function setupHeader(text) {
+  const lines = text.split(/\r?\n/)
+  const first = comments(lines).findIndex(line => line !== null && /^##\s/.test(line))
+  return (first < 0 ? lines : lines.slice(0, first)).join('\n')
 }
 
 const channel = c => {

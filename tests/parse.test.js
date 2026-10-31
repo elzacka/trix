@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseEntries, lead, alphabetical, searchEntries, inline,
   mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, listName, iconName, TEXTS, KINDS,
+  formatSetup, setupHeader,
 } from '../ui/parse.js'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
@@ -218,6 +219,27 @@ test('file names stay in the data folder', () => {
   for (const name of ['../a.md', 'a/b.md', 'a\\b.md', 'C:a.md', '.a.md', 'a.txt', 'Oppsett.md']) assert.ok(!listName(name), name)
   assert.ok(iconName('logo.svg') && iconName('ikon.PNG', 'menylinje'))
   assert.ok(!iconName('logo.svg', 'menylinje') && !iconName('../logo.png') && !iconName('logo.gif'))
+})
+
+test('the setup screen writes what the parser reads, under the file\'s own comment', () => {
+  const seed = read('../seed/Oppsett.md')
+  assert.equal(formatSetup(parseSetup(seed), setupHeader(seed)), seed)
+  const text = [
+    '# Oppsett', '<!--', '## Visninger', '- Ikke | en | linje.md', '-->', '', '## Visninger', '- Telefon \\| SMS | oppslag | Telefon.md | søk | Navn eller nummer',
+    '## Vindu', '- type | vindu', '- bredde | 700', '## Farger', '- aksent | #c00', '## Ikoner', '- menylinje | prikk.png | farge', '- app | app.png',
+    '## Tekster', '- søk | Finn \\| filtrer',
+  ].join('\n')
+  const setup = parseSetup(text)
+  assert.deepEqual(setup.problems, [])
+  assert.equal(setupHeader(text), '# Oppsett\n<!--\n## Visninger\n- Ikke | en | linje.md\n-->\n')
+  const again = parseSetup(formatSetup(setup, setupHeader(text)))
+  for (const part of ['views', 'menu', 'fonts', 'window', 'texts']) assert.deepEqual(again[part], setup[part], part)
+  assert.deepEqual(again.views[0].name, 'Telefon | SMS')
+  assert.deepEqual(again.window, { type: 'vindu', bredde: 700 })
+  assert.deepEqual(Object.keys(again.icons), ['menylinje', 'app'])
+  assert.equal(again.icons.menylinje.color, true)
+  assert.deepEqual(parseSetup('## Vindu\n- type | flytende').problems, ['Oppsett.md, linje 2: Type må være panel eller vindu'])
+  assert.deepEqual(parseSetup('## Ikoner\n- app | app.svg').problems, ['Oppsett.md, linje 2: Skriv navnet på en .png-fil i samme mappe'])
 })
 
 test('placeholders', () => {

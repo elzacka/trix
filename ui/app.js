@@ -1,7 +1,8 @@
 import {
   parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseEntries, lead, alphabetical, sortShortcuts,
-  searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, fill, contrastProblems, SETUP_FILE,
+  searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, fill, contrastProblems, SETUP_FILE, TOKENS,
 } from './parse.js'
+import { openSetup, closeSetup, dropped } from './setup.js'
 
 const { invoke } = window.__TAURI__.core
 const { listen } = window.__TAURI__.event
@@ -13,11 +14,6 @@ const KINDS = {
   oppslag: { has: hasEntries, merge: mergeEntries, render: renderLookup },
   kort: { has: hasEntries, merge: mergeEntries, render: renderCards },
   artikler: { has: hasEntries, merge: mergeEntries, render: renderArticles },
-}
-
-// The setup's colour names as the stylesheet's tokens.
-const TOKENS = {
-  bakgrunn: 'bg', flate: 'surface', linje: 'line', tekst: 'text', dempet: 'muted', aksent: 'accent', 'på aksent': 'on-accent',
 }
 
 const state = {
@@ -39,8 +35,16 @@ const state = {
   capturing: false,
   problems: [],
   error: '',
+  /** What the app last sent to Rust, so a reload sends only changes. */
   tray: '',
   trayIcon: '',
+  appIcon: '',
+  size: '',
+  mode: '',
+  /** A published copy: content only, no editing. */
+  team: false,
+  publishTo: '',
+  setupOpen: false,
 }
 
 const $ = id => document.getElementById(id)
@@ -74,7 +78,7 @@ function icon(name, paths) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   svg.setAttribute('viewBox', '0 0 24 24')
   svg.setAttribute('aria-hidden', 'true')
-  svg.dataset.icon = name
+  if (name) svg.dataset.icon = name
   svg.innerHTML = paths.map(d => `<path d="${d}"/>`).join('')
   return svg
 }
@@ -104,13 +108,21 @@ async function loadIcons(setup, problems) {
     state.trayIcon = key
     await invoke('set_tray_icon', { name: tray?.file ?? null, color: tray?.color ?? false }).catch(error => problems.push(String(error)))
   }
+  const app = setup.icons.app?.file ?? ''
+  if (app !== state.appIcon) {
+    state.appIcon = app
+    await invoke('set_app_icon', { name: app || null }).catch(error => problems.push(String(error)))
+  }
 }
 
 async function load() {
   const problems = []
   try {
     const loaded = await invoke('load')
-    Object.assign(state, { os: loaded.os, version: loaded.version, hotkey: loaded.hotkey, view: loaded.view, setupText: loaded.setup })
+    Object.assign(state, {
+      os: loaded.os, version: loaded.version, hotkey: loaded.hotkey, view: loaded.view, setupText: loaded.setup,
+      team: loaded.team, publishTo: loaded.publishTo,
+    })
     state.setup = parseSetup(loaded.setup)
     problems.push(...state.setup.problems)
     const old = new Map(state.views.map(v => [`${v.kind}|${v.file}`, v]))
@@ -175,8 +187,9 @@ function applySetup() {
       continue
     }
     $('menu').append(items.get(key))
-    items.get(key).hidden = false
+    items.get(key).hidden = key === 'oppsett' && state.team
   }
+  for (const id of ['edit-file', 'import']) $(id).hidden = state.team
 
   const root = document.documentElement
   root.removeAttribute('style')
@@ -192,7 +205,17 @@ function applySetup() {
   if (fonts.størrelse) root.style.setProperty('--font-size', `${fonts.størrelse}px`)
   problems.push(...contrastProblems({ lys: resolved('light'), mørk: resolved('dark') }))
 
-  invoke('set_size', { width: size.bredde ?? 420, height: size.høyde ?? 600 }).catch(error => state.problems.push(String(error)))
+  const mode = size.type ?? 'panel'
+  if (mode !== state.mode) {
+    state.mode = mode
+    invoke('set_mode', { window: mode === 'vindu' }).catch(error => state.problems.push(String(error)))
+  }
+  // Only on a change: in a window the user's own size stays.
+  const dimensions = [size.bredde ?? 420, size.høyde ?? 600]
+  if (dimensions.join('x') !== state.size) {
+    state.size = dimensions.join('x')
+    invoke('set_size', { width: dimensions[0], height: dimensions[1] }).catch(error => state.problems.push(String(error)))
+  }
   const tray = [texts.navn, t('åpne'), t('avslutt')]
   if (tray.join('\n') !== state.tray) {
     state.tray = tray.join('\n')
@@ -490,8 +513,29 @@ function openEditor(name, original, text = original) {
   $('text').scrollTop = 0
 }
 
-const editView = (text) => { const view = current(); if (view) openEditor(view.file, view.text, text) }
-const editSetup = () => openEditor(SETUP_FILE, state.setupText)
+const editView = (text) => { const view = current(); if (view && !state.team) openEditor(view.file, view.text, text) }
+
+/** The setup screen; it shows its changes in the app as they are made. */
+function editSetup() {
+  if (state.team || state.setupOpen) return
+  closeMenu()
+  openSetup({
+    state, h, t, invoke, icon,
+    preview: async setup => {
+      state.setup = setup
+      const loaded = new Map(state.views.map(v => [v.file, v]))
+      state.views = setup.views.map(v => ({ text: '', query: '', order: 'file', tags: [], open: null, reading: null, ...loaded.get(v.file), ...v }))
+      if (state.tab >= state.views.length) state.tab = 0
+      const problems = applySetup()
+      await loadIcons(setup, problems)
+      renderTabs()
+      return problems
+    },
+    saved: async () => { await load() },
+    restore: load,
+    editText: () => openEditor(SETUP_FILE, state.setupText),
+  })
+}
 
 function closeEditor() {
   state.editing = null
@@ -721,6 +765,11 @@ document.addEventListener('keydown', e => {
     else if (e.key === 'Escape') { e.preventDefault(); cancelEdit() }
     return
   }
+  if (state.setupOpen) {
+    if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); $('setup-save').click() }
+    else if (e.key === 'Escape' && !e.target.closest('input, select')) { e.preventDefault(); closeSetup() }
+    return
+  }
   if (mod && /^[1-9]$/.test(e.key)) { e.preventDefault(); selectTab(Number(e.key) - 1) }
   else if (e.ctrlKey && e.key === 'Tab') { e.preventDefault(); step(e.shiftKey ? -1 : 1) }
   else if (mod && e.key.toLowerCase() === 'e') { e.preventDefault(); editView() }
@@ -741,7 +790,8 @@ document.addEventListener('keydown', e => {
 })
 
 // The files are the user's: read them again each time the app comes forward.
-window.addEventListener('focus', () => { if (!state.editing) load() })
+window.addEventListener('focus', () => { if (!state.editing && !state.setupOpen) load() })
+window.__TAURI__.webview.getCurrentWebview().onDragDropEvent(event => dropped(event.payload))
 listen('opened', () => { if (!state.editing && !$('search').hidden) $('query').select() })
 
 load().then(focusView)

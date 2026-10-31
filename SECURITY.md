@@ -13,6 +13,9 @@ One process with the user's rights, no elevated parts, no network, no listening 
 | Icons from the setup | File → webview, tray | Script in an SVG; large file | Shown as `<img>` or CSS mask from a data URL, never inserted as markup; 1 MB limit; tray: PNG decoded by Tauri |
 | Links in the content | Webview → browser | Web page in the panel | `on_navigation`: own origin only; `on_new_window`: deny; http(s) goes to the browser |
 | IPC from the panel | Webview → Rust | File access beyond the data folder | Only the app's own commands; names checked as above; `open_url` http(s) only; remote pages get no IPC (Tauri, no `remote` capability) |
+| Setup screen: icon chosen or dropped | Any file → data folder | Overwritten file; large file | `add_icon`: `.svg`/`.png` by name, 1 MB, a free name beside an existing file; `read_dropped` reads only a path the user dropped, 1 MB |
+| «Publiser», «Lag zip» | Rust → team folder, Downloads | Overwritten files; data beyond the setup | Only into an empty folder or one with `publisert.json`; files: the setup's own names, checked as above; zip at a free name; `ditto` and `tar.exe` by absolute path, no shell; refused in a team copy |
+| Team copy in a shared folder | Other team members → files | Changed content or setup | The folder's own access rights decide who can write; the app offers no editing in a team copy; per-device settings stay outside it |
 | Imported file | File → editor | Script; overwritten list | Same text-node rendering; written only on «Lagre», with the changed-on-disk check |
 | Export | Rust → Downloads | Overwritten file | Never over an existing file |
 | System list (macOS) | System prefs → Rust | Command injection | `/usr/bin/defaults`, `plutil`, `mdfind` by absolute path, arguments without a shell; bundle IDs limited to `[A-Za-z0-9.-]`; read only when a view shows it |

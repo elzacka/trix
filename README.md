@@ -1,17 +1,30 @@
 # Trix Ultra
 
-Tray app for Windows and macOS, built from blocks you choose in one Markdown
-file: views, menu, colours, fonts, icons, window size and every UI text. The
-content is Markdown files you edit. No installer, no network.
+App for Windows and macOS, built from blocks an admin chooses for a team:
+views, menu, colours, fonts, icons, window and every UI text, all in one
+Markdown file. The content is Markdown files. No installer, no network.
 
 | | |
 |---|---|
-| Files | `Oppsett.md`, one `.md` per view, `innstillinger.json` in `~/Library/Application Support/Trix Ultra` (macOS) or `%APPDATA%\Trix Ultra` (Windows). Created on first launch from [seed/](seed/) |
+| Files | `Oppsett.md`, one `.md` per view, icons, in `~/Library/Application Support/Trix Ultra` (macOS) or `%APPDATA%\Trix Ultra` (Windows). Created on first launch from [seed/](seed/) |
 | Portable | A folder `Trix Ultra-data` next to the app holds the files instead |
-| Setup | `Oppsett.md`, format in its top comment; menu «Endre oppsettet» or Ctrl+, / ⌘, |
+| Per device | `innstillinger.json` in the folder above, never in the shared one: hotkey, system list, window type, last team folder |
+| Setup | Menu «Endre oppsettet» or Ctrl+, / ⌘,: a screen that writes `Oppsett.md`; or the file itself, format in its top comment |
 | Content | Each view's file, format in its top comment; menu «Kildedata», or Ctrl+E / ⌘E |
-| Open | Tray or menu bar icon; Ctrl+Alt+U / ⌘⌥U (menu: «Endre hurtigåpner») |
+| Open | Panel: tray or menu bar icon. Window: like other apps, from the folder, Dock or taskbar. Both: Ctrl+Alt+U / ⌘⌥U (menu: «Endre hurtigåpner») |
 | Keys | Ctrl/⌘+1–9 or Ctrl+Tab: views. Esc: back, close, clear, hide |
+
+## Admin and team
+
+| | Admin | Team |
+|---|---|---|
+| Copy | Own data folder; setup screen and editing | `Trix Ultra-data` with `publisert.json` beside the app: content only, no editing or setup |
+| Share | Setup screen → «Del med teamet»: «Publiser» copies the app and the data to a folder (drag it in), such as a Teams or SharePoint folder synced with OneDrive; «Lag zip» puts the same in Downloads | Opens the app in that folder; a synced folder brings each new publish |
+| By hand | Copy the app and the data folder yourself, with `publisert.json` in it (`{}` is enough) | Same |
+
+«Publiser» writes only to an empty folder or one published to before. The app
+copied is the admin's platform: a mixed team gets the other build beside it
+(`Trix Ultra.app` and `Trix Ultra.exe` share `Trix Ultra-data`).
 
 ## Setup blocks
 
@@ -21,8 +34,8 @@ content is Markdown files you edit. No installer, no network.
 | `## Meny` | Menu items in order: `visning`, `kildedata`, `oppsett`, `hurtigåpner`, `avslutt`, `versjon`, `---` |
 | `## Farger` | `bakgrunn`, `flate`, `linje`, `tekst`, `dempet`, `aksent`, `på aksent`: light and dark. Contrast under 4.5:1 shows a warning |
 | `## Skrift` | Text and key fonts (Syne, Inter or any installed font), size |
-| `## Vindu` | Panel width and height |
-| `## Ikoner` | SVG or PNG from the data folder: logo, menu bar/tray icon, the icons in the panel |
+| `## Vindu` | `type`: panel at the tray icon, or a normal window in the Dock or taskbar; width, height |
+| `## Ikoner` | SVG or PNG from the data folder: logo, menu bar/tray icon, window icon (Windows), the icons in the app |
 | `## Tekster` | Every UI string, with `{placeholders}` |
 
 A missing section keeps the defaults; a bad line shows as a warning with its
@@ -40,7 +53,8 @@ Shortcuts each time the app opens; on Windows [system/Windows.md](system/Windows
 
 ## App icon
 
-The icon in Finder, the Dock and Explorer is part of the build: replace
+The icon in Finder, the Dock and Explorer is part of the build (the setup's
+`app` icon is the window and taskbar icon on Windows while it runs): replace
 [assets/icon.svg](assets/icon.svg) (and [assets/tray.svg](assets/tray.svg) for
 the default menu bar icon), then `npx tauri icon assets/icon.svg -o
 src-tauri/icons`, `rsvg-convert -w 44 -h 44 assets/tray.svg -o

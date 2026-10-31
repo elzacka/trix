@@ -73,6 +73,16 @@
     <textarea id="text" spellcheck="false" aria-labelledby="editor-title"></textarea>
   </section>
 
+  <section id="setup" hidden aria-labelledby="setup-title">
+    <div class="editor-bar">
+      <h1 id="setup-title" tabindex="-1">Oppsett</h1>
+      <button id="setup-cancel" class="button"></button>
+      <button id="setup-save" class="button primary"></button>
+    </div>
+    <div id="setup-problems" aria-live="polite"></div>
+    <div id="setup-body"></div>
+  </section>
+
   <input id="import-file" type="file" accept=".md,.markdown,.txt" hidden>
   <dialog id="import-dialog" aria-labelledby="import-question">
     <form method="dialog">

@@ -24,6 +24,7 @@ use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 use tauri_plugin_opener::OpenerExt;
 
 mod system;
+mod team;
 
 #[cfg(target_os = "macos")]
 use tauri::RunEvent;
@@ -50,6 +51,12 @@ struct Settings {
     /// Which shortcuts the list shows: None or «mine», «system», «begge».
     #[serde(rename = "vis", skip_serializing_if = "Option::is_none")]
     view: Option<String>,
+    /// The setup's window type, kept so the app starts in it: «panel» or «vindu».
+    #[serde(rename = "vindu", skip_serializing_if = "Option::is_none")]
+    mode: Option<String>,
+    /// The team folder the admin last published to.
+    #[serde(rename = "publiser til", skip_serializing_if = "Option::is_none")]
+    publish_to: Option<String>,
 }
 
 const VIEWS: [&str; 3] = ["mine", "system", "begge"];
@@ -63,6 +70,9 @@ struct Loaded {
     hotkey: String,
     hotkey_taken: bool,
     view: String,
+    /// A published copy: content only, no editing.
+    team: bool,
+    publish_to: String,
 }
 
 /// The folder the app sits in: next to the .exe, or next to the .app.
@@ -79,6 +89,11 @@ fn user_dir() -> PathBuf {
     } else {
         PathBuf::from(std::env::var_os("APPDATA").expect("APPDATA")).join("Trix Ultra")
     }
+}
+
+/// Settings are per device: a team's shared data folder holds none of them.
+fn settings_dir() -> PathBuf {
+    std::env::var_os("TRIX_ULTRA_DATA_DIR").map_or_else(user_dir, PathBuf::from)
 }
 
 fn data_dir() -> PathBuf {
@@ -134,14 +149,16 @@ fn read_or_seed(path: &Path, seed: &str) -> Result<String, String> {
 }
 
 fn settings() -> Settings {
-    fs::read_to_string(data_dir().join(SETTINGS))
+    fs::read_to_string(settings_dir().join(SETTINGS))
         .ok()
         .and_then(|text| serde_json::from_str(&text).ok())
         .unwrap_or_default()
 }
 
 fn write_settings(settings: &Settings) -> Result<(), String> {
-    let path = data_dir().join(SETTINGS);
+    let dir = settings_dir();
+    fs::create_dir_all(&dir).map_err(|e| io_error(&dir, e))?;
+    let path = dir.join(SETTINGS);
     let json = serde_json::to_string_pretty(settings).expect("settings as JSON");
     fs::write(&path, json + "\n").map_err(|e| io_error(&path, e))
 }
@@ -169,7 +186,83 @@ fn load(app: AppHandle) -> Result<Loaded, String> {
         hotkey,
         hotkey_taken,
         view: current_view(),
+        team: is_team(),
+        publish_to: settings().publish_to.unwrap_or_default(),
     })
+}
+
+fn is_team() -> bool {
+    data_dir().join(team::MARK).is_file()
+}
+
+/// The admin's files that make up the team's copy: names checked like any other.
+fn team_files(names: &[String]) -> Result<Vec<PathBuf>, String> {
+    if is_team() {
+        return Err("Dette er teamets kopi. Publiser fra din egen.".into());
+    }
+    names.iter().map(|name| data_file(name, &[".md", ".svg", ".png"])).filter(|p| p.as_ref().map_or(true, |p| p.is_file())).collect()
+}
+
+/// The app and a copy of its data into a team folder: empty, or published to before.
+#[tauri::command]
+fn publish(files: Vec<String>, target: String) -> Result<(), String> {
+    let files = team_files(&files)?;
+    let target = PathBuf::from(target.trim());
+    team::check_target(&target, PORTABLE)?;
+    team::publish(&files, &target, PORTABLE, env!("CARGO_PKG_VERSION"))?;
+    write_settings(&Settings { publish_to: Some(target.display().to_string()), ..settings() })
+}
+
+/// The same as `publish`, as a zip in Downloads, shown in Finder or Explorer.
+#[tauri::command]
+fn export_team(app: AppHandle, files: Vec<String>, name: String) -> Result<(), String> {
+    let files = team_files(&files)?;
+    let name = team::folder_name(&name);
+    let staging = std::env::temp_dir().join(format!("trix-ultra-{}", std::process::id()));
+    let folder = staging.join(&name);
+    let _ = fs::remove_dir_all(&staging);
+    fs::create_dir_all(&folder).map_err(|e| io_error(&folder, e))?;
+    let downloads = app.path().download_dir().map_err(|e| e.to_string())?;
+    let zip = (1..)
+        .map(|n| downloads.join(if n == 1 { format!("{name}.zip") } else { format!("{name} {n}.zip") }))
+        .find(|path| !path.exists())
+        .expect("a free name");
+    let result = team::publish(&files, &folder, PORTABLE, env!("CARGO_PKG_VERSION")).and_then(|()| team::zip(&folder, &zip));
+    let _ = fs::remove_dir_all(&staging);
+    result?;
+    app.opener().reveal_item_in_dir(zip).map_err(|e| e.to_string())
+}
+
+/// An icon the admin chose or dropped, copied into the data folder; its name there, never over another file.
+#[tauri::command]
+fn add_icon(name: String, bytes: Vec<u8>) -> Result<String, String> {
+    let name = Path::new(&name).file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
+    data_file(&name, &[".svg", ".png"])?;
+    if bytes.len() as u64 > ICON_LIMIT {
+        return Err(format!("{name} er større enn 1 MB"));
+    }
+    let (stem, extension) = name.rsplit_once('.').expect("an extension");
+    for n in 1.. {
+        let candidate = if n == 1 { name.clone() } else { format!("{stem} {n}.{extension}") };
+        let path = data_dir().join(&candidate);
+        match fs::read(&path) {
+            Ok(existing) if existing == bytes => return Ok(candidate),
+            Ok(_) => continue,
+            Err(_) => return fs::write(&path, &bytes).map(|()| candidate).map_err(|e| io_error(&path, e)),
+        }
+    }
+    unreachable!()
+}
+
+/// A dropped file, read for `add_icon`.
+#[tauri::command]
+fn read_dropped(path: String) -> Result<tauri::ipc::Response, String> {
+    let path = PathBuf::from(path);
+    let size = fs::metadata(&path).map_err(|e| io_error(&path, e))?.len();
+    if size > ICON_LIMIT {
+        return Err(format!("{} er større enn 1 MB", path.display()));
+    }
+    fs::read(&path).map(tauri::ipc::Response::new).map_err(|e| io_error(&path, e))
 }
 
 /// A view's file; a missing one starts as the template for its type.
@@ -282,9 +375,12 @@ fn default_tray_icon(app: &AppHandle) -> Image<'static> {
     }
 }
 
-/// The tray icon's tooltip and menu in the names the setup gives.
+/// The window's title, the tray icon's tooltip and its menu in the names the setup gives.
 #[tauri::command]
 fn set_tray(app: AppHandle, name: String, open: String, quit: String) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.set_title(&name);
+    }
     let tray = app.tray_by_id("tray").ok_or("tray")?;
     let open = MenuItem::with_id(&app, "open", open, true, None::<&str>).map_err(|e| e.to_string())?;
     let quit = MenuItem::with_id(&app, "quit", quit, true, None::<&str>).map_err(|e| e.to_string())?;
@@ -302,7 +398,9 @@ fn set_size(app: AppHandle, width: f64, height: f64) -> Result<(), String> {
         return Ok(());
     }
     window.set_size(size).map_err(|e| e.to_string())?;
-    if window.is_visible().unwrap_or(false) {
+    if windowed(&app) {
+        let _ = window.center();
+    } else if window.is_visible().unwrap_or(false) {
         place(&app, &window);
     }
     Ok(())
@@ -320,6 +418,60 @@ fn set_hotkey(app: AppHandle, hotkey: String) -> Result<(), String> {
 
 /// Set while a file dialog has focus, so the panel stays open behind it.
 struct Holding(AtomicBool);
+
+/// Set while the setup screen is open, so a colour picker or a drag from Finder does not hide the panel.
+struct KeepOpen(AtomicBool);
+
+#[tauri::command]
+fn keep_open(keep: tauri::State<KeepOpen>, open: bool) {
+    keep.0.store(open, Ordering::Relaxed);
+}
+
+/// A normal window in the Dock or taskbar instead of the panel at the tray icon.
+struct WindowMode(AtomicBool);
+
+fn windowed(app: &AppHandle) -> bool {
+    app.state::<WindowMode>().0.load(Ordering::Relaxed)
+}
+
+#[tauri::command]
+fn set_mode(app: AppHandle, window: bool) -> Result<(), String> {
+    if windowed(&app) != window {
+        apply_mode(&app, window);
+        if let Some(main) = app.get_webview_window("main") {
+            if window { let _ = main.center(); } else { place(&app, &main); }
+        }
+    }
+    write_settings(&Settings { mode: Some(if window { "vindu" } else { "panel" }.into()), ..settings() })
+}
+
+fn apply_mode(app: &AppHandle, window: bool) {
+    app.state::<WindowMode>().0.store(window, Ordering::Relaxed);
+    let Some(main) = app.get_webview_window("main") else { return };
+    let _ = main.set_decorations(window);
+    let _ = main.set_resizable(window);
+    let _ = main.set_skip_taskbar(!window);
+    let _ = main.set_always_on_top(!window);
+    if let Some(tray) = app.tray_by_id("tray") {
+        let _ = tray.set_visible(!window);
+    }
+    #[cfg(target_os = "macos")]
+    {
+        let _ = app.set_activation_policy(if window { tauri::ActivationPolicy::Regular } else { tauri::ActivationPolicy::Accessory });
+        round_corners(&main, !window);
+    }
+}
+
+/// The window and taskbar icon (Windows); the Dock's is the bundle's.
+#[tauri::command]
+fn set_app_icon(app: AppHandle, name: Option<String>) -> Result<(), String> {
+    let window = app.get_webview_window("main").ok_or("window")?;
+    let icon = match name {
+        Some(name) => Image::from_bytes(&read_image(&name, &[".png"])?).map_err(|e| format!("{name}: {e}"))?,
+        None => app.default_window_icon().cloned().ok_or("icon")?.to_owned(),
+    };
+    window.set_icon(icon).map_err(|e| e.to_string())
+}
 
 #[tauri::command]
 fn hold(holding: tauri::State<Holding>) {
@@ -368,27 +520,30 @@ fn place(app: &AppHandle, window: &WebviewWindow) {
     let _ = window.set_position(PhysicalPosition::new(x.round() as i32, y.round() as i32));
 }
 
-/// Rounded like other Mac windows: a borderless window has square corners of its own.
+/// The panel rounded like other Mac windows: a borderless window has square corners of its own. A normal window has the system's.
 #[cfg(target_os = "macos")]
-fn round_corners(window: &WebviewWindow) {
+fn round_corners(window: &WebviewWindow, panel: bool) {
     use objc2_app_kit::{NSColor, NSWindow};
     let Ok(pointer) = window.ns_window() else { return };
-    // SAFETY: Tauri's live NSWindow, used on the main thread during setup.
+    // SAFETY: Tauri's live NSWindow, used on the main thread.
     let ns_window = unsafe { &*pointer.cast::<NSWindow>() };
-    ns_window.setOpaque(false);
-    ns_window.setBackgroundColor(Some(&NSColor::clearColor()));
+    ns_window.setOpaque(!panel);
+    let background = if panel { NSColor::clearColor() } else { NSColor::windowBackgroundColor() };
+    ns_window.setBackgroundColor(Some(&background));
     let Some(view) = ns_window.contentView() else { return };
     view.setWantsLayer(true);
     if let Some(layer) = view.layer() {
-        layer.setCornerRadius(16.0);
-        layer.setMasksToBounds(true);
+        layer.setCornerRadius(if panel { 16.0 } else { 0.0 });
+        layer.setMasksToBounds(panel);
     }
     ns_window.invalidateShadow();
 }
 
 fn show(app: &AppHandle) {
     let Some(window) = app.get_webview_window("main") else { return };
-    place(app, &window);
+    if !windowed(app) {
+        place(app, &window);
+    }
     #[cfg(target_os = "macos")]
     let _ = app.show();
     let _ = window.unminimize();
@@ -460,17 +615,20 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             load, read_list, system_list, save, reveal_file, open_url, set_hotkey, set_view, set_tray,
-            set_size, set_tray_icon, read_icon, export_list, hold, hide, quit
+            set_size, set_tray_icon, read_icon, export_list, hold, hide, quit, keep_open, set_mode, set_app_icon,
+            publish, export_team, add_icon, read_dropped
         ])
         .manage(LastHidden(Mutex::new(None)))
         .manage(Holding(AtomicBool::new(false)))
+        .manage(KeepOpen(AtomicBool::new(false)))
+        .manage(WindowMode(AtomicBool::new(false)))
         .setup(|app| {
             build_panel(app.handle())?;
             #[cfg(target_os = "macos")]
             {
                 app.set_activation_policy(tauri::ActivationPolicy::Accessory);
                 if let Some(window) = app.get_webview_window("main") {
-                    round_corners(&window);
+                    round_corners(&window, true);
                 }
             }
 
@@ -502,17 +660,28 @@ fn main() {
                     }
                 })
                 .build(app)?;
+            if settings().mode.as_deref() == Some("vindu") {
+                apply_mode(app.handle(), true);
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.center();
+                }
+            }
             show(app.handle());
             Ok(())
         })
         .on_window_event(|window, event| match event {
+            // A window on Windows closes the app, like other apps there; on a Mac the Dock icon opens it again.
             WindowEvent::CloseRequested { api, .. } => {
+                if windowed(window.app_handle()) && cfg!(windows) {
+                    return;
+                }
                 api.prevent_close();
                 hide(window.app_handle().clone());
             }
             // A panel, like a menu: it closes when the user clicks elsewhere.
             WindowEvent::Focused(false) => {
-                if window.state::<Holding>().0.swap(false, Ordering::Relaxed) {
+                let held = window.state::<Holding>().0.swap(false, Ordering::Relaxed);
+                if held || windowed(window.app_handle()) || window.state::<KeepOpen>().0.load(Ordering::Relaxed) {
                     return;
                 }
                 *window.state::<LastHidden>().0.lock().expect("lock") = Some(Instant::now());

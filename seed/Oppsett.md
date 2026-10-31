@@ -2,7 +2,7 @@
 
 <!--
 Appen lager fanene, menyen, fargene, skriftene og tekstene sine ut fra denne fila.
-Endre den som du vil, og velg «Lagre». Ctrl+, eller ⌘, åpner fila.
+Du kan endre fila her eller i «Endre oppsettet» i menyen (Ctrl+, eller ⌘,), som skriver den samme fila.
 En seksjon du sletter, får standardverdiene tilbake.
 
 ## Visninger
@@ -38,13 +38,15 @@ En seksjon du sletter, får standardverdiene tilbake.
 - størrelse: 12–20
 
 ## Vindu
+- type: panel (åpnes ved ikonet i menylinjen eller på oppgavelinjen) eller vindu (et vanlig vindu i Dock eller på oppgavelinjen)
 - bredde: 320–1200, høyde: 400–1000
 
 ## Ikoner
 - Navn | fil: Et .svg- eller .png-bilde i samme mappe som denne fila
-- Navn: logo, menylinje, meny, søk, tøm, tasteoppslag, tilbake, valgt, undermeny, fjern
+- Navn: logo, app, menylinje, meny, søk, tøm, tasteoppslag, tilbake, valgt, undermeny, fjern
 - Ikonene i appen får tekstfargen. Det er bare formen i bildet som teller.
 - logo: Vises i sine egne farger.
+- app: Ikonet på vinduet og oppgavelinjen i Windows, bare .png.
 - menylinje: Ikonet i menylinjen (Mac) eller ved klokka på oppgavelinjen (Windows), bare .png. På Mac blir det svart eller hvitt som de andre ikonene der. Skriv | farge etter filnavnet for å beholde fargene.
 - Ikonet i Finder og Utforsker hører til selve appen. Du endrer det når du bygger appen selv, se README.
 
