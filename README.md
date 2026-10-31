@@ -14,6 +14,13 @@ Markdown file. The content is Markdown files. No installer, no network.
 | Open | Panel: tray or menu bar icon. Window: like other apps, from the folder, Dock or taskbar. Both: Ctrl+Alt+U / ⌘⌥U (menu: «Endre hurtigåpner») |
 | Keys | Ctrl/⌘+1–9 or Ctrl+Tab: views. Esc: back, close, clear, hide |
 
+## Start as admin
+
+1. Download `Trix-Ultra-macOS.zip` or `Trix-Ultra-Windows.zip` (CI artifacts), unzip, open the app (see Run).
+2. Menu «Endre oppsettet» (Ctrl+, / ⌘,): tabs, menu, colours, fonts, window, icons, texts.
+3. Each tab: menu «Kildedata» → «Se og endre i fila» for the content.
+4. Setup screen → «Del med teamet»: «Publiser» or «Lag zip».
+
 ## Admin and team
 
 | | Admin | Team |
