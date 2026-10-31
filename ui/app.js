@@ -8,7 +8,7 @@ const { listen } = window.__TAURI__.event
 
 const TABS = [
   {
-    file: 'Hurtigtaster.md', search: 'Søk i hurtigtaster', export: 'Eksporter mine hurtigtaster', import: 'Importer hurtigtaster …',
+    file: 'Hurtigtaster.md', search: 'Søk i hurtigtaster', export: 'Eksporter hurtigtaster', import: 'Importer hurtigtaster …',
     empty: 'har ingen hurtigtaster', has: text => ['mac', 'windows'].some(os => parseShortcuts(text, os).length), merge: mergeShortcuts,
   },
   {
