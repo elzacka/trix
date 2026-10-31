@@ -94,7 +94,7 @@ fn data_dir() -> PathBuf {
     if portable.is_dir() { portable } else { user_dir() }
 }
 
-/// Lists that Trix 0.2 and earlier kept next to the app move to the user's folder, once.
+/// Lists found next to the app move into the user's folder while it has none.
 fn move_old_lists() {
     let dir = data_dir();
     if dir == user_dir() {

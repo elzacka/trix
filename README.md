@@ -5,7 +5,7 @@ read from two Markdown files you edit. No installer, no network.
 
 | | |
 |---|---|
-| Files | `Hurtigtaster.md`, `Jukselapp.md`, `innstillinger.json` in `~/Library/Application Support/Trix` (macOS) or `%APPDATA%\Trix` (Windows), menu: «Åpne kildemappe»; created on first launch from [seed/](seed/). Lists next to the app (0.2 and earlier) move there on first launch |
+| Files | `Hurtigtaster.md`, `Jukselapp.md`, `innstillinger.json` in `~/Library/Application Support/Trix` (macOS) or `%APPDATA%\Trix` (Windows), menu: «Åpne kildemappe»; created on first launch from [seed/](seed/). Lists found next to the app move there while the folder is empty |
 | Portable | A folder `Trix-data` next to `Trix.exe` or `Trix.app` holds the files instead |
 | Format | Comment at the top of each file |
 | Edit | Menu: «Se og endre i fila», or Ctrl+E / ⌘E |
@@ -30,7 +30,7 @@ read from two Markdown files you edit. No installer, no network.
 ```sh
 npm ci
 npm test            # parsers
-npm run dev         # files land in src-tauri/target/debug/
+TRIX_DATA_DIR=/tmp/trix npm run dev   # without it: your own lists
 npm run build:mac   # dist/Trix-macOS.zip, universal
 ```
 
