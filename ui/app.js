@@ -1,5 +1,5 @@
 import {
-  parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseCheatSheet, alphabetical, searchCheatSheet,
+  parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseCheatSheet, alphabetical, sortShortcuts, searchCheatSheet,
   formatKeys, inline, plain, mergeShortcuts, mergeCheatSheet,
 } from './parse.js'
 
@@ -8,11 +8,11 @@ const { listen } = window.__TAURI__.event
 
 const TABS = [
   {
-    file: 'Hurtigtaster.md', search: 'Søk i hurtigtaster', export: 'Eksporter hurtigtaster', import: 'Importer hurtigtaster …',
+    name: 'Hurtigtaster', file: 'Hurtigtaster.md', search: 'Søk i hurtigtaster',
     empty: 'har ingen hurtigtaster', has: text => ['mac', 'windows'].some(os => parseShortcuts(text, os).length), merge: mergeShortcuts,
   },
   {
-    file: 'Jukselapp.md', search: 'Søk i jukselapp', export: 'Eksporter jukselapp', import: 'Importer jukselapp …',
+    name: 'Jukselapp', file: 'Jukselapp.md', search: 'Søk i jukselapp',
     empty: 'har ingen oppslag', has: text => parseCheatSheet(text).length > 0, merge: mergeCheatSheet,
   },
 ]
@@ -28,7 +28,7 @@ const state = {
   importing: '',
   tags: [],
   open: null,
-  order: 'file',
+  orders: ['file', 'file'],
   editing: false,
   discarding: false,
   recording: false,
@@ -96,16 +96,10 @@ function render() {
   $('error').hidden = !state.error
   $('error').textContent = state.error
   $('system-name').textContent = systemName()
-  document.querySelectorAll('[data-view]').forEach(b => {
-    b.hidden = state.tab !== 0
-    b.setAttribute('aria-checked', b.dataset.view === state.view)
-  })
-  document.querySelectorAll('[data-order]').forEach(b => {
-    b.hidden = state.tab !== 1
-    b.setAttribute('aria-checked', b.dataset.order === state.order)
-  })
-  $('export').textContent = TABS[state.tab].export
-  $('import').textContent = TABS[state.tab].import
+  $('sources').hidden = state.tab !== 0
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-checked', b.dataset.view === state.view))
+  document.querySelectorAll('[data-order]').forEach(b => b.setAttribute('aria-checked', b.dataset.order === state.orders[state.tab]))
+  $('source-label').textContent = `Kildedata ${TABS[state.tab].name}`
   $('hotkey').replaceChildren(...(state.recording ? ['Trykk ny hurtigtast …']
     : [state.hotkey ? 'Endre hurtigåpner' : 'Velg hurtigåpner', state.hotkey && h('span', { class: 'menu-keys' }, hotkeyName())].filter(Boolean)))
   if (state.tab === 0) renderShortcuts()
@@ -130,6 +124,7 @@ function renderShortcuts() {
   const combo = id && formatKeys(query, state.os)[0]
   const lists = shownLists().map(({ title, text }) => {
     const parsed = parseShortcuts(text, state.os)
+    if (state.orders[0] === 'az') sortShortcuts(parsed)
     return { title, sections: id ? lookupShortcuts(parsed, id) : filterShortcuts(parsed, query) }
   })
   if (id && state.hotkey && comboId(state.hotkey, state.os) === id) {
@@ -165,7 +160,7 @@ function renderCheatSheet() {
     const found = searchCheatSheet(parsed, query, state.tags)
     sections = found.length ? [{ title: '', entries: found }] : []
   } else {
-    const grouped = state.order === 'az' ? alphabetical(parsed) : parsed
+    const grouped = state.orders[1] === 'az' ? alphabetical(parsed) : parsed
     sections = grouped
       .map(s => ({ ...s, entries: s.entries.filter(e => state.tags.every(t => e.tags.includes(t))) }))
       .filter(s => s.entries.length)
@@ -441,7 +436,8 @@ $('edit').addEventListener('click', () => openEditor())
 $('more').addEventListener('click', toggleMenu)
 document.querySelectorAll('.submenu-toggle').forEach(b => b.addEventListener('click', () => setSubmenu(b, b.getAttribute('aria-expanded') !== 'true')))
 document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)))
-document.querySelectorAll('[data-order]').forEach(b => b.addEventListener('click', () => { state.order = b.dataset.order; closeMenu(); render() }))
+document.querySelectorAll('[data-order]').forEach(b => b.addEventListener('click', () => { state.orders[state.tab] = b.dataset.order; closeMenu(); render() }))
+$('edit-file').addEventListener('click', () => openEditor())
 $('import').addEventListener('click', chooseImport)
 $('import-file').addEventListener('change', e => { if (e.target.files[0]) readImport(e.target.files[0]) })
 $('import-dialog').addEventListener('close', finishImport)

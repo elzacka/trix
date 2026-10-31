@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseCheatSheet, alphabetical, searchCheatSheet, inline,
-  mergeShortcuts, mergeCheatSheet,
+  mergeShortcuts, mergeCheatSheet, sortShortcuts,
 } from '../ui/parse.js'
 
 test('keys as symbols on a Mac and words on Windows', () => {
@@ -142,4 +142,11 @@ test('the Windows list parses whole', () => {
   const lines = text.split('\n').filter(l => l.startsWith('- ')).length
   assert.equal(sections.reduce((n, s) => n + s.items.length, 0), lines)
   for (const s of sections) assert.equal(new Set(s.items.map(i => i.title)).size, s.items.length, s.title)
+})
+
+test('shortcuts A–Å: groups and their lines, ungrouped lines first', () => {
+  const sorted = sortShortcuts(parseShortcuts('- Ånd | F3\n- Bord | F4\n## Øvrig\n- B | F1\n- A | F2\n## Chrome\n- Å | F5', 'mac'))
+  assert.deepEqual(sorted.map(s => [s.title, s.items.map(i => i.title)]), [
+    ['', ['Bord', 'Ånd']], ['Chrome', ['Å']], ['Øvrig', ['A', 'B']],
+  ])
 })

@@ -22,21 +22,24 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg>
       </button>
       <div id="menu" role="menu" hidden>
-        <button role="menuitem" class="submenu-toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="view-menu">Vis<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
-        <div id="view-menu" class="submenu" role="menu" aria-label="Vis" hidden>
-          <button role="menuitemradio" data-view="mine" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>Mine hurtigtaster</button>
-          <button role="menuitemradio" data-view="system" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg><span id="system-name"></span></button>
-          <button role="menuitemradio" data-view="begge" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>Begge</button>
-          <button role="menuitemradio" data-order="file" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>Som kildefila</button>
-          <button role="menuitemradio" data-order="az" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>A–Å</button>
+        <button role="menuitem" class="submenu-toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="view-menu">Visning<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
+        <div id="view-menu" class="submenu" role="menu" aria-label="Visning" hidden>
+          <div id="sources" role="group">
+            <button role="menuitemradio" data-view="mine" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>Mine hurtigtaster</button>
+            <button role="menuitemradio" data-view="system" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg><span id="system-name"></span></button>
+            <button role="menuitemradio" data-view="begge" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>Begge</button>
+            <hr>
+          </div>
+          <button role="menuitemradio" data-order="az" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>Sorter A–Å</button>
+          <button role="menuitemradio" data-order="file" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>Rekkefølgen i kildefila</button>
         </div>
-        <button role="menuitem" class="submenu-toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="transfer-menu">Eksport og import<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
-        <div id="transfer-menu" class="submenu" role="menu" aria-label="Eksport og import" hidden>
-          <button role="menuitem" id="export"></button>
-          <button role="menuitem" id="import"></button>
+        <button role="menuitem" class="submenu-toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="source-menu"><span id="source-label"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
+        <div id="source-menu" class="submenu" role="menu" aria-labelledby="source-label" hidden>
+          <button role="menuitem" id="edit-file">Se og endre i fila</button>
+          <button role="menuitem" id="export">Eksporter</button>
+          <button role="menuitem" id="import">Importer …</button>
+          <button role="menuitem" id="reveal-file">Åpne kildemappe</button>
         </div>
-        <hr>
-        <button role="menuitem" id="reveal-file">Vis kildemappa</button>
         <hr>
         <button role="menuitem" id="hotkey"></button>
         <hr>

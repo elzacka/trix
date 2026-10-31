@@ -221,6 +221,12 @@ export function parseCheatSheet(text) {
 
 const collator = new Intl.Collator('nb')
 
+/** Groups A–Å with their lines A–Å; lines without a group stay first. In place. */
+export function sortShortcuts(sections) {
+  for (const s of sections) s.items.sort((a, b) => collator.compare(a.title, b.title))
+  return sections.sort((a, b) => (b.title === '') - (a.title === '') || collator.compare(a.title, b.title))
+}
+
 /** One section per first letter, A–Å. */
 export function alphabetical(sections) {
   const groups = new Map()
