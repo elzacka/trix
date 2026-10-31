@@ -61,6 +61,7 @@ function keyName(token, os) {
 }
 
 const alternatives = text => text.split(/\s+eller\s+/i)
+const HOLD = /^hold inne\s+/i
 
 /** «ctrl shift S eller F1» → ['Ctrl+Shift+S', 'F1'] on Windows, ['⌃⇧S', 'F1'] on a Mac. */
 export function formatKeys(text, os) {
@@ -141,10 +142,11 @@ export function parseShortcuts(text, os) {
     const keys = second === undefined ? first : os === 'mac' ? second : first
     if (second !== undefined && !keys) continue
     if (!sections.length) sections.push({ title: '', items: [] })
+    const combos = alternatives(keys).map(k => ({ hold: HOLD.test(k), text: k.replace(HOLD, '') }))
     sections.at(-1).items.push({
       title: title.trim(),
-      keys: formatKeys(keys, os),
-      combos: alternatives(keys).map(k => comboId(k, os)).filter(Boolean),
+      keys: combos.map(k => ({ hold: k.hold, text: formatKeys(k.text, os)[0] })).filter(k => k.text),
+      combos: combos.map(k => comboId(k.text, os)).filter(Boolean),
     })
   }
   return sections.filter(s => s.items.length)
@@ -158,7 +160,7 @@ export function filterShortcuts(sections, query) {
     .map(s => ({
       ...s,
       items: s.items.filter(item => {
-        const text = [s.title, item.title, ...item.keys].join(' ').toLocaleLowerCase('nb')
+        const text = [s.title, item.title, ...item.keys.map(k => k.text)].join(' ').toLocaleLowerCase('nb')
         return words.every(w => text.includes(w))
       }),
     }))
