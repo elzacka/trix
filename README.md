@@ -17,7 +17,7 @@ sheet, read from two Markdown files next to the app. No installer, no network.
 
 ## Run
 
-- macOS: unzip, move `Trix.app` to any folder in Finder, open. The CI build is
+- macOS 15 or later: unzip, move `Trix.app` to any folder in Finder, open. The CI build is
   ad hoc signed: first launch needs System Settings → Privacy & Security → Open
   Anyway.
 - Windows: `winget install elzacka.Trix`, then start with `trix` (Win+R). The

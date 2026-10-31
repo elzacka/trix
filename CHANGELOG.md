@@ -6,6 +6,7 @@
 - Import a list (replace or merge) and export own list to Downloads
 - Hurtigtaster for new users: four examples and Trix's own keys
 - Focused buttons: one ring
+- macOS 15 or later, the versions Apple still patches
 
 ## 0.2.0 - 2026-10-30
 
