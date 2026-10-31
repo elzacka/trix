@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseCheatSheet, alphabetical, searchCheatSheet, inline,
+  mergeShortcuts,
 } from '../ui/parse.js'
 
 test('keys as symbols on a Mac and words on Windows', () => {
@@ -104,7 +105,27 @@ test('inline Markdown', () => {
 test('the seed files parse', () => {
   const shortcuts = readFileSync(new URL('../seed/Hurtigtaster.md', import.meta.url), 'utf8')
   const cheat = readFileSync(new URL('../seed/Jukselapp.md', import.meta.url), 'utf8')
-  assert.equal(parseShortcuts(shortcuts, 'windows').length, 3)
+  assert.equal(parseShortcuts(shortcuts, 'windows').length, 2)
   assert.equal(parseShortcuts(shortcuts, 'mac').flatMap(s => s.items).every(i => i.keys.length), true)
   assert.equal(parseCheatSheet(cheat).flatMap(s => s.entries).length, 6)
+})
+
+test('merge adds missing groups and lines, keeps the user\'s lines', () => {
+  const current = '# Hurtigtaster\r\n\r\n<!--\r\n## Ikke en gruppe\r\n-->\r\n\r\n## Redigering\r\n\r\n- Kopier | ctrl C\r\n- Lim inn | ctrl V\r\n\r\n## Trix\r\n\r\n- Søk | ctrl F\r\n'
+  const imported = '## redigering\n- kopier | ctrl shift C\n- Angre | ctrl Z\n## Ikke en gruppe\n- Ny | ctrl N\n- Ny | ctrl M\n## Trix\n- Søk | ctrl F\n'
+  assert.equal(mergeShortcuts(current, imported), [
+    '# Hurtigtaster', '', '<!--', '## Ikke en gruppe', '-->', '', '## Redigering', '', '- Kopier | ctrl C', '- Lim inn | ctrl V',
+    '- Angre | ctrl Z', '', '## Trix', '', '- Søk | ctrl F', '', '## Ikke en gruppe', '', '- Ny | ctrl N', '',
+  ].join('\n'))
+  assert.equal(mergeShortcuts('', '- A | F1\n## B\n- C | F2'), '- A | F1\n\n## B\n\n- C | F2\n')
+  assert.equal(mergeShortcuts('## B\n- C | F2', '- A | F1'), '- A | F1\n\n## B\n- C | F2\n')
+  assert.equal(mergeShortcuts('- A | F1\n## B', '- D | F3'), '- A | F1\n- D | F3\n## B\n')
+})
+
+test('the Windows list parses whole', () => {
+  const text = readFileSync(new URL('../system/Windows.md', import.meta.url), 'utf8')
+  const sections = parseShortcuts(text, 'windows')
+  const lines = text.split('\n').filter(l => l.startsWith('- ')).length
+  assert.equal(sections.reduce((n, s) => n + s.items.length, 0), lines)
+  for (const s of sections) assert.equal(new Set(s.items.map(i => i.title)).size, s.items.length, s.title)
 })

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Menu «Vis»: own shortcuts, the system's, or both. macOS: System Settings' shortcuts as set on this Mac, App Shortcuts included. Windows: Windows 11, Norwegian Office and browsers
+- Import a list (replace or merge) and export own list to Downloads
+- Hurtigtaster for new users: four examples and Trix's own keys
+
 ## 0.2.0 - 2026-10-30
 
 - Hurtigtaster for new users lists Trix's own keys

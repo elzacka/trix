@@ -1,6 +1,6 @@
 import {
   parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseCheatSheet, alphabetical, searchCheatSheet,
-  formatKeys, inline, plain,
+  formatKeys, inline, plain, mergeShortcuts,
 } from './parse.js'
 
 const { invoke } = window.__TAURI__.core
@@ -17,6 +17,9 @@ const state = {
   files: ['', ''],
   queries: ['', ''],
   hotkey: '',
+  view: 'mine',
+  system: '',
+  importing: '',
   tags: [],
   open: null,
   order: 'file',
@@ -52,14 +55,19 @@ const closeIcon = () => icon(['M18 6l-12 12', 'M6 6l12 12'])
 async function load() {
   try {
     const loaded = await invoke('load')
-    Object.assign(state, { os: loaded.os, files: loaded.files, hotkey: loaded.hotkey, error: '' })
+    Object.assign(state, {
+      os: loaded.os, files: loaded.files, hotkey: loaded.hotkey, view: loaded.view, system: loaded.system, error: '',
+    })
     $('version').textContent = `v${loaded.version} | elzacka`
     if (loaded.hotkeyTaken) state.error = `En annen app bruker ${hotkeyName()}`
+    else if (loaded.systemError) state.error = loaded.systemError
   } catch (error) {
     state.error = String(error)
   }
   render()
 }
+
+const systemName = () => (state.os === 'mac' ? 'Hurtigtaster i macOS' : 'Hurtigtaster i Windows')
 
 const hotkeyName = () => (state.hotkey ? formatKeys(state.hotkey, state.os)[0] : 'Ingen')
 
@@ -81,6 +89,8 @@ function render() {
   $('capture').setAttribute('aria-pressed', state.capturing)
   $('error').hidden = !state.error
   $('error').textContent = state.error
+  $('system-name').textContent = systemName()
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-checked', b.dataset.view === state.view))
   $('hotkey').textContent = state.recording ? 'Trykk ny hurtigtast …' : `Hurtigåpner: ${hotkeyName()}`
   if (state.tab === 0) renderShortcuts()
   else renderCheatSheet()
@@ -90,30 +100,42 @@ function emptyState(text) {
   return h('div', { class: 'empty' }, h('p', {}, text), h('button', { onclick: clearAll }, 'Vis alt'))
 }
 
+/** The user's list first: the shortcuts they chose themselves. */
+function shownLists() {
+  return [
+    state.view !== 'system' && { title: 'Mine hurtigtaster', text: state.files[0] },
+    state.view !== 'mine' && { title: systemName(), text: state.system },
+  ].filter(Boolean)
+}
+
 function renderShortcuts() {
   const query = state.queries[0].trim()
-  const parsed = parseShortcuts(state.files[0], state.os)
   const id = lookupId(query, state.os)
   const combo = id && formatKeys(query, state.os)[0]
-  let sections = filterShortcuts(parsed, query)
-  if (id) {
-    sections = lookupShortcuts(parsed, id)
-    if (state.hotkey && comboId(state.hotkey, state.os) === id) {
-      sections.push({ title: 'Trix', items: [{ title: 'Åpner Trix', keys: [hotkeyName()] }] })
-    }
+  const lists = shownLists().map(({ title, text }) => {
+    const parsed = parseShortcuts(text, state.os)
+    return { title, sections: id ? lookupShortcuts(parsed, id) : filterShortcuts(parsed, query) }
+  })
+  if (id && state.hotkey && comboId(state.hotkey, state.os) === id) {
+    lists[0].sections.push({ title: 'Trix', items: [{ title: 'Åpner Trix', keys: [hotkeyName()] }] })
   }
+  const sections = lists.flatMap(l => l.sections)
   const count = sections.reduce((n, s) => n + s.items.length, 0)
   $('tools').replaceChildren(...(id && count ? [h('span', {}, `${combo}: ${count} treff`)] : []))
   $('status').textContent = id ? (count ? `${combo}: ${count} treff` : `${combo} er ikke i lista`) : query ? `${count} treff` : ''
+  const group = (s, heading) => h('section', {},
+    s.title && h(heading, {}, s.title),
+    h('div', { class: 'card' }, s.items.map(item =>
+      h('div', { class: 'shortcut' },
+        h('span', { class: 'name' }, item.title),
+        h('span', { class: 'keys' }, item.keys.flatMap((k, i) =>
+          [i > 0 && h('span', { class: 'or' }, 'eller'), h('kbd', {}, k)]))))))
   $('list').replaceChildren(
     ...(sections.length
-      ? sections.map(s => h('section', {},
-        s.title && h('h2', {}, s.title),
-        h('div', { class: 'card' }, s.items.map(item =>
-          h('div', { class: 'shortcut' },
-            h('span', { class: 'name' }, item.title),
-            h('span', { class: 'keys' }, item.keys.flatMap((k, i) =>
-              [i > 0 && h('span', { class: 'or' }, 'eller'), h('kbd', {}, k)])))))))
+      ? lists.length > 1
+        ? lists.filter(l => l.sections.length).map(l =>
+          h('div', { class: 'source' }, h('h2', {}, l.title), l.sections.map(s => group(s, 'h3'))))
+        : sections.map(s => group(s, 'h2'))
       : [id ? emptyState(`${combo} er ikke i lista`)
         : query ? emptyState(`Ingen treff på «${query}»`) : h('p', { class: 'empty' }, 'Lista er tom')]),
   )
@@ -206,12 +228,12 @@ function selectTab(tab) {
 
 // Editor
 
-function openEditor() {
+function openEditor(text = state.files[state.tab]) {
   closeMenu()
   state.editing = true
   state.discarding = false
   $('editor-title').textContent = TABS[state.tab].file
-  $('text').value = state.files[state.tab]
+  $('text').value = text
   $('editor-error').hidden = true
   $('cancel').textContent = 'Avbryt'
   $('view').hidden = true
@@ -272,6 +294,58 @@ function toggleMenu() {
   $('menu').hidden = false
   $('more').setAttribute('aria-expanded', 'true')
   $('menu').querySelector('button').focus()
+}
+
+async function setView(view) {
+  closeMenu()
+  try {
+    await invoke('set_view', { view })
+  } catch (error) {
+    state.error = String(error)
+    return render()
+  }
+  state.tab = 0
+  await load()
+}
+
+async function exportList() {
+  closeMenu()
+  try {
+    await invoke('export_list')
+  } catch (error) {
+    state.error = String(error)
+    render()
+  }
+}
+
+// Import: the result opens in the editor, and the file changes only on «Lagre».
+
+async function chooseImport() {
+  closeMenu()
+  await invoke('hold')
+  $('import-file').value = ''
+  $('import-file').click()
+}
+
+async function readImport(file) {
+  const text = await file.text()
+  if (!['mac', 'windows'].some(os => parseShortcuts(text, os).length)) {
+    state.error = `${file.name} har ingen hurtigtaster`
+    return render()
+  }
+  selectTab(0)
+  // An empty list keeps its format comment.
+  if (!parseShortcuts(state.files[0], state.os).length) return openEditor(mergeShortcuts(state.files[0], text))
+  state.importing = text
+  $('import-dialog').returnValue = ''
+  $('import-dialog').showModal()
+}
+
+function finishImport() {
+  const choice = $('import-dialog').returnValue
+  if (choice === 'merge') openEditor(mergeShortcuts(state.files[0], state.importing))
+  else if (choice === 'replace') openEditor(state.importing)
+  state.importing = ''
 }
 
 const MODIFIERS = ['Meta', 'Control', 'Alt', 'Shift']
@@ -351,8 +425,13 @@ $('query').addEventListener('input', e => {
 })
 $('clear').addEventListener('click', clearAll)
 $('capture').addEventListener('click', startCapture)
-$('edit').addEventListener('click', openEditor)
+$('edit').addEventListener('click', () => openEditor())
 $('more').addEventListener('click', toggleMenu)
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)))
+$('import').addEventListener('click', chooseImport)
+$('import-file').addEventListener('change', e => { if (e.target.files[0]) readImport(e.target.files[0]) })
+$('import-dialog').addEventListener('close', finishImport)
+$('export').addEventListener('click', exportList)
 $('reveal-file').addEventListener('click', () => { closeMenu(); invoke('reveal_file', { name: TABS[state.tab].file }) })
 $('hotkey').addEventListener('click', () => { state.recording = true; render() })
 $('quit').addEventListener('click', () => invoke('quit'))
@@ -370,6 +449,7 @@ document.addEventListener('contextmenu', e => {
 })
 
 document.addEventListener('keydown', e => {
+  if ($('import-dialog').open) return
   const mod = state.os === 'mac' ? e.metaKey : e.ctrlKey
   if (state.recording) return recordHotkey(e)
   if (state.capturing) return captureKey(e)

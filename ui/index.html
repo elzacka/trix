@@ -22,7 +22,17 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg>
       </button>
       <div id="menu" role="menu" hidden>
+        <div role="group" aria-labelledby="view-label">
+          <div id="view-label" class="menu-label">Vis</div>
+          <button role="menuitemradio" data-view="mine" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>Mine hurtigtaster</button>
+          <button role="menuitemradio" data-view="system" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg><span id="system-name"></span></button>
+          <button role="menuitemradio" data-view="begge" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>Begge</button>
+        </div>
+        <hr>
+        <button role="menuitem" id="import">Importer hurtigtaster …</button>
+        <button role="menuitem" id="export">Eksporter mine hurtigtaster</button>
         <button role="menuitem" id="reveal-file">Vis kildemappa</button>
+        <hr>
         <button role="menuitem" id="hotkey"></button>
         <hr>
         <button role="menuitem" id="quit">Avslutt Trix</button>
@@ -57,5 +67,17 @@
     <p id="editor-error" role="alert" hidden></p>
     <textarea id="text" spellcheck="false" aria-labelledby="editor-title"></textarea>
   </section>
+
+  <input id="import-file" type="file" accept=".md,.markdown,.txt" hidden>
+  <dialog id="import-dialog" aria-labelledby="import-question">
+    <form method="dialog">
+      <p id="import-question">Vil du slå fila sammen med lista di eller erstatte lista?</p>
+      <div class="dialog-buttons">
+        <button class="button" value="cancel">Avbryt</button>
+        <button class="button" value="replace">Erstatt</button>
+        <button class="button primary" value="merge" autofocus>Slå sammen</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>

@@ -4,7 +4,10 @@ use std::{
     fs,
     io::ErrorKind,
     path::{Path, PathBuf},
-    sync::Mutex,
+    sync::{
+        Mutex,
+        atomic::{AtomicBool, Ordering},
+    },
     time::{Duration, Instant},
 };
 
@@ -19,6 +22,8 @@ use tauri::{
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 use tauri_plugin_opener::OpenerExt;
+
+mod system;
 
 #[cfg(target_os = "macos")]
 use tauri::RunEvent;
@@ -36,7 +41,12 @@ struct Settings {
     /// None: the default. Empty: no hotkey.
     #[serde(rename = "hurtigtast", skip_serializing_if = "Option::is_none")]
     hotkey: Option<String>,
+    /// Which shortcuts the list shows: None or «mine», «system», «begge».
+    #[serde(rename = "vis", skip_serializing_if = "Option::is_none")]
+    view: Option<String>,
 }
+
+const VIEWS: [&str; 3] = ["mine", "system", "begge"];
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -47,6 +57,10 @@ struct Loaded {
     files: Vec<String>,
     hotkey: String,
     hotkey_taken: bool,
+    view: String,
+    /// The system's shortcuts when the view shows them, in the format of `Hurtigtaster.md`.
+    system: String,
+    system_error: String,
 }
 
 /// The folder Trix sits in, so the lists travel with it: next to Trix.exe, or next to Trix.app.
@@ -98,8 +112,18 @@ fn settings() -> Settings {
         .unwrap_or_default()
 }
 
+fn write_settings(settings: &Settings) -> Result<(), String> {
+    let path = data_dir().join(SETTINGS);
+    let json = serde_json::to_string_pretty(settings).expect("settings as JSON");
+    fs::write(&path, json + "\n").map_err(|e| io_error(&path, e))
+}
+
 fn current_hotkey() -> String {
     settings().hotkey.unwrap_or_else(|| DEFAULT_HOTKEY.into())
+}
+
+fn current_view() -> String {
+    settings().view.filter(|v| VIEWS.contains(&v.as_str())).unwrap_or_else(|| VIEWS[0].into())
 }
 
 #[tauri::command]
@@ -116,6 +140,12 @@ fn load(app: AppHandle) -> Result<Loaded, String> {
     let hotkey = current_hotkey();
     let hotkey_taken = !hotkey.is_empty()
         && !app.global_shortcut().is_registered(hotkey.as_str());
+    let view = current_view();
+    // Read only when shown: on a Mac this reads the system's settings.
+    let (system, system_error) = match view.as_str() {
+        "mine" => (String::new(), String::new()),
+        _ => system::list().map_or_else(|error| (String::new(), error), |text| (text, String::new())),
+    };
     Ok(Loaded {
         os: if cfg!(target_os = "macos") { "mac" } else { "windows" },
         version: env!("CARGO_PKG_VERSION"),
@@ -123,7 +153,31 @@ fn load(app: AppHandle) -> Result<Loaded, String> {
         files,
         hotkey,
         hotkey_taken,
+        view,
+        system,
+        system_error,
     })
+}
+
+#[tauri::command]
+fn set_view(view: String) -> Result<(), String> {
+    if !VIEWS.contains(&view.as_str()) {
+        return Err(format!("Ukjent visning: {view}"));
+    }
+    write_settings(&Settings { view: Some(view), ..settings() })
+}
+
+/// A copy of the user's list in Downloads, shown in Finder or Explorer; never over an existing file.
+#[tauri::command]
+fn export_list(app: AppHandle) -> Result<(), String> {
+    let source = file_path(FILES[0].0)?;
+    let folder = app.path().download_dir().map_err(|e| e.to_string())?;
+    let target = (1..)
+        .map(|n| folder.join(if n == 1 { "Hurtigtaster.md".into() } else { format!("Hurtigtaster {n}.md") }))
+        .find(|path| !path.exists())
+        .expect("a free name");
+    fs::copy(&source, &target).map_err(|e| io_error(&target, e))?;
+    app.opener().reveal_item_in_dir(target).map_err(|e| e.to_string())
 }
 
 /// Refuses when the file changed on disk since `original` was read, so nothing is lost.
@@ -178,9 +232,15 @@ fn set_hotkey(app: AppHandle, hotkey: String) -> Result<(), String> {
         let _ = register(&app, &current_hotkey());
         return Err(error);
     }
-    let path = data_dir().join(SETTINGS);
-    let json = serde_json::to_string_pretty(&Settings { hotkey: Some(hotkey) }).expect("settings as JSON");
-    fs::write(&path, json + "\n").map_err(|e| io_error(&path, e))
+    write_settings(&Settings { hotkey: Some(hotkey), ..settings() })
+}
+
+/// Set while a file dialog has focus, so the panel stays open behind it.
+struct Holding(AtomicBool);
+
+#[tauri::command]
+fn hold(holding: tauri::State<Holding>) {
+    holding.0.store(true, Ordering::Relaxed);
 }
 
 /// When the panel last hid because it lost focus, so the tray click that caused it does not reopen it.
@@ -316,9 +376,10 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            load, save, reveal_file, open_url, set_hotkey, hide, quit
+            load, save, reveal_file, open_url, set_hotkey, set_view, export_list, hold, hide, quit
         ])
         .manage(LastHidden(Mutex::new(None)))
+        .manage(Holding(AtomicBool::new(false)))
         .setup(|app| {
             build_panel(app.handle())?;
             #[cfg(target_os = "macos")]
@@ -372,9 +433,13 @@ fn main() {
             }
             // A panel, like a menu: it closes when the user clicks elsewhere.
             WindowEvent::Focused(false) => {
+                if window.state::<Holding>().0.swap(false, Ordering::Relaxed) {
+                    return;
+                }
                 *window.state::<LastHidden>().0.lock().expect("lock") = Some(Instant::now());
                 hide(window.app_handle().clone());
             }
+            WindowEvent::Focused(true) => window.state::<Holding>().0.store(false, Ordering::Relaxed),
             _ => {}
         })
         .build(tauri::generate_context!())

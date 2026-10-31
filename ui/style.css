@@ -153,6 +153,30 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 
 #version { padding: 6px 10px; color: var(--muted); font-size: 0.85em; }
 
+.menu-label { padding: 6px 10px 2px; color: var(--muted); font-size: 12px; }
+
+#menu [role="menuitemradio"] { display: flex; align-items: center; gap: 6px; }
+
+#menu [role="menuitemradio"] svg { width: 16px; height: 16px; }
+
+#menu [aria-checked="false"] svg { visibility: hidden; }
+
+dialog {
+  max-width: 340px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+dialog::backdrop { background: rgb(0 0 0 / 0.25); }
+
+dialog p { margin: 0 0 14px; }
+
+.dialog-buttons { display: flex; justify-content: flex-end; gap: 6px; }
+
 /* List view */
 
 main {
@@ -216,7 +240,11 @@ main {
 
 section + section { margin-top: 18px; }
 
-h2 {
+.source + .source { margin-top: 28px; }
+
+.source > h2 { margin: 0 0 10px 4px; color: var(--text); font-size: 14px; letter-spacing: 0; text-transform: none; }
+
+h2, h3 {
   margin: 0 0 6px 4px;
   color: var(--muted);
   font-size: 12px;

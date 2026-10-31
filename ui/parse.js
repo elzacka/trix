@@ -266,3 +266,41 @@ export function inline(text) {
 export function plain(text) {
   return inline(text).map(s => s.text).join('')
 }
+
+/** Groups and their item lines with the line numbers they end at; outside the format comment. */
+function shortcutBlocks(lines) {
+  const groups = []
+  comments(lines).forEach((line, i) => {
+    if (line === null) return
+    if (/^##(?!#)/.test(line)) groups.push({ title: line.replace(/^#+/, '').trim(), heading: i, end: i, items: [] })
+    const item = line.match(/^[-*]\s+(.*)$/)
+    if (!item) return
+    if (!groups.length) groups.push({ title: '', heading: -1, end: i, items: [] })
+    const group = groups.at(-1)
+    group.items.push({ name: item[1].split(/\s*(?<!\\)\|/)[0].trim().toLocaleLowerCase('nb'), line })
+    group.end = i
+  })
+  return groups
+}
+
+/** The current list with the imported groups and lines it lacks; a line whose name is already in its group stays as it is. */
+export function mergeShortcuts(current, imported) {
+  const lines = current.replace(/\r\n/g, '\n').replace(/\n+$/, '').split('\n')
+  const groups = shortcutBlocks(lines)
+  const after = new Map()
+  const before = new Map()
+  const added = []
+  for (const group of shortcutBlocks(imported.split(/\r?\n/))) {
+    const key = group.title.toLocaleLowerCase('nb')
+    const target = groups.find(g => g.title.toLocaleLowerCase('nb') === key)
+    const names = new Set(target?.items.map(i => i.name))
+    const fresh = group.items.filter(i => !names.has(i.name) && names.add(i.name))
+    if (!fresh.length) continue
+    if (target) after.set(target.end, [...(after.get(target.end) ?? []), ...fresh.map(i => i.line)])
+    // Lines without a group stay above the first group, where the parser reads them as ungrouped.
+    else if (!group.title && groups.length) before.set(groups[0].heading, [...fresh.map(i => i.line), ''])
+    else added.push('', ...(group.title ? [`## ${group.title}`, ''] : []), ...fresh.map(i => i.line))
+  }
+  const merged = lines.flatMap((line, i) => [...(before.get(i) ?? []), line, ...(after.get(i) ?? [])])
+  return [...merged, ...added].join('\n').replace(/^\n+/, '') + '\n'
+}
