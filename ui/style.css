@@ -388,6 +388,9 @@ kbd {
 
 :is(.body, .article, .flip) code { padding: 0 4px; background: var(--key); border-radius: 4px; font: 0.86em ui-monospace, monospace; }
 
+/* A card face has its own colours: the code ground follows its text */
+.flip code { background: color-mix(in srgb, currentColor 15%, transparent); }
+
 .subheading { margin: 12px 0 4px; color: var(--text); font-size: 1em; font-weight: 600; letter-spacing: 0; text-transform: none; }
 
 .entry .also { color: var(--muted); font-size: 12px; }
