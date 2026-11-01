@@ -4,7 +4,7 @@
 
 - View type `steg`, default tab «Steg»: guides in steps
 - Demo content on emergency preparedness (Beredskap): groups and entries in A–Å order, Tiltakskort in scenario order
-- Kort: the card name on the back stands out from its headings; each card is as tall as its own content
+- Kort: the card name on the back stands out from its headings; each card is as tall as its own content; the turn icon sits under the last line on both sides; the front shows bold, italic and code; screen readers read the front's text; long words wrap
 
 ## 1.1.0 - 2026-11-01
 

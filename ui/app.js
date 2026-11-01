@@ -357,10 +357,11 @@ function renderLookup(view) {
   renderEntries(view, entrySections(view), entries => h('div', { class: 'card' }, entries.map(e => entry(view, e))))
 }
 
-function rich(text) {
+/** Inline Markdown as elements; with `links` false, a link is its text. */
+function rich(text, links = true) {
   return inline(text).map(seg => {
     if (seg.type === 'link') {
-      return h('a', { href: seg.href, onclick: e => { e.preventDefault(); e.stopPropagation(); invoke('open_url', { url: seg.href }) } }, seg.text)
+      return !links ? seg.text : h('a', { href: seg.href, onclick: e => { e.preventDefault(); e.stopPropagation(); invoke('open_url', { url: seg.href }) } }, seg.text)
     }
     return seg.type === 'text' ? seg.text : h(seg.type, {}, seg.text)
   })
@@ -406,10 +407,10 @@ function flipCard(view, e) {
   const front = lead(e)
   return h('div', { class: `flip${flipped ? ' flipped' : ''}`, id: `entry-${e.id}` },
     h('button', { class: 'flip-toggle', 'aria-pressed': flipped, onclick: () => { view.open = flipped ? null : e.id; render() } },
-      h('span', { class: 'sr-only' }, e.title)),
+      h('span', { class: 'sr-only' }, front ? `${e.title}. ${plain(front)}` : e.title)),
     h('div', { class: 'face front', 'aria-hidden': 'true' },
       h('span', { class: 'title' }, e.title),
-      front && h('span', { class: 'lead' }, plain(front)),
+      front && h('span', { class: 'lead' }, rich(front, false)),
       turnIcon()),
     h('div', { class: 'face back', inert: !flipped },
       h('p', { class: 'title', 'aria-hidden': 'true' }, e.title),
