@@ -5,6 +5,8 @@
 - View type `steg`, default tab «Steg»: guides in steps
 - Demo content on emergency preparedness (Beredskap): groups and entries in A–Å order, Tiltakskort in scenario order
 - Kort: the card name on the back stands out from its headings; each card is as tall as its own content; the turn icon sits under the last line on both sides; the front shows bold, italic and code; screen readers read the front's text; long words wrap
+- Contrast: default «dempet» (light) and «aksent», «bakside» (dark) pass AA on every shade the app mixes; the warning checks those shades and aksent on bakgrunn
+- Tags on a card back show hover and selection; focus rings stay visible on the back and on filled buttons; search and setup fields have borders at 3:1; tabs react to hover; an open Oppslag entry has even spacing
 
 ## 1.1.0 - 2026-11-01
 

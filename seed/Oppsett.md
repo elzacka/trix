@@ -79,12 +79,12 @@ En seksjon du sletter, får standardverdiene tilbake.
 - flate | #ffffff | #1a1e23
 - linje | #e2e8f0 | #2b3138
 - tekst | #1e293b | #e5e7eb
-- dempet | #64748b | #9aa3ae
-- aksent | #00466a | #6f93a8
+- dempet | #5a687c | #9aa3ae
+- aksent | #00466a | #7598ad
 - på aksent | #ffffff | #0b1218
 - forside | #ffffff | #1a1e23
 - på forside | #1e293b | #e5e7eb
-- bakside | #00466a | #6f93a8
+- bakside | #00466a | #7598ad
 - på bakside | #ffffff | #0b1218
 
 ## Skrift

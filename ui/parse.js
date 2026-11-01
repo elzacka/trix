@@ -604,15 +604,24 @@ export function contrast(a, b) {
 }
 
 // Text against what it stands on: WCAG AA for normal text.
-const PAIRS = [['tekst', 'bakgrunn'], ['tekst', 'flate'], ['dempet', 'bakgrunn'], ['dempet', 'flate'], ['aksent', 'flate'], ['på aksent', 'aksent'],
-  ['på forside', 'forside'], ['på bakside', 'bakside']]
+const PAIRS = [['tekst', 'bakgrunn'], ['tekst', 'flate'], ['dempet', 'bakgrunn'], ['dempet', 'flate'], ['aksent', 'bakgrunn'], ['aksent', 'flate'],
+  ['på aksent', 'aksent'], ['på forside', 'forside'], ['på bakside', 'bakside']]
+
+const mix = (a, b, share) => a.map((v, i) => v * share + b[i] * (1 - share))
+
+// A ground and the shades `style.css` mixes from it: --key, --accent-soft, a card face on hover.
+const shades = (c, ground) => ({
+  flate: [c.flate, mix(c.tekst, c.flate, 0.06), mix(c.aksent, c.flate, 0.1)],
+  forside: [c.forside, mix(c['på forside'], c.forside, 0.05)],
+  bakside: [c.bakside, mix(c['på bakside'], c.bakside, 0.05)],
+})[ground] ?? [c[ground]]
 
 /** `modes` holds the colours as [r, g, b] per mode: { lys: { tekst: [...] }, mørk: {...} }. */
 export function contrastProblems(modes) {
   const problems = []
   for (const [mode, colors] of Object.entries(modes)) {
     for (const [text, ground] of PAIRS) {
-      const ratio = contrast(colors[text], colors[ground])
+      const ratio = Math.min(...shades(colors, ground).map(shade => contrast(colors[text], shade)))
       if (ratio < 4.5) {
         const shown = ratio.toFixed(1).replace('.', ',')
         // «på aksent» names the text that stands on aksent

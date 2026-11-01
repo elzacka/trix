@@ -16,7 +16,7 @@
   --surface-light: #ffffff;
   --line-light: #e2e8f0;
   --text-light: #1e293b;
-  --muted-light: #64748b;
+  --muted-light: #5a687c;
   --accent-light: #00466a;
   --on-accent-light: #ffffff;
   --front-light: #ffffff;
@@ -28,11 +28,11 @@
   --line-dark: #2b3138;
   --text-dark: #e5e7eb;
   --muted-dark: #9aa3ae;
-  --accent-dark: #6f93a8;
+  --accent-dark: #7598ad;
   --on-accent-dark: #0b1218;
   --front-dark: #1a1e23;
   --on-front-dark: #e5e7eb;
-  --back-dark: #6f93a8;
+  --back-dark: #7598ad;
   --on-back-dark: #0b1218;
   --font-text: "Syne", "Inter", system-ui, sans-serif;
   --font-keys: "Inter", system-ui, sans-serif;
@@ -96,7 +96,7 @@ button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
 
 /* Against its own fill, the accent ring would vanish */
-.button.primary:focus-visible { outline-color: var(--text); }
+:is(.button.primary, .chip, [aria-pressed="true"]):focus-visible { outline-color: var(--text); }
 
 svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -143,6 +143,8 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
   color: var(--muted);
   font-weight: 600;
 }
+
+.tabs button:hover { color: var(--text); }
 
 .tabs button[aria-selected="true"] {
   background: var(--surface);
@@ -248,7 +250,7 @@ main {
   width: 100%;
   padding: 9px 36px;
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--muted);
   border-radius: 10px;
   outline: none;
 }
@@ -380,6 +382,10 @@ kbd {
 
 .entry .body { padding: 0 12px 12px; user-select: text; -webkit-user-select: text; }
 
+.body > :first-child { margin-top: 0; }
+
+.body > :last-child { margin-bottom: 0; }
+
 .body p, .body ul, .body ol, .guide p, .guide ul, .guide ol { margin: 0 0 8px; }
 
 .body ul, .body ol, .guide ul, .guide ol { padding-left: 20px; }
@@ -454,6 +460,8 @@ kbd {
 
 .flip:hover .front { background: color-mix(in srgb, var(--on-front) 5%, var(--front)); }
 
+.flip:hover .back { background: color-mix(in srgb, var(--on-back) 5%, var(--back)); }
+
 .front .lead { font-size: 0.86em; }
 
 .back { background: var(--back); color: var(--on-back); transform: rotateY(180deg); font-size: 0.86em; user-select: text; -webkit-user-select: text; }
@@ -472,6 +480,13 @@ kbd {
 .back .subheading { margin: 4px 0 0; color: inherit; }
 
 .back .tag { background: transparent; border-color: currentColor; color: inherit; }
+
+.back .tag:hover { background: color-mix(in srgb, currentColor 15%, transparent); }
+
+.back .tag[aria-pressed="true"] { background: var(--on-back); color: var(--back); }
+
+/* The back can be the accent colour: the ring takes the back's text colour, apart from a filled tag */
+.back :focus-visible { outline: 2px solid var(--on-back); outline-offset: 2px; }
 
 .flipped .front { transform: rotateY(-180deg); }
 
@@ -564,7 +579,7 @@ kbd {
 #setup-body input:not([type="checkbox"], [type="radio"], [type="color"]), #setup-body select {
   min-width: 0;
   padding: 5px 8px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--muted);
   border-radius: 7px;
   background: var(--surface);
 }
@@ -623,7 +638,7 @@ kbd {
 
 .color { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 
-.colors input[type="color"] { flex: none; width: 36px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; }
+.colors input[type="color"] { flex: none; width: 36px; height: 28px; padding: 0; border: 1px solid var(--muted); border-radius: 6px; background: none; }
 
 #setup-body .colors .hex { width: 6.5em; font-family: var(--font-keys); }
 
