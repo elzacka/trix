@@ -95,10 +95,10 @@ endret utenfor appen etter at du åpnet den: Kopier endringene dine, velg
 
 #### Filene
 
-| Hvor | Mappe |
-|---|---|
-| Mac | `~/Library/Application Support/Trix Ultra` |
-| Windows | `%APPDATA%\Trix Ultra` |
+| Hvor       | Mappe                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------- |
+| Mac        | `~/Library/Application Support/Trix Ultra`                                                  |
+| Windows    | `%APPDATA%\Trix Ultra`                                                                      |
 | Delt mappe | `Trix Ultra-data` ved siden av appen, hvis den finnes, se [Del med andre](#4-del-med-andre) |
 
 | Fil | Holder |
