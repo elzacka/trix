@@ -8,7 +8,7 @@
   "permissions": [
     "core:event:default",
     "allow-load",
-    "allow-read-list",
+    "allow-read-content",
     "allow-system-list",
     "allow-save",
     "allow-reveal-file",
@@ -19,7 +19,7 @@
     "allow-set-size",
     "allow-set-tray-icon",
     "allow-read-icon",
-    "allow-export-list",
+    "allow-export-content",
     "allow-hold",
     "allow-hide",
     "allow-quit",

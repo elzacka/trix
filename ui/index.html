@@ -29,9 +29,9 @@
             <button role="menuitemradio" data-order="file" aria-checked="false"><svg data-icon="valgt" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg><span data-text="filrekkefølge"></span></button>
           </div>
         </div>
-        <div data-item="kildedata" role="none">
-          <button role="menuitem" class="submenu-toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="source-menu"><span id="source-label"></span><svg data-icon="undermeny" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
-          <div id="source-menu" class="submenu" role="menu" aria-labelledby="source-label" hidden>
+        <div data-item="innhold" role="none">
+          <button role="menuitem" class="submenu-toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="content-menu"><span id="content-label"></span><svg data-icon="undermeny" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6l6 -6"/></svg></button>
+          <div id="content-menu" class="submenu" role="menu" aria-labelledby="content-label" hidden>
             <button role="menuitem" id="edit-file" data-text="rediger"></button>
             <button role="menuitem" id="export" data-text="eksporter"></button>
             <button role="menuitem" id="import" data-text="importer"></button>
@@ -46,7 +46,7 @@
     </div>
   </header>
 
-  <main id="view" role="tabpanel">
+  <main id="tabpanel" role="tabpanel">
     <div class="search" id="search">
       <svg data-icon="søk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
       <input id="query" type="search" autocomplete="off" spellcheck="false">

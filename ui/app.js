@@ -11,7 +11,7 @@ const own = window.__TAURI__.webviewWindow.getCurrentWebviewWindow()
 
 const hasEntries = text => parseEntries(text).length > 0
 
-const KINDS = {
+const MODULE_VIEWS = {
   hurtigtaster: { has: text => ['mac', 'windows'].some(os => parseShortcuts(text, os).length), merge: mergeShortcuts, render: renderShortcuts },
   oppslag: { has: hasEntries, merge: mergeEntries, render: renderLookup },
   kort: { has: hasEntries, merge: mergeEntries, render: renderCards },
@@ -24,8 +24,8 @@ const state = {
   version: '',
   setupText: '',
   setup: parseSetup(''),
-  /** The setup's views with their file, search, order, tags and the open entry. */
-  views: [],
+  /** The setup's modules with their file, search, order, tags and the open entry. */
+  modules: [],
   hotkey: '',
   view: 'mine',
   system: '',
@@ -47,8 +47,8 @@ const state = {
 }
 
 const $ = id => document.getElementById(id)
-const current = () => state.views[state.tab]
-const has = (view, option) => view?.options.includes(option)
+const current = () => state.modules[state.tab]
+const has = (tab, option) => tab?.options.includes(option)
 const t = (key, values) => fill(state.setup.texts[key], { navn: state.setup.texts.navn, ...values })
 
 /** The setup's own icons as data URLs, by name. */
@@ -114,12 +114,12 @@ async function load() {
     })
     state.setup = parseSetup(loaded.setup)
     problems.push(...state.setup.problems)
-    const old = new Map(state.views.map(v => [`${v.kind}|${v.file}`, v]))
-    state.views = await Promise.all(state.setup.views.map(async v => {
-      const kept = old.get(`${v.kind}|${v.file}`)
+    const old = new Map(state.modules.map(v => [`${v.module}|${v.file}`, v]))
+    state.modules = await Promise.all(state.setup.modules.map(async v => {
+      const kept = old.get(`${v.module}|${v.file}`)
       let text = ''
       try {
-        text = await invoke('read_list', { name: v.file, kind: v.kind, title: v.name })
+        text = await invoke('read_content', { name: v.file, module: v.module, title: v.name })
       } catch (error) {
         problems.push(String(error))
       }
@@ -133,10 +133,10 @@ async function load() {
         reading: kept?.reading ?? null,
       }
     }))
-    if (state.tab >= state.views.length) state.tab = 0
+    if (state.tab >= state.modules.length) state.tab = 0
     state.system = ''
     // Read only when shown: on a Mac this reads the system's settings.
-    if (state.view !== 'mine' && state.views.some(v => has(v, 'system'))) {
+    if (state.view !== 'mine' && state.modules.some(v => has(v, 'system'))) {
       try {
         state.system = await invoke('system_list')
       } catch (error) {
@@ -165,7 +165,7 @@ function applySetup() {
     $(id).title = t(key)
   }
   $('query').setAttribute('aria-label', t('søk'))
-  $('tabs').setAttribute('aria-label', t('visninger'))
+  $('tabs').setAttribute('aria-label', t('moduler'))
 
   const items = new Map([...document.querySelectorAll('#menu [data-item]')].map(el => [el.dataset.item, el]))
   $('menu').querySelectorAll(':scope > hr').forEach(hr => hr.remove())
@@ -234,42 +234,42 @@ const hotkeyName = () => formatKeys(state.hotkey, state.os)[0] ?? ''
 // List view
 
 function render() {
-  const view = current()
+  const tab = current()
   renderTabs()
-  $('view').setAttribute('aria-labelledby', `tab-${state.tab}`)
-  const reading = view?.kind === 'steg' && view.reading != null
-  $('search').hidden = !has(view, 'søk') || reading
-  $('query').placeholder = state.capturing ? t('trykk hurtigtasten') : view?.placeholder || t('søk')
-  if (view && $('query').value !== view.query) $('query').value = view.query
-  $('clear').hidden = !view?.query
-  $('capture').hidden = !(view?.kind === 'hurtigtaster' && has(view, 'tasteoppslag'))
+  $('tabpanel').setAttribute('aria-labelledby', `tab-${state.tab}`)
+  const reading = tab?.module === 'steg' && tab.reading != null
+  $('search').hidden = !has(tab, 'søk') || reading
+  $('query').placeholder = state.capturing ? t('trykk hurtigtasten') : tab?.placeholder || t('søk')
+  if (tab && $('query').value !== tab.query) $('query').value = tab.query
+  $('clear').hidden = !tab?.query
+  $('capture').hidden = !(tab?.module === 'hurtigtaster' && has(tab, 'tasteoppslag'))
   $('capture').setAttribute('aria-pressed', state.capturing)
   const problems = [...state.problems, state.error].filter(Boolean)
   $('error').hidden = !problems.length
   $('error').replaceChildren(...problems.map(p => h('p', {}, p)))
   $('system-name').textContent = systemName()
-  $('sources').hidden = !has(view, 'system')
-  for (const id of ['view-label', 'source-label']) $(id).closest('[data-item]').classList.toggle('unused', !view)
+  $('sources').hidden = !has(tab, 'system')
+  for (const id of ['view-label', 'content-label']) $(id).closest('[data-item]').classList.toggle('unused', !tab)
   document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-checked', b.dataset.view === state.view))
-  document.querySelectorAll('[data-order]').forEach(b => b.setAttribute('aria-checked', b.dataset.order === view?.order))
+  document.querySelectorAll('[data-order]').forEach(b => b.setAttribute('aria-checked', b.dataset.order === tab?.order))
   $('view-label').textContent = t('visning')
-  $('source-label').textContent = t('kildedata', { visning: view?.name ?? '' })
+  $('content-label').textContent = t('innhold', { fane: tab?.name ?? '' })
   $('quit').textContent = t('avslutt')
   $('version').textContent = `v${state.version} | elzacka`
   $('hotkey').replaceChildren(...(state.recording ? [t('ny hurtigtast')]
     : [state.hotkey ? t('endre hurtigåpner') : t('velg hurtigåpner'), state.hotkey && h('span', { class: 'menu-keys' }, hotkeyName())].filter(Boolean)))
   $('tools').replaceChildren()
   $('status').textContent = ''
-  if (view) KINDS[view.kind].render(view)
+  if (tab) MODULE_VIEWS[tab.module].render(tab)
   else $('list').replaceChildren(h('p', { class: 'empty' }, t('tom')))
 }
 
 function renderTabs() {
   const tabs = $('tabs')
-  tabs.hidden = state.views.length < 2
+  tabs.hidden = state.modules.length < 2
   const switchKeys = i => [i < 9 && formatKeys(`mod ${i + 1}`, state.os)[0], formatKeys('ctrl tab', state.os)[0]].filter(Boolean).join(' / ')
-  tabs.replaceChildren(...state.views.map((v, i) => h('button', {
-    role: 'tab', id: `tab-${i}`, 'aria-controls': 'view', 'aria-selected': i === state.tab, tabindex: i === state.tab ? 0 : -1,
+  tabs.replaceChildren(...state.modules.map((v, i) => h('button', {
+    role: 'tab', id: `tab-${i}`, 'aria-controls': 'tabpanel', 'aria-selected': i === state.tab, tabindex: i === state.tab ? 0 : -1,
     title: switchKeys(i), onclick: () => selectTab(i),
   }, v.name)))
 }
@@ -279,21 +279,21 @@ function emptyState(text) {
 }
 
 /** The user's list first: the shortcuts they chose themselves. */
-function shownLists(view) {
-  const system = has(view, 'system') ? state.view : 'mine'
+function shownLists(tab) {
+  const system = has(tab, 'system') ? state.view : 'mine'
   return [
-    system !== 'system' && { title: t('mine hurtigtaster'), text: view.text },
+    system !== 'system' && { title: t('mine hurtigtaster'), text: tab.text },
     system !== 'mine' && { title: systemName(), text: state.system },
   ].filter(Boolean)
 }
 
-function renderShortcuts(view) {
-  const query = view.query.trim()
-  const id = has(view, 'tasteoppslag') ? lookupId(query, state.os) : null
+function renderShortcuts(tab) {
+  const query = tab.query.trim()
+  const id = has(tab, 'tasteoppslag') ? lookupId(query, state.os) : null
   const combo = id && formatKeys(query, state.os)[0]
-  const lists = shownLists(view).map(({ title, text }) => {
+  const lists = shownLists(tab).map(({ title, text }) => {
     const parsed = parseShortcuts(text, state.os)
-    if (view.order === 'az') sortShortcuts(parsed)
+    if (tab.order === 'az') sortShortcuts(parsed)
     return { title, sections: id ? lookupShortcuts(parsed, id) : filterShortcuts(parsed, query) }
   })
   if (id && state.hotkey && comboId(state.hotkey, state.os) === id) {
@@ -323,16 +323,16 @@ function renderShortcuts(view) {
 }
 
 /** Oppslag, kort and steg: groups or A–Å, narrowed by the search and the chosen tags. */
-function entrySections(view) {
-  const parsed = parseEntries(view.text)
-  const tags = has(view, 'emneknagger') ? view.tags : []
-  const query = view.query.trim()
+function entrySections(tab) {
+  const parsed = parseEntries(tab.text)
+  const tags = has(tab, 'emneknagger') ? tab.tags : []
+  const query = tab.query.trim()
   let sections
   if (query) {
     const found = searchEntries(parsed, query, tags)
     sections = found.length ? [{ title: '', entries: found }] : []
   } else {
-    sections = (view.order === 'az' ? alphabetical(parsed) : parsed)
+    sections = (tab.order === 'az' ? alphabetical(parsed) : parsed)
       .map(s => ({ ...s, entries: s.entries.filter(e => tags.every(tag => e.tags.includes(tag))) }))
       .filter(s => s.entries.length)
   }
@@ -340,21 +340,21 @@ function entrySections(view) {
   $('status').textContent = query || tags.length ? t('treff', { antall: count }) : ''
   $('tools').replaceChildren(...(tags.length
     ? [h('span', {}, t('merket', { antall: count })), ...tags.map(tag =>
-      h('button', { class: 'chip', 'aria-label': t('fjern merke', { emne: tag }), onclick: () => toggleTag(view, tag) }, tag, closeIcon()))]
+      h('button', { class: 'chip', 'aria-label': t('fjern merke', { emne: tag }), onclick: () => toggleTag(tab, tag) }, tag, closeIcon()))]
     : []))
   return sections
 }
 
-function renderEntries(view, sections, list) {
-  const filtered = view.query.trim() || (has(view, 'emneknagger') && view.tags.length)
+function renderEntries(tab, sections, list) {
+  const filtered = tab.query.trim() || (has(tab, 'emneknagger') && tab.tags.length)
   $('list').replaceChildren(...(sections.length
     ? sections.map(s => h('section', {}, s.title && h('h2', {}, s.title), list(s.entries)))
-    : [filtered ? emptyState(view.query.trim() ? t('ingen treff', { søk: view.query.trim() }) : t('tom'))
+    : [filtered ? emptyState(tab.query.trim() ? t('ingen treff', { søk: tab.query.trim() }) : t('tom'))
       : h('p', { class: 'empty' }, t('tom'))]))
 }
 
-function renderLookup(view) {
-  renderEntries(view, entrySections(view), entries => h('div', { class: 'card' }, entries.map(e => entry(view, e))))
+function renderLookup(tab) {
+  renderEntries(tab, entrySections(tab), entries => h('div', { class: 'card' }, entries.map(e => entry(tab, e))))
 }
 
 /** Inline Markdown as elements; with `links` false, a link is its text. */
@@ -388,56 +388,56 @@ function tableCell(tag, text, align) {
   return el
 }
 
-function tagButtons(view, e) {
-  return !has(view, 'emneknagger') || !e.tags.length ? null
+function tagButtons(tab, e) {
+  return !has(tab, 'emneknagger') || !e.tags.length ? null
     : h('div', { class: 'tags' }, e.tags.map(tag =>
-      h('button', { class: 'tag', 'aria-pressed': view.tags.includes(tag), onclick: () => toggleTag(view, tag, e.id) }, `#${tag}`)))
+      h('button', { class: 'tag', 'aria-pressed': tab.tags.includes(tag), onclick: () => toggleTag(tab, tag, e.id) }, `#${tag}`)))
 }
 
-function entry(view, e) {
-  const open = view.open === e.id
+function entry(tab, e) {
+  const open = tab.open === e.id
   const preview = plain(lead(e))
   return h('div', { class: `entry${open ? ' open' : ''}`, id: `entry-${e.id}` },
-    h('button', { 'aria-expanded': open, onclick: () => { view.open = open ? null : e.id; render() } },
+    h('button', { 'aria-expanded': open, onclick: () => { tab.open = open ? null : e.id; render() } },
       h('span', { class: 'title' }, e.title),
       !open && preview && h('span', { class: 'preview' }, preview)),
     open && h('div', { class: 'body' },
       blocks(e.blocks, 3),
       e.aliases.length > 0 && h('p', { class: 'also' }, `${t('også')}: ${e.aliases.join(', ')}`),
-      tagButtons(view, e)),
+      tagButtons(tab, e)),
   )
 }
 
 // Cards: the front is the name and the first paragraph, the back is the rest.
 
-function renderCards(view) {
-  renderEntries(view, entrySections(view), entries => {
-    const cards = h('div', { class: 'cards' }, entries.map(e => flipCard(view, e)))
-    if (view.columns) cards.style.gridTemplateColumns = `repeat(${view.columns}, minmax(0, 1fr))`
+function renderCards(tab) {
+  renderEntries(tab, entrySections(tab), entries => {
+    const cards = h('div', { class: 'cards' }, entries.map(e => flipCard(tab, e)))
+    if (tab.columns) cards.style.gridTemplateColumns = `repeat(${tab.columns}, minmax(0, 1fr))`
     return cards
   })
-  fitCards(view)
+  fitCards(tab)
 }
 
-/** «N i høyden»: N rows fill the panel below the search; a card with more text grows past its share. */
-function fitCards(view) {
-  const main = $('view')
+/** «N i høyden»: N rows fill the tab below the search; a card with more text grows past its share. */
+function fitCards(tab) {
+  const main = $('tabpanel')
   const all = [...main.querySelectorAll('.cards')]
-  if (!view.rows || !all.length) return
+  if (!tab.rows || !all.length) return
   const top = all[0].getBoundingClientRect().top - main.getBoundingClientRect().top - main.clientTop + main.scrollTop
   const style = getComputedStyle(main)
   const gap = parseFloat(getComputedStyle(all[0]).rowGap)
-  const free = main.clientHeight - top - parseFloat(style.paddingBottom) - gap * (view.rows - 1)
-  for (const cards of all) cards.style.setProperty('--card-height', `${Math.max(free / view.rows, 0)}px`)
+  const free = main.clientHeight - top - parseFloat(style.paddingBottom) - gap * (tab.rows - 1)
+  for (const cards of all) cards.style.setProperty('--card-height', `${Math.max(free / tab.rows, 0)}px`)
 }
 
-new ResizeObserver(() => { if (current()?.kind === 'kort') fitCards(current()) }).observe($('view'))
+new ResizeObserver(() => { if (current()?.module === 'kort') fitCards(current()) }).observe($('tabpanel'))
 
-function flipCard(view, e) {
-  const flipped = view.open === e.id
+function flipCard(tab, e) {
+  const flipped = tab.open === e.id
   const front = lead(e)
   return h('div', { class: `flip${flipped ? ' flipped' : ''}`, id: `entry-${e.id}` },
-    h('button', { class: 'flip-toggle', 'aria-pressed': flipped, onclick: () => { view.open = flipped ? null : e.id; render() } },
+    h('button', { class: 'flip-toggle', 'aria-pressed': flipped, onclick: () => { tab.open = flipped ? null : e.id; render() } },
       h('span', { class: 'sr-only' }, front ? `${e.title}. ${plain(front)}` : e.title)),
     h('div', { class: 'face front', 'aria-hidden': 'true' },
       h('span', { class: 'title' }, e.title),
@@ -446,75 +446,75 @@ function flipCard(view, e) {
     h('div', { class: 'face back', inert: !flipped },
       h('p', { class: 'title', 'aria-hidden': 'true' }, e.title),
       blocks(e.blocks.slice(front ? 1 : 0), 3),
-      tagButtons(view, e),
+      tagButtons(tab, e),
       turnIcon()),
   )
 }
 
-// Steg: a list of guides, title and lead; one opens to read in the panel.
+// Steg: a list of guides, title and lead; one opens to read in the tab.
 
-function renderGuides(view) {
-  const sections = entrySections(view)
-  const reading = sections.flatMap(s => s.entries).find(e => e.id === view.reading)
-    ?? parseEntries(view.text).flatMap(s => s.entries).find(e => e.id === view.reading)
+function renderGuides(tab) {
+  const sections = entrySections(tab)
+  const reading = sections.flatMap(s => s.entries).find(e => e.id === tab.reading)
+    ?? parseEntries(tab.text).flatMap(s => s.entries).find(e => e.id === tab.reading)
   if (reading) {
     $('tools').replaceChildren()
     $('list').replaceChildren(h('article', { class: 'guide' },
-      h('button', { class: 'back-link', onclick: () => closeGuide(view) }, backIcon(), t('tilbake')),
+      h('button', { class: 'back-link', onclick: () => closeGuide(tab) }, backIcon(), t('tilbake')),
       h('h1', { tabindex: -1, id: 'guide-title' }, reading.title),
       blocks(reading.blocks, 2),
-      tagButtons(view, reading)))
+      tagButtons(tab, reading)))
     return
   }
-  view.reading = null
-  renderEntries(view, sections, entries => h('div', { class: 'card' }, entries.map(e => {
+  tab.reading = null
+  renderEntries(tab, sections, entries => h('div', { class: 'card' }, entries.map(e => {
     const preview = plain(lead(e))
-    return h('div', { class: 'entry' }, h('button', { id: `entry-${e.id}`, onclick: () => openGuide(view, e.id) },
+    return h('div', { class: 'entry' }, h('button', { id: `entry-${e.id}`, onclick: () => openGuide(tab, e.id) },
       h('span', { class: 'title' }, e.title),
       preview && h('span', { class: 'preview' }, preview)))
   })))
 }
 
-function openGuide(view, id) {
-  view.reading = id
+function openGuide(tab, id) {
+  tab.reading = id
   render()
-  $('view').scrollTop = 0
+  $('tabpanel').scrollTop = 0
   $('guide-title')?.focus()
 }
 
-function closeGuide(view) {
-  const id = view.reading
-  view.reading = null
+function closeGuide(tab) {
+  const id = tab.reading
+  tab.reading = null
   render()
   document.getElementById(`entry-${id}`)?.focus()
 }
 
-function toggleTag(view, tag, keepOpen) {
-  view.tags = view.tags.includes(tag) ? view.tags.filter(x => x !== tag) : [...view.tags, tag]
-  view.reading = null
+function toggleTag(tab, tag, keepOpen) {
+  tab.tags = tab.tags.includes(tag) ? tab.tags.filter(x => x !== tag) : [...tab.tags, tag]
+  tab.reading = null
   render()
   if (keepOpen != null) document.getElementById(`entry-${keepOpen}`)?.scrollIntoView({ block: 'nearest' })
 }
 
 function clearAll() {
-  const view = current()
-  view.query = ''
-  view.tags = []
+  const tab = current()
+  tab.query = ''
+  tab.tags = []
   render()
   $('query').focus()
 }
 
-function focusView() {
+function focusTab() {
   if (!$('search').hidden) $('query').focus()
   else $(`tab-${state.tab}`)?.focus()
 }
 
-function selectTab(tab) {
-  if (!state.views[tab]) return
-  state.tab = tab
+function selectTab(i) {
+  if (!state.modules[i]) return
+  state.tab = i
   closeMenu()
   render()
-  focusView()
+  focusTab()
 }
 
 // Editor
@@ -527,7 +527,7 @@ function openEditor(name, original, text = original) {
   $('text').value = text
   $('editor-error').hidden = true
   $('cancel').textContent = t('avbryt')
-  $('view').hidden = true
+  $('tabpanel').hidden = true
   document.querySelector('.bar').hidden = true
   $('editor').hidden = false
   $('text').focus()
@@ -535,9 +535,9 @@ function openEditor(name, original, text = original) {
   $('text').scrollTop = 0
 }
 
-const editView = (text) => { const view = current(); if (view) openEditor(view.file, view.text, text) }
+const editContent = (text) => { const tab = current(); if (tab) openEditor(tab.file, tab.text, text) }
 
-/** «Tilpass» opens in a window of its own; the panel shows each change it sends. */
+/** «Tilpass» opens in a window of its own; the main window shows each change it sends. */
 function editSetup() {
   closeMenu()
   invoke('open_setup').catch(error => { state.problems = [String(error)]; render() })
@@ -550,9 +550,9 @@ own.listen('preview', async ({ payload: setup }) => {
   const n = ++previews
   state.setupOpen = true
   state.setup = setup
-  const loaded = new Map(state.views.map(v => [v.file, v]))
-  state.views = setup.views.map(v => ({ text: '', query: '', order: 'file', tags: [], open: null, reading: null, ...loaded.get(v.file), ...v }))
-  if (state.tab >= state.views.length) state.tab = 0
+  const loaded = new Map(state.modules.map(v => [v.file, v]))
+  state.modules = setup.modules.map(v => ({ text: '', query: '', order: 'file', tags: [], open: null, reading: null, ...loaded.get(v.file), ...v }))
+  if (state.tab >= state.modules.length) state.tab = 0
   const problems = applySetup()
   await loadIcons(setup, problems)
   if (n !== previews) return
@@ -566,10 +566,10 @@ own.listen('restore', () => { state.setupOpen = false; load() })
 function closeEditor() {
   state.editing = null
   $('editor').hidden = true
-  $('view').hidden = false
+  $('tabpanel').hidden = false
   document.querySelector('.bar').hidden = false
   render()
-  focusView()
+  focusTab()
 }
 
 const dirty = () => $('text').value !== state.editing.original.replace(/\r\n/g, '\n')
@@ -633,7 +633,7 @@ async function setView(view) {
 async function exportList() {
   closeMenu()
   try {
-    await invoke('export_list', { name: current().file })
+    await invoke('export_content', { name: current().file })
   } catch (error) {
     state.error = String(error)
     render()
@@ -650,15 +650,15 @@ async function chooseImport() {
 }
 
 async function readImport(file) {
-  const view = current()
-  const kind = KINDS[view.kind]
+  const tab = current()
+  const views = MODULE_VIEWS[tab.module]
   const text = await file.text()
-  if (!kind.has(text)) {
-    state.error = t('passer ikke', { fil: file.name, visning: view.name })
+  if (!views.has(text)) {
+    state.error = t('passer ikke', { fil: file.name, fane: tab.name })
     return render()
   }
   // An empty list keeps its format comment.
-  if (!kind.has(view.text)) return editView(kind.merge(view.text, text))
+  if (!views.has(tab.text)) return editContent(views.merge(tab.text, text))
   state.importing = text
   $('import-dialog').returnValue = ''
   $('import-dialog').showModal()
@@ -666,9 +666,9 @@ async function readImport(file) {
 
 function finishImport() {
   const choice = $('import-dialog').returnValue
-  const view = current()
-  if (choice === 'merge') editView(KINDS[view.kind].merge(view.text, state.importing))
-  else if (choice === 'replace') editView(state.importing)
+  const tab = current()
+  if (choice === 'merge') editContent(MODULE_VIEWS[tab.module].merge(tab.text, state.importing))
+  else if (choice === 'replace') editContent(state.importing)
   state.importing = ''
 }
 
@@ -742,9 +742,9 @@ async function setHotkey(hotkey) {
 // Events
 
 $('query').addEventListener('input', e => {
-  const view = current()
-  view.query = e.target.value
-  view.open = null
+  const tab = current()
+  tab.query = e.target.value
+  tab.open = null
   render()
 })
 $('clear').addEventListener('click', clearAll)
@@ -753,7 +753,7 @@ $('more').addEventListener('click', toggleMenu)
 document.querySelectorAll('.submenu-toggle').forEach(b => b.addEventListener('click', () => setSubmenu(b, b.getAttribute('aria-expanded') !== 'true')))
 document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)))
 document.querySelectorAll('[data-order]').forEach(b => b.addEventListener('click', () => { current().order = b.dataset.order; closeMenu(); render() }))
-$('edit-file').addEventListener('click', () => editView())
+$('edit-file').addEventListener('click', () => editContent())
 $('edit-setup').addEventListener('click', editSetup)
 $('import').addEventListener('click', chooseImport)
 $('import-file').addEventListener('change', e => { if (e.target.files[0]) readImport(e.target.files[0]) })
@@ -776,14 +776,14 @@ document.addEventListener('contextmenu', e => {
 })
 
 function step(by) {
-  const count = state.views.length
+  const count = state.modules.length
   if (count) selectTab((state.tab + by + count) % count)
 }
 
 document.addEventListener('keydown', e => {
   if ($('import-dialog').open) return
   const mod = state.os === 'mac' ? e.metaKey : e.ctrlKey
-  const view = current()
+  const tab = current()
   if (state.recording) return recordHotkey(e)
   if (state.capturing) return captureKey(e)
   if (state.editing) {
@@ -793,16 +793,16 @@ document.addEventListener('keydown', e => {
   }
   if (mod && /^[1-9]$/.test(e.key)) { e.preventDefault(); selectTab(Number(e.key) - 1) }
   else if (e.ctrlKey && e.key === 'Tab') { e.preventDefault(); step(e.shiftKey ? -1 : 1) }
-  else if (mod && e.key.toLowerCase() === 'e') { e.preventDefault(); editView() }
+  else if (mod && e.key.toLowerCase() === 'e') { e.preventDefault(); editContent() }
   else if (mod && e.key === ',') { e.preventDefault(); editSetup() }
   else if (mod && e.key.toLowerCase() === 'f') { e.preventDefault(); if (!$('search').hidden) $('query').select() }
   else if (e.key === 'Escape') {
     e.preventDefault()
     if (!$('menu').hidden) { closeMenu(); $('more').focus() }
-    else if (view?.reading != null) closeGuide(view)
-    else if (view?.open != null) { view.open = null; render() }
-    else if (view?.tags.length) { view.tags = []; render() }
-    else if (view?.query) clearAll()
+    else if (tab?.reading != null) closeGuide(tab)
+    else if (tab?.open != null) { tab.open = null; render() }
+    else if (tab?.tags.length) { tab.tags = []; render() }
+    else if (tab?.query) clearAll()
     else invoke('hide')
   } else if (e.target.getAttribute('role') === 'tab' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
     step(e.key === 'ArrowLeft' ? -1 : 1)
@@ -816,4 +816,4 @@ window.addEventListener('focus', reload)
 listen('files-changed', reload)
 listen('opened', () => { if (!state.editing && !$('search').hidden) $('query').select() })
 
-load().then(focusView)
+load().then(focusTab)

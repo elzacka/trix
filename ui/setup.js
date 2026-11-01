@@ -1,8 +1,8 @@
-// «Tilpass»: a window of its own. Each change shows in the open panel at once, and «Lagre» writes `Oppsett.md`.
+// «Tilpass»: a window of its own. Each change shows in the main window at once, and «Lagre» writes `Oppsett.md`.
 
 import {
-  parseSetup, formatSetup, setupHeader, fill, KINDS, MENU, ICONS, PNG_ONLY, TEXTS, WINDOW, FONT_SIZE, FONT_PATTERN, OPTIONS,
-  DEFAULT_OPTIONS, TOKENS, CARD_COUNT, listName, iconName,
+  parseSetup, formatSetup, setupHeader, fill, MODULES, MENU, ICONS, PNG_ONLY, TEXTS, WINDOW, FONT_SIZE, FONT_PATTERN, OPTIONS,
+  DEFAULT_OPTIONS, TOKENS, CARD_COUNT, contentName, iconName,
 } from './parse.js'
 import { h, svg } from './dom.js'
 
@@ -12,7 +12,7 @@ const win = window.__TAURI__.webviewWindow.getCurrentWebviewWindow()
 
 const $ = id => document.getElementById(id)
 
-const KIND_NAMES = { hurtigtaster: 'Hurtigtaster', oppslag: 'Oppslag', kort: 'Kort', steg: 'Steg' }
+const MODULE_NAMES = { hurtigtaster: 'Hurtigtaster', oppslag: 'Oppslag', kort: 'Kort', steg: 'Steg' }
 const OPTION_NAMES = {
   'søk': 'Søkefelt', tasteoppslag: 'Slå opp hurtigtaster', system: 'Maskinens egne hurtigtaster', emneknagger: 'Emneknagger',
   'a–å': 'Sorter A–Å fra start',
@@ -42,7 +42,7 @@ let draft = null
 let menuRows = []
 let dirty = false
 let discarding = false
-let open = new Set(['faner'])
+let open = new Set(['moduler'])
 
 const t = (key, values) => fill(draft.texts[key], { navn: draft.texts.navn, ...values })
 const mod = e => (/Mac/.test(navigator.userAgent) ? e.metaKey : e.ctrlKey)
@@ -67,7 +67,7 @@ async function start() {
   render()
 }
 
-/** Closes the window; the panel reads the files again. A first try with unsaved changes asks to discard them. */
+/** Closes the window; the main window reads the files again. A first try with unsaved changes asks to discard them. */
 function close() {
   if (dirty && !discarding) {
     discarding = true
@@ -95,7 +95,7 @@ function show(problems) {
   $('setup-problems').replaceChildren(...problems.map(p => h('p', {}, p)))
 }
 
-/** Each change: the panel shows the draft; `again` builds the screen anew after a change in its structure. */
+/** Each change: the main window shows the draft; `again` builds the screen anew after a change in its structure. */
 function change(again) {
   dirty = true
   discarding = false
@@ -109,7 +109,7 @@ function change(again) {
 function render() {
     const scroll = $('setup-body').scrollTop
   $('setup-body').replaceChildren(
-    section('faner', 'Faner', views()),
+    section('moduler', 'Moduler', modules()),
     section('meny', 'Meny', menu()),
     section('farger', 'Farger', colors()),
     section('skrift', 'Skrift og vindu', fonts()),
@@ -184,23 +184,23 @@ function unique(base, taken) {
   return name
 }
 
-function views() {
-    const list = rows(draft.views, view, order => { draft.views = order; change(true) })
-  const kind = h('select', { 'aria-label': 'Type' }, KINDS.map(k => h('option', { value: k }, KIND_NAMES[k])))
+function modules() {
+    const list = rows(draft.modules, moduleRow, order => { draft.modules = order; change(true) })
+  const choice = h('select', { 'aria-label': 'Modul' }, MODULES.map(k => h('option', { value: k }, MODULE_NAMES[k])))
   const add = () => {
-    const name = unique(KIND_NAMES[kind.value], draft.views.map(v => v.name.toLocaleLowerCase('nb')))
-    const file = unique(name, draft.views.map(v => v.file.toLocaleLowerCase('nb').replace(/\.md$/, '')))
-    draft.views.push({ name, kind: kind.value, file: `${file}.md`, options: [...DEFAULT_OPTIONS[kind.value]], placeholder: '', fresh: true })
+    const name = unique(MODULE_NAMES[choice.value], draft.modules.map(v => v.name.toLocaleLowerCase('nb')))
+    const file = unique(name, draft.modules.map(v => v.file.toLocaleLowerCase('nb').replace(/\.md$/, '')))
+    draft.modules.push({ name, module: choice.value, file: `${file}.md`, options: [...DEFAULT_OPTIONS[choice.value]], placeholder: '', fresh: true })
     change(true)
   }
-  return [list, h('div', { class: 'add' }, kind, h('button', { class: 'button', onclick: add }, 'Legg til fane'))]
+  return [list, h('div', { class: 'add' }, choice, h('button', { class: 'button', onclick: add }, 'Legg til modul'))]
 }
 
-function view(v, i) {
+function moduleRow(v, i) {
     const file = h('input', {
     value: v.file, 'aria-label': 'Fil', spellcheck: 'false',
     onchange: e => {
-      const ok = listName(e.target.value.trim())
+      const ok = contentName(e.target.value.trim())
       e.target.setAttribute('aria-invalid', !ok)
       if (ok) { v.file = e.target.value.trim(); delete v.fresh; change() }
     },
@@ -211,7 +211,7 @@ function view(v, i) {
       v.name = e.target.value
       // A new tab's file follows its name until the user names the file.
       const stem = v.name.replace(/[\\/:*?"<>|]/g, '').trim().replace(/^\.+/, '')
-      if (v.fresh && stem && listName(`${stem}.md`)) { v.file = `${stem}.md`; file.value = v.file }
+      if (v.fresh && stem && contentName(`${stem}.md`)) { v.file = `${stem}.md`; file.value = v.file }
       if (v.name.trim()) change()
     },
   })
@@ -219,16 +219,16 @@ function view(v, i) {
     h('div', { class: 'row-line' },
       name,
       h('select', {
-        'aria-label': 'Type',
-        onchange: e => { v.kind = e.target.value; v.options = [...DEFAULT_OPTIONS[v.kind]]; change(true) },
-      }, KINDS.map(k => h('option', { value: k, selected: k === v.kind }, KIND_NAMES[k]))),
-      iconButton(`Fjern ${v.name}`, REMOVE, () => { draft.views.splice(i, 1); change(true) })),
-    h('div', { class: 'checks' }, OPTIONS[v.kind].map(o => checkbox(OPTION_NAMES[o], v.options.includes(o), on => {
-      v.options = OPTIONS[v.kind].filter(x => (x === o ? on : v.options.includes(x)))
+        'aria-label': 'Modul',
+        onchange: e => { v.module = e.target.value; v.options = [...DEFAULT_OPTIONS[v.module]]; change(true) },
+      }, MODULES.map(k => h('option', { value: k, selected: k === v.module }, MODULE_NAMES[k]))),
+      iconButton(`Fjern ${v.name}`, REMOVE, () => { draft.modules.splice(i, 1); change(true) })),
+    h('div', { class: 'checks' }, OPTIONS[v.module].map(o => checkbox(OPTION_NAMES[o], v.options.includes(o), on => {
+      v.options = OPTIONS[v.module].filter(x => (x === o ? on : v.options.includes(x)))
       change(o === 'søk')
     }))),
-    ...(v.kind !== 'kort' ? [] : [['columns', 'Kort i bredden'], ['rows', 'Kort i høyden']]).map(([prop, label]) => field(label, h('select', {
-      // null, not undefined: the preview event is JSON, and «Automatisk» must reach the panel
+    ...(v.module !== 'kort' ? [] : [['columns', 'Kort i bredden'], ['rows', 'Kort i høyden']]).map(([prop, label]) => field(label, h('select', {
+      // null, not undefined: the preview event is JSON, and «Automatisk» must reach the main window
       onchange: e => { v[prop] = Number(e.target.value) || null; change() },
     }, h('option', { value: '' }, 'Automatisk'), Array.from({ length: CARD_COUNT[1] - CARD_COUNT[0] + 1 }, (_, n) => n + CARD_COUNT[0])
       .map(n => h('option', { value: n, selected: v[prop] === n }, String(n)))))),
@@ -241,7 +241,7 @@ function view(v, i) {
 
 function menuLabel(key) {
   const labels = {
-    visning: t('visning'), kildedata: t('kildedata', { visning: '' }).trim(), oppsett: t('oppsett'),
+    visning: t('visning'), innhold: t('innhold', { fane: '' }).trim(), oppsett: t('oppsett'),
     hurtigåpner: t('endre hurtigåpner'), avslutt: t('avslutt'), versjon: 'Versjon', '---': 'Skillelinje',
   }
   return labels[key]
@@ -343,7 +343,7 @@ function fonts() {
     field('Skrift', font('tekst')),
     field('Skrift på taster', font('taster')),
     field('Størrelse', number(draft.fonts, 'størrelse', FONT_SIZE, 14)),
-    h('div', { class: 'checks', role: 'radiogroup', 'aria-label': 'Vindu' }, radio('panel', 'Panel ved ikonet'), radio('vindu', 'Vanlig vindu')),
+    h('div', { class: 'checks', role: 'radiogroup', 'aria-label': 'Vindustype' }, radio('panel', 'Panel ved ikonet'), radio('vindu', 'Vanlig vindu')),
     field('Bredde', number(draft.window, 'bredde', WINDOW.bredde, 420)),
     field('Høyde', number(draft.window, 'høyde', WINDOW.høyde, 600)),
   ]
@@ -427,7 +427,7 @@ win.onCloseRequested(e => {
   }
 })
 
-// The panel's warnings for the draft: contrast and icons it could not read.
+// The main window's warnings for the draft: contrast and icons it could not read.
 win.listen('problems', e => show(e.payload))
 // `Oppsett.md` changed in an editor: shown here too, unless this window holds changes of its own.
 listen('files-changed', () => { if (!dirty) start() })

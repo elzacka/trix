@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseEntries, lead, alphabetical, searchEntries, inline,
-  mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, listName, iconName, TEXTS, TOKENS, KINDS,
+  mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, contentName, iconName, TEXTS, TOKENS, MODULES,
   formatSetup, setupHeader,
 } from '../ui/parse.js'
 
@@ -142,18 +142,18 @@ test('the templates parse', () => {
   assert.equal(parseShortcuts(shortcuts, 'windows').length, 2)
   assert.equal(parseShortcuts(shortcuts, 'mac').flatMap(s => s.items).every(i => i.keys.length), true)
   assert.equal(parseEntries(read('../seed/maler/oppslag.md')).flatMap(s => s.entries).length, 9)
-  for (const kind of ['kort', 'steg']) {
-    const entries = parseEntries(read(`../seed/maler/${kind}.md`)).flatMap(s => s.entries)
-    assert.ok(entries.length > 1 && entries.every(e => lead(e) && e.blocks.length > 1), kind)
+  for (const module of ['kort', 'steg']) {
+    const entries = parseEntries(read(`../seed/maler/${module}.md`)).flatMap(s => s.entries)
+    assert.ok(entries.length > 1 && entries.every(e => lead(e) && e.blocks.length > 1), module)
   }
-  for (const kind of KINDS) assert.match(read(`../seed/maler/${kind}.md`), /^# \{navn\}\n/)
+  for (const module of MODULES) assert.match(read(`../seed/maler/${module}.md`), /^# \{navn\}\n/)
 })
 
 test('the seed setup is the default setup, with every text', () => {
   const seed = parseSetup(read('../seed/Oppsett.md'))
   const defaults = parseSetup('')
   assert.deepEqual(seed.problems, [])
-  assert.deepEqual(seed.views, defaults.views)
+  assert.deepEqual(seed.modules, defaults.modules)
   assert.deepEqual(seed.menu, defaults.menu)
   assert.deepEqual(seed.texts, TEXTS)
   const listed = read('../seed/Oppsett.md').split('## Tekster').at(-1).match(/^- [^|]+/gm).map(l => l.slice(2).trim())
@@ -169,18 +169,18 @@ test('the seed colours, fonts and window are the stylesheet\'s and the config\'s
   }
   assert.ok(css.includes(`--font-text: "${seed.fonts.tekst}"`) && css.includes(`--font-keys: "${seed.fonts.taster}"`))
   assert.ok(css.includes(`--font-size: ${seed.fonts.størrelse}px;`))
-  const [panel] = JSON.parse(read('../src-tauri/tauri.conf.json')).app.windows
-  assert.deepEqual([panel.width, panel.height], [seed.window.bredde, seed.window.høyde])
+  const [main] = JSON.parse(read('../src-tauri/tauri.conf.json')).app.windows
+  assert.deepEqual([main.width, main.height], [seed.window.bredde, seed.window.høyde])
 })
 
-test('setup: views in order, options, the same type twice', () => {
+test('setup: modules in order, options, the same module twice', () => {
   const setup = parseSetup([
     '## Visninger', '- Ordliste | Oppslag | Ordliste.md', '- Taster | hurtigtaster | Taster.md | søk, system',
     '- Spørsmål | oppslag | Spørsmål og svar.md | søk, A-Å', '- Telefonliste | oppslag | Telefonliste.md | søk | Navn eller nummer',
     '- Lenker | oppslag | Lenker.md | | Finn en lenke', '- Liste | oppslag | Liste.md |', '## Meny', '- avslutt', '- ---', '- versjon',
   ].join('\n'))
   assert.deepEqual(setup.problems, [])
-  assert.deepEqual(setup.views.map(v => [v.name, v.kind, v.file, v.options, v.placeholder]), [
+  assert.deepEqual(setup.modules.map(v => [v.name, v.module, v.file, v.options, v.placeholder]), [
     ['Ordliste', 'oppslag', 'Ordliste.md', ['søk', 'emneknagger'], ''],
     ['Taster', 'hurtigtaster', 'Taster.md', ['søk', 'system'], ''],
     ['Spørsmål', 'oppslag', 'Spørsmål og svar.md', ['søk', 'a–å'], ''],
@@ -194,11 +194,11 @@ test('setup: views in order, options, the same type twice', () => {
 test('setup: cards across and down', () => {
   const setup = parseSetup('## Visninger\n- Kort | kort | Kort.md | søk, 3 i bredden, 2 I HØYDEN\n- Auto | kort | Auto.md | søk')
   assert.deepEqual(setup.problems, [])
-  assert.deepEqual(setup.views.map(v => [v.options, v.columns, v.rows]), [[['søk'], 3, 2], [['søk'], undefined, undefined]])
+  assert.deepEqual(setup.modules.map(v => [v.options, v.columns, v.rows]), [[['søk'], 3, 2], [['søk'], undefined, undefined]])
   assert.match(formatSetup(setup, '# Oppsett'), /- Kort \| kort \| Kort\.md \| søk, 3 i bredden, 2 i høyden\n- Auto \| kort \| Auto\.md \| søk\n/)
   assert.deepEqual(parseSetup('## Visninger\n- K | kort | K.md | 7 i bredden\n- O | oppslag | O.md | 2 i høyden').problems, [
     'Oppsett.md, linje 2: Antall kort i bredden må være et heltall fra 1 til 6',
-    'Oppsett.md, linje 3: «2 i høyden» passer ikke til typen oppslag',
+    'Oppsett.md, linje 3: «2 i høyden» passer ikke til modulen oppslag',
   ])
 })
 
@@ -225,10 +225,10 @@ test('setup problems name the line, and a bad line is left out', () => {
     '## Skrift', '- tekst | "x"; }', '## Vindu', '- bredde | 5000', '## Ikoner', '- menylinje | ikon.svg', '## Tema',
   ].join('\n'))
   assert.deepEqual(setup.problems, [
-    'Oppsett.md, linje 2: «kart» er ikke en type. Bruk hurtigtaster, oppslag, kort eller steg.',
+    'Oppsett.md, linje 2: «kart» er ikke en modul. Bruk hurtigtaster, oppslag, kort eller steg.',
     'Oppsett.md, linje 3: «../hemmelig.md» må være et filnavn som slutter på .md',
-    'Oppsett.md, linje 4: Skriv navn, type og fil, skilt med |',
-    'Oppsett.md, linje 5: «tasteoppslag» passer ikke til typen oppslag',
+    'Oppsett.md, linje 4: Skriv navn, modul og fil, skilt med |',
+    'Oppsett.md, linje 5: «tasteoppslag» passer ikke til modulen oppslag',
     'Oppsett.md, linje 7: «slett alt» er ikke et menyvalg',
     'Oppsett.md, linje 9: «rosa» er ikke en farge i oppsettet',
     'Oppsett.md, linje 11: Skriv navnet på skriften, bare bokstaver, tall, mellomrom og bindestrek',
@@ -236,13 +236,19 @@ test('setup problems name the line, and a bad line is left out', () => {
     'Oppsett.md, linje 15: Skriv navnet på en .png-fil i samme mappe',
     'Oppsett.md, linje 16: «Tema» er ikke en del av oppsettet',
   ])
-  assert.deepEqual(setup.views.map(v => [v.name, v.options]), [['Taster', []]])
-  assert.deepEqual(parseSetup('## Visninger\n').problems, ['Oppsett.md har ingen visninger'])
+  assert.deepEqual(setup.modules.map(v => [v.name, v.options]), [['Taster', []]])
+  assert.deepEqual(parseSetup('## Moduler\n').problems, ['Oppsett.md har ingen moduler'])
+})
+
+test('setup: the older names Visninger, kildedata and {visning} still read', () => {
+  const setup = parseSetup('## Visninger\n- K | kort | K.md\n## Meny\n- kildedata\n## Tekster\n- visninger | Lister\n- kildedata | Fila {visning}')
+  assert.deepEqual([setup.modules.map(v => v.name), setup.menu, setup.texts.moduler, setup.texts.innhold, setup.problems], [['K'], ['innhold'], 'Lister', 'Fila {fane}', []])
+  assert.match(formatSetup(setup, '# Oppsett'), /\n## Moduler\n\n- K \| kort \| K\.md/)
 })
 
 test('file names stay in the data folder', () => {
-  for (const name of ['Ordliste.md', 'Slik gjør du.md']) assert.ok(listName(name), name)
-  for (const name of ['../a.md', 'a/b.md', 'a\\b.md', 'C:a.md', '.a.md', 'a.txt', 'Oppsett.md']) assert.ok(!listName(name), name)
+  for (const name of ['Ordliste.md', 'Slik gjør du.md']) assert.ok(contentName(name), name)
+  for (const name of ['../a.md', 'a/b.md', 'a\\b.md', 'C:a.md', '.a.md', 'a.txt', 'Oppsett.md']) assert.ok(!contentName(name), name)
   assert.ok(iconName('logo.svg') && iconName('ikon.PNG', 'menylinje'))
   assert.ok(!iconName('logo.svg', 'menylinje') && !iconName('../logo.png') && !iconName('logo.gif'))
 })
@@ -259,17 +265,17 @@ test('the setup screen writes what the parser reads, under the file\'s own comme
   assert.deepEqual(setup.problems, [])
   assert.equal(setupHeader(text), '# Oppsett\n<!--\n## Visninger\n- Ikke | en | linje.md\n-->\n')
   const again = parseSetup(formatSetup(setup, setupHeader(text)))
-  for (const part of ['views', 'menu', 'fonts', 'window', 'texts']) assert.deepEqual(again[part], setup[part], part)
-  assert.deepEqual(again.views[0].name, 'Telefon | SMS')
+  for (const part of ['modules', 'menu', 'fonts', 'window', 'texts']) assert.deepEqual(again[part], setup[part], part)
+  assert.deepEqual(again.modules[0].name, 'Telefon | SMS')
   // A backslash needs no escape of its own: only one right before a pipe is read as one
   for (const name of ['a\\', 'a\\|b', 'x\\\\|y', '\\']) {
-    const back = parseSetup(formatSetup({ ...setup, views: [{ ...setup.views[0], name }], texts: { søk: name } }, '# Oppsett'))
-    assert.deepEqual([back.views[0].name, back.texts.søk], [name, name], name)
+    const back = parseSetup(formatSetup({ ...setup, modules: [{ ...setup.modules[0], name }], texts: { søk: name } }, '# Oppsett'))
+    assert.deepEqual([back.modules[0].name, back.texts.søk], [name, name], name)
   }
   assert.deepEqual(again.window, { type: 'vindu', bredde: 700 })
   assert.deepEqual(Object.keys(again.icons), ['menylinje', 'app'])
   assert.equal(again.icons.menylinje.color, true)
-  assert.deepEqual(parseSetup('## Vindu\n- type | flytende').problems, ['Oppsett.md, linje 2: Type må være panel eller vindu'])
+  assert.deepEqual(parseSetup('## Vindu\n- type | flytende').problems, ['Oppsett.md, linje 2: Vindustype må være panel eller vindu'])
   assert.deepEqual(parseSetup('## Ikoner\n- app | app.svg').problems, ['Oppsett.md, linje 2: Skriv navnet på en .png-fil i samme mappe'])
 })
 

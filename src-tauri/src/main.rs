@@ -30,7 +30,7 @@ use tauri::RunEvent;
 
 /// Written when missing; after that the files are the user's.
 const SETUP: (&str, &str) = ("Oppsett.md", include_str!("../../seed/Oppsett.md"));
-/// One template per view type; `{navn}` becomes the view's name.
+/// One template per module; `{navn}` becomes the tab's name.
 const TEMPLATES: [(&str, &str); 4] = [
     ("hurtigtaster", include_str!("../../seed/maler/hurtigtaster.md")),
     ("oppslag", include_str!("../../seed/maler/oppslag.md")),
@@ -111,7 +111,7 @@ fn file_path(name: &str) -> Result<PathBuf, String> {
     data_file(name, &[".md"])
 }
 
-/// Larger icons are a mistake, and the panel reads them each time it opens.
+/// Larger icons are a mistake, and the main window reads them each time it opens.
 const ICON_LIMIT: u64 = 1024 * 1024;
 
 fn read_image(name: &str, extensions: &[&str]) -> Result<Vec<u8>, String> {
@@ -230,18 +230,18 @@ fn read_dropped(dropped: tauri::State<Dropped>, path: String) -> Result<tauri::i
     fs::read(&path).map(tauri::ipc::Response::new).map_err(|e| io_error(&path, e))
 }
 
-/// A view's file; a missing one starts as the template for its type.
+/// A tab's content file; a missing one starts as the template for its module.
 #[tauri::command]
-fn read_list(name: String, kind: String, title: String) -> Result<String, String> {
+fn read_content(name: String, module: String, title: String) -> Result<String, String> {
     let template = TEMPLATES
         .iter()
-        .find(|(k, _)| *k == kind)
+        .find(|(m, _)| *m == module)
         .map(|(_, text)| text.replace("{navn}", &title))
-        .ok_or_else(|| format!("Ukjent type: {kind}"))?;
+        .ok_or_else(|| format!("Ukjent modul: {module}"))?;
     read_or_seed(&file_path(&name)?, &template)
 }
 
-/// The system's shortcuts in the format of a hurtigtaster file; read only when a view shows them.
+/// The system's shortcuts in the format of a hurtigtaster file; read only when a tab shows them.
 #[tauri::command]
 fn system_list() -> Result<String, String> {
     system::list()
@@ -255,9 +255,9 @@ fn set_view(view: String) -> Result<(), String> {
     write_settings(&Settings { view: Some(view), ..settings() })
 }
 
-/// A copy of the user's list in Downloads, shown in Finder or Explorer; never over an existing file.
+/// A copy of the user's content file in Downloads, shown in Finder or Explorer; never over an existing file.
 #[tauri::command]
-fn export_list(app: AppHandle, name: String) -> Result<(), String> {
+fn export_content(app: AppHandle, name: String) -> Result<(), String> {
     let source = file_path(&name)?;
     let stem = name.trim_end_matches(".md");
     let folder = app.path().download_dir().map_err(|e| e.to_string())?;
@@ -269,7 +269,7 @@ fn export_list(app: AppHandle, name: String) -> Result<(), String> {
     app.opener().reveal_item_in_dir(target).map_err(|e| e.to_string())
 }
 
-/// A view's file from the panel's editor; `Oppsett.md` only from «Tilpass».
+/// A tab's content file from the main window's editor; `Oppsett.md` only from «Tilpass».
 #[tauri::command]
 fn save(name: String, original: String, text: String) -> Result<String, String> {
     let path = file_path(&name)?;
@@ -303,7 +303,7 @@ fn write_checked(path: PathBuf, original: &str, text: String) -> Result<String, 
     Ok(text)
 }
 
-/// `Oppsett.md` for «Tilpass»; seeded like the panel does.
+/// `Oppsett.md` for «Tilpass»; seeded like the main window does.
 #[tauri::command]
 fn read_setup() -> Result<String, String> {
     let dir = data_dir();
@@ -326,7 +326,7 @@ fn open_setup_file(app: AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
-/// «Tilpass»: a normal window beside the panel, which stays open to show each change.
+/// «Tilpass»: a normal window beside the main window, which stays open to show each change.
 #[tauri::command]
 fn open_setup(app: AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window(SETUP_WINDOW) {
@@ -348,7 +348,7 @@ fn open_setup(app: AppHandle) -> Result<(), String> {
     window.set_focus().map_err(|e| e.to_string())
 }
 
-/// To the left of the panel, else to its right, so the changes stay in view; without room, at the edge with the most.
+/// To the left of the main window, else to its right, so the changes stay in view; without room, at the edge with the most.
 fn beside(main: &WebviewWindow, window: &WebviewWindow) {
     let (Ok(at), Ok(size), Ok(own)) = (main.outer_position(), main.outer_size(), window.outer_size()) else { return };
     let Some(area) = main.current_monitor().ok().flatten().map(|m| *m.work_area()) else { return };
@@ -399,7 +399,7 @@ fn register(app: &AppHandle, hotkey: &str) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
-/// An icon from the setup, as bytes; the panel shows it as an image, never as markup.
+/// An icon from the setup, as bytes; the main window shows it as an image, never as markup.
 #[tauri::command]
 fn read_icon(name: String) -> Result<tauri::ipc::Response, String> {
     read_image(&name, &[".svg", ".png"]).map(tauri::ipc::Response::new)
@@ -439,7 +439,7 @@ fn set_tray(app: AppHandle, name: String, open: String, quit: String) -> Result<
     tray.set_tooltip(Some(name)).map_err(|e| e.to_string())
 }
 
-/// The panel's size from the setup, placed again at the tray icon.
+/// The main window's size from the setup; a panel is placed again at the tray icon.
 #[tauri::command]
 fn set_size(app: AppHandle, width: f64, height: f64) -> Result<(), String> {
     let window = app.get_webview_window("main").ok_or("window")?;
@@ -532,7 +532,7 @@ struct LastHidden(Mutex<Option<Instant>>);
 /// Under the icon at the top of the screen (macOS menu bar), above it at the bottom (Windows tray).
 fn place(app: &AppHandle, window: &WebviewWindow) {
     let scale = window.scale_factor().unwrap_or(1.0);
-    let Ok(panel) = window.outer_size() else { return };
+    let Ok(outer) = window.outer_size() else { return };
     // Right after launch the icon is not laid out yet and reports no height.
     let icon = app
         .tray_by_id("tray")
@@ -552,7 +552,7 @@ fn place(app: &AppHandle, window: &WebviewWindow) {
     let area = monitor.work_area();
     let (left, top) = (f64::from(area.position.x), f64::from(area.position.y));
     let (right, bottom) = (left + f64::from(area.size.width), top + f64::from(area.size.height));
-    let (width, height) = (f64::from(panel.width), f64::from(panel.height));
+    let (width, height) = (f64::from(outer.width), f64::from(outer.height));
     let gap = 6.0 * scale;
     // Without the icon: the corner where it sits.
     let (x, y, icon_width, icon_height) = match icon {
@@ -653,7 +653,7 @@ fn guarded<'a>(app: &AppHandle, builder: WebviewWindowBuilder<'a, tauri::Wry, Ap
         })
 }
 
-fn build_panel(app: &AppHandle) -> tauri::Result<WebviewWindow> {
+fn build_main_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     guarded(app, WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?).build()
 }
 
@@ -704,8 +704,8 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            load, read_list, system_list, save, reveal_file, open_url, set_hotkey, set_view, set_tray,
-            set_size, set_tray_icon, read_icon, export_list, hold, hide, quit, set_mode, set_app_icon,
+            load, read_content, system_list, save, reveal_file, open_url, set_hotkey, set_view, set_tray,
+            set_size, set_tray_icon, read_icon, export_content, hold, hide, quit, set_mode, set_app_icon,
             open_setup, read_setup, save_setup, open_setup_file, add_icon, read_dropped
         ])
         .manage(LastHidden(Mutex::new(None)))
@@ -715,7 +715,7 @@ fn main() {
         .manage(Dropped(Mutex::new(Vec::new())))
         .manage(WindowMode(AtomicBool::new(false)))
         .setup(|app| {
-            build_panel(app.handle())?;
+            build_main_window(app.handle())?;
             #[cfg(target_os = "macos")]
             {
                 app.set_activation_policy(tauri::ActivationPolicy::Accessory);
@@ -824,7 +824,7 @@ mod tests {
     }
 
     #[test]
-    fn the_panel_cannot_write_the_setup() {
+    fn the_main_window_cannot_write_the_setup() {
         assert_eq!(save("oppsett.md".into(), String::new(), String::new()), Err("Ukjent fil: oppsett.md".into()));
     }
 
@@ -859,8 +859,8 @@ mod tests {
 
     #[test]
     fn templates_start_with_the_views_name() {
-        for (kind, text) in TEMPLATES {
-            assert!(text.starts_with("# {navn}\n"), "{kind}");
+        for (module, text) in TEMPLATES {
+            assert!(text.starts_with("# {navn}\n"), "{module}");
         }
     }
 }

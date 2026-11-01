@@ -1,9 +1,15 @@
 # Trix Ultra
 
-Build your own quick-reference app for Windows and macOS: Keyboard shortcuts,
-glossary, flip cards and step-by-step guides as tabs, from Markdown files.
-Choose the views, menu, colours, fonts, icons, window and every UI text in one
-file or in «Tilpass». No installer, no network.
+An app shell for quick reference on Windows and macOS:
+
+- Four modules, each shown as a tab: shortcuts (`hurtigtaster`), lookup
+  (`oppslag`), flip cards (`kort`), step-by-step guides (`steg`)
+- Two window types: a panel at the menu bar or tray icon, or a normal window
+- Appearance: colours for light and dark mode, fonts, icons, menu and every
+  UI text, in one file or in «Tilpass»
+- Your own content in plain Markdown files, one per tab
+
+No installer, no network.
 
 ## Use
 

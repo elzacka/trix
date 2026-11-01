@@ -394,9 +394,9 @@ export const mergeShortcuts = (current, imported) => merge(current, imported, sh
 
 export const mergeEntries = (current, imported) => merge(current, imported, entryBlocks, [''])
 
-// Setup: `Oppsett.md` decides the views, the menu, the colours, the fonts, the window and the texts.
+// Setup: `Oppsett.md` decides the modules, the menu, the colours, the fonts, the window and the texts.
 
-export const KINDS = ['hurtigtaster', 'oppslag', 'kort', 'steg']
+export const MODULES = ['hurtigtaster', 'oppslag', 'kort', 'steg']
 
 export const OPTIONS = {
   hurtigtaster: ['søk', 'tasteoppslag', 'system', 'a–å'],
@@ -419,16 +419,16 @@ const CARD_AXIS = { bredden: 'columns', 'høyden': 'rows' }
 
 export const SETUP_FILE = 'Oppsett.md'
 
-const DEFAULT_VIEWS = [
-  { name: 'Hurtigtaster', kind: 'hurtigtaster', file: 'Hurtigtaster.md', options: ['søk', 'tasteoppslag', 'system'], placeholder: '' },
-  { name: 'Oppslag', kind: 'oppslag', file: 'Oppslag.md', options: DEFAULT_OPTIONS.oppslag, placeholder: '' },
-  { name: 'Kort', kind: 'kort', file: 'Kort.md', options: DEFAULT_OPTIONS.kort, placeholder: '' },
-  { name: 'Steg', kind: 'steg', file: 'Steg.md', options: DEFAULT_OPTIONS.steg, placeholder: '' },
+const DEFAULT_MODULES = [
+  { name: 'Hurtigtaster', module: 'hurtigtaster', file: 'Hurtigtaster.md', options: ['søk', 'tasteoppslag', 'system'], placeholder: '' },
+  { name: 'Oppslag', module: 'oppslag', file: 'Oppslag.md', options: DEFAULT_OPTIONS.oppslag, placeholder: '' },
+  { name: 'Kort', module: 'kort', file: 'Kort.md', options: DEFAULT_OPTIONS.kort, placeholder: '' },
+  { name: 'Steg', module: 'steg', file: 'Steg.md', options: DEFAULT_OPTIONS.steg, placeholder: '' },
 ]
 
-export const MENU = ['visning', 'kildedata', 'oppsett', 'hurtigåpner', 'avslutt', 'versjon', '---']
+export const MENU = ['visning', 'innhold', 'oppsett', 'hurtigåpner', 'avslutt', 'versjon', '---']
 
-const DEFAULT_MENU = ['visning', 'kildedata', '---', 'oppsett', 'hurtigåpner', '---', 'avslutt', 'versjon']
+const DEFAULT_MENU = ['visning', 'innhold', '---', 'oppsett', 'hurtigåpner', '---', 'avslutt', 'versjon']
 
 /** Icon names in the setup; `menylinje` (tray) and `app` (window and taskbar) are PNG only. */
 export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'valgt', 'undermeny', 'fjern', 'snu']
@@ -436,7 +436,7 @@ export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'taste
 export const PNG_ONLY = ['app', 'menylinje']
 
 /** An image file in the data folder, as `data_file` in `main.rs` checks it. */
-export const iconName = (name, kind) => /^[^\\/:*?"<>|.][^\\/:*?"<>|]*\.(svg|png)$/i.test(name) && (!PNG_ONLY.includes(kind) || /\.png$/i.test(name))
+export const iconName = (name, icon) => /^[^\\/:*?"<>|.][^\\/:*?"<>|]*\.(svg|png)$/i.test(name) && (!PNG_ONLY.includes(icon) || /\.png$/i.test(name))
 
 export const COLORS = ['bakgrunn', 'flate', 'linje', 'tekst', 'dempet', 'aksent', 'på aksent', 'forside', 'på forside', 'bakside', 'på bakside']
 
@@ -457,7 +457,7 @@ export const FONT_SIZE = [12, 20]
 
 export const TEXTS = {
   'navn': 'Trix Ultra',
-  'visninger': 'Visninger',
+  'moduler': 'Moduler',
   'flere valg': 'Flere valg',
   'søk': 'Søk',
   'tøm søk': 'Tøm søk',
@@ -476,13 +476,13 @@ export const TEXTS = {
   'systemets hurtigtaster': 'Hurtigtaster i {system}',
   'begge': 'Begge',
   'a–å': 'Sorter A–Å',
-  'filrekkefølge': 'Rekkefølgen i kildefila',
+  'filrekkefølge': 'Rekkefølgen i fila',
   'visning': 'Visning',
-  'kildedata': 'Kildedata {visning}',
+  'innhold': 'Innhold {fane}',
   'rediger': 'Se og endre i fila',
   'eksporter': 'Eksporter',
   'importer': 'Importer …',
-  'åpne mappe': 'Åpne kildemappe',
+  'åpne mappe': 'Åpne datamappen',
   'oppsett': 'Tilpass',
   'velg hurtigåpner': 'Velg hurtigåpner',
   'endre hurtigåpner': 'Endre hurtigåpner',
@@ -497,25 +497,28 @@ export const TEXTS = {
   'importspørsmål': 'Vil du slå fila sammen med lista di eller erstatte lista?',
   'erstatt': 'Erstatt',
   'slå sammen': 'Slå sammen',
-  'passer ikke': '{fil} passer ikke i {visning}',
+  'passer ikke': '{fil} passer ikke i {fane}',
   'opptatt': 'En annen app bruker {taster}',
   'kan ikke bruke': '{navn} kan ikke bruke {taster}',
 }
 
-/** «Søk i {visning}» with the values it names; a name it does not know stays as written. */
+/** «Innhold {fane}» with the values it names; a name it does not know stays as written. */
 export function fill(text, values = {}) {
   return text.replace(/\{([^{}]+)\}/g, (all, key) => (key in values ? String(values[key]) : all))
 }
 
 /** A plain file name in the data folder: no folder, no hidden file. */
-export const listName = name => /^[^\\/:*?"<>|.][^\\/:*?"<>|]*\.md$/i.test(name) && name.toLowerCase() !== SETUP_FILE.toLowerCase()
+export const contentName = name => /^[^\\/:*?"<>|.][^\\/:*?"<>|]*\.md$/i.test(name) && name.toLowerCase() !== SETUP_FILE.toLowerCase()
 
 const key = text => text.trim().toLocaleLowerCase('nb').replace(/^a-å$/, 'a–å')
+
+/** Older names for a section, a menu item and a text, still read. */
+const RENAMED = { visninger: 'moduler', kildedata: 'innhold' }
 
 /** Sections it has replace the defaults; sections it lacks keep them. Problems name the line. */
 export function parseSetup(text) {
   const setup = {
-    views: [], menu: [], colors: {}, fonts: {}, window: {}, icons: {}, texts: { ...TEXTS }, problems: [],
+    modules: [], menu: [], colors: {}, fonts: {}, window: {}, icons: {}, texts: { ...TEXTS }, problems: [],
   }
   const seen = new Set()
   let section = null
@@ -523,8 +526,8 @@ export function parseSetup(text) {
   comments(text.split(/\r?\n/)).forEach((line, i) => {
     if (line === null) return
     if (/^##\s/.test(line)) {
-      section = key(line.slice(3))
-      if (!['visninger', 'meny', 'farger', 'skrift', 'vindu', 'ikoner', 'tekster'].includes(section)) {
+      section = RENAMED[key(line.slice(3))] ?? key(line.slice(3))
+      if (!['moduler', 'meny', 'farger', 'skrift', 'vindu', 'ikoner', 'tekster'].includes(section)) {
         problem(i, `«${line.slice(3).trim()}» er ikke en del av oppsettet`)
         section = null
       }
@@ -535,33 +538,34 @@ export function parseSetup(text) {
     if (!item || !section) return
     const parts = item[1].split(/\s*(?<!\\)\|\s*/).map(part => part.replace(/\\\|/g, '|').trim())
     const name = key(parts[0])
-    if (section === 'visninger') {
-      const [title, kind = '', file = '', options, placeholder = ''] = parts
-      if (!title || !kind || !file) return problem(i, 'Skriv navn, type og fil, skilt med |')
-      if (!KINDS.includes(key(kind))) return problem(i, `«${kind}» er ikke en type. Bruk hurtigtaster, oppslag, kort eller steg.`)
-      if (!listName(file)) return problem(i, `«${file}» må være et filnavn som slutter på .md`)
-      const chosen = options === undefined || (!options && placeholder) ? DEFAULT_OPTIONS[key(kind)] : options.split(',').map(key).filter(Boolean)
+    if (section === 'moduler') {
+      const [title, module = '', file = '', options, placeholder = ''] = parts
+      if (!title || !module || !file) return problem(i, 'Skriv navn, modul og fil, skilt med |')
+      if (!MODULES.includes(key(module))) return problem(i, `«${module}» er ikke en modul. Bruk hurtigtaster, oppslag, kort eller steg.`)
+      if (!contentName(file)) return problem(i, `«${file}» må være et filnavn som slutter på .md`)
+      const chosen = options === undefined || (!options && placeholder) ? DEFAULT_OPTIONS[key(module)] : options.split(',').map(key).filter(Boolean)
       const count = {}
       const flags = chosen.filter(o => {
-        const [, n, axis] = (key(kind) === 'kort' && o.match(CARD_OPTION)) || []
+        const [, n, axis] = (key(module) === 'kort' && o.match(CARD_OPTION)) || []
         if (!axis) return true
         const [min, max] = CARD_COUNT
         if (!/^\d+$/.test(n) || n < min || n > max) problem(i, `Antall kort i ${axis} må være et heltall fra ${min} til ${max}`)
         else count[CARD_AXIS[axis]] = Number(n)
         return false
       })
-      const wrong = flags.find(o => !OPTIONS[key(kind)].includes(o))
-      if (wrong) problem(i, `«${wrong}» passer ikke til typen ${key(kind)}`)
-      setup.views.push({ name: title, kind: key(kind), file, options: flags.filter(o => OPTIONS[key(kind)].includes(o)), placeholder, ...count })
+      const wrong = flags.find(o => !OPTIONS[key(module)].includes(o))
+      if (wrong) problem(i, `«${wrong}» passer ikke til modulen ${key(module)}`)
+      setup.modules.push({ name: title, module: key(module), file, options: flags.filter(o => OPTIONS[key(module)].includes(o)), placeholder, ...count })
     } else if (section === 'meny') {
-      if (MENU.includes(name)) setup.menu.push(name)
+      const item = RENAMED[name] ?? name
+      if (MENU.includes(item)) setup.menu.push(item)
       else problem(i, `«${parts[0]}» er ikke et menyvalg`)
     } else if (section === 'farger') {
       if (!COLORS.includes(name)) return problem(i, `«${parts[0]}» er ikke en farge i oppsettet`)
       if (!parts[1]) return problem(i, `Skriv en farge for ${name}`)
       setup.colors[name] = { light: parts[1], dark: parts[2] || parts[1], line: i + 1 }
     } else if (section === 'vindu' && name === 'type') {
-      if (!WINDOW_TYPES.includes(key(parts[1] ?? ''))) return problem(i, 'Type må være panel eller vindu')
+      if (!WINDOW_TYPES.includes(key(parts[1] ?? ''))) return problem(i, 'Vindustype må være panel eller vindu')
       setup.window.type = key(parts[1])
     } else if (section === 'vindu' || (section === 'skrift' && name === 'størrelse')) {
       const [min, max] = section === 'vindu' ? WINDOW[name] ?? [] : FONT_SIZE
@@ -582,13 +586,14 @@ export function parseSetup(text) {
       }
       setup.icons[name] = { file: parts[1], color: key(parts[2] ?? '') === 'farge', line: i + 1 }
     } else if (section === 'tekster') {
-      if (!(name in TEXTS)) return problem(i, `«${parts[0]}» er ikke en tekst i oppsettet`)
-      setup.texts[name] = parts.slice(1).join(' | ')
+      const text = RENAMED[name] ?? name
+      if (!(text in TEXTS)) return problem(i, `«${parts[0]}» er ikke en tekst i oppsettet`)
+      setup.texts[text] = parts.slice(1).join(' | ').replaceAll('{visning}', '{fane}')
     }
   })
-  if (!seen.has('visninger')) setup.views = DEFAULT_VIEWS.map(v => ({ ...v }))
+  if (!seen.has('moduler')) setup.modules = DEFAULT_MODULES.map(v => ({ ...v }))
   if (!seen.has('meny')) setup.menu = [...DEFAULT_MENU]
-  if (!setup.views.length) setup.problems.push(`${SETUP_FILE} har ingen visninger`)
+  if (!setup.modules.length) setup.problems.push(`${SETUP_FILE} har ingen moduler`)
   return setup
 }
 
@@ -597,16 +602,16 @@ const cell = text => String(text).replace(/\|/g, '\\|')
 /** The setup as `Oppsett.md`, below `header` (the title and format comment of the file it replaces). */
 export function formatSetup(setup, header) {
   const lines = (title, items) => [`## ${title}`, '', ...items.map(item => `- ${item}`), ...(items.length ? [''] : [])]
-  const view = v => {
-    const counts = Object.entries(CARD_AXIS).filter(([, prop]) => v.kind === 'kort' && v[prop]).map(([axis, prop]) => `${v[prop]} i ${axis}`)
-    const parts = [v.name, v.kind, v.file, [...v.options, ...counts].join(', ')]
+  const row = v => {
+    const counts = Object.entries(CARD_AXIS).filter(([, prop]) => v.module === 'kort' && v[prop]).map(([axis, prop]) => `${v[prop]} i ${axis}`)
+    const parts = [v.name, v.module, v.file, [...v.options, ...counts].join(', ')]
     if (v.placeholder) parts.push(v.placeholder)
     return parts.map(cell).join(' | ')
   }
   const color = ([name, c]) => [name, c.light, ...(c.dark !== c.light ? [c.dark] : [])].join(' | ')
   return [
     header.trimEnd(), '',
-    ...lines('Visninger', setup.views.map(view)),
+    ...lines('Moduler', setup.modules.map(row)),
     ...lines('Meny', setup.menu),
     ...lines('Farger', Object.entries(setup.colors).map(color)),
     ...lines('Skrift', Object.entries(setup.fonts).map(([name, value]) => `${name} | ${value}`)),

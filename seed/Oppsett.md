@@ -6,15 +6,15 @@ Du kan endre fila her eller i «Tilpass» i menyen (Ctrl+, eller ⌘,).
 Appen viser endringene med en gang du lagrer fila. I «Tilpass» ser du dem før du lagrer.
 En seksjon du sletter, får standardverdiene tilbake.
 
-## Visninger
-- Én linje per fane, i den rekkefølgen fanene skal stå: Navn | type | fil | valg | tekst i søkefeltet
-- Typer:
+## Moduler
+- Én linje per modul. Hver modul vises som en fane, i samme rekkefølge som linjene: Navn | modul | fil | valg | tekst i søkefeltet
+- Moduler du kan velge:
   - hurtigtaster: Handlinger med tastene for Windows og Mac. Du kan slå opp en tastekombinasjon.
   - oppslag: Ord og begreper med forklaring, andre navn og emneknagger. Til ordliste, jukselapp og spørsmål og svar.
   - kort: Kort med forside og bakside. Trykk på kortet for å snu det.
   - steg: Veiledninger delt i steg. Til «slik gjør du».
-- Samme type flere ganger: Gi hver fane sin egen fil.
-- Fil: Et filnavn som slutter på .md, i samme mappe som denne fila. Appen lager fila fra malen for typen hvis den mangler.
+- Samme modul flere ganger: Gi hver linje sin egen fil.
+- Fil: Et filnavn som slutter på .md, i samme mappe som denne fila. Appen lager fila fra malen for modulen hvis den mangler.
 - Valg, skilt med komma. Uten valg får hurtigtaster søk og tasteoppslag, de andre søk og emneknagger.
   - søk: Søkefelt
   - tasteoppslag: Slår opp en hurtigtast du trykker eller skriver, og viser knappen med tastaturet i søkefeltet (hurtigtaster)
@@ -26,7 +26,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 - Eksempel: - Telefonliste | oppslag | Telefonliste.md | søk | Søk etter navn eller nummer
 
 ## Meny
-- Valgene i menyen, i rekkefølge: visning, kildedata, oppsett, hurtigåpner, avslutt, versjon
+- Valgene i menyen, i rekkefølge: visning, innhold, oppsett, hurtigåpner, avslutt, versjon
 - ---: Skillelinje
 - Slett en linje for å skjule valget.
 
@@ -57,7 +57,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 - Nøkkel | tekst. Ord i {klammer} fyller appen inn.
 -->
 
-## Visninger
+## Moduler
 
 - Hurtigtaster | hurtigtaster | Hurtigtaster.md | søk, tasteoppslag, system
 - Oppslag | oppslag | Oppslag.md | søk, emneknagger
@@ -67,7 +67,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 ## Meny
 
 - visning
-- kildedata
+- innhold
 - ---
 - oppsett
 - hurtigåpner
@@ -105,7 +105,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 ## Tekster
 
 - navn | Trix Ultra
-- visninger | Visninger
+- moduler | Moduler
 - flere valg | Flere valg
 - søk | Søk
 - tøm søk | Tøm søk
@@ -124,13 +124,13 @@ En seksjon du sletter, får standardverdiene tilbake.
 - systemets hurtigtaster | Hurtigtaster i {system}
 - begge | Begge
 - a–å | Sorter A–Å
-- filrekkefølge | Rekkefølgen i kildefila
+- filrekkefølge | Rekkefølgen i fila
 - visning | Visning
-- kildedata | Kildedata {visning}
+- innhold | Innhold {fane}
 - rediger | Se og endre i fila
 - eksporter | Eksporter
 - importer | Importer …
-- åpne mappe | Åpne kildemappe
+- åpne mappe | Åpne datamappen
 - oppsett | Tilpass
 - velg hurtigåpner | Velg hurtigåpner
 - endre hurtigåpner | Endre hurtigåpner
@@ -145,6 +145,6 @@ En seksjon du sletter, får standardverdiene tilbake.
 - importspørsmål | Vil du slå fila sammen med lista di eller erstatte lista?
 - erstatt | Erstatt
 - slå sammen | Slå sammen
-- passer ikke | {fil} passer ikke i {visning}
+- passer ikke | {fil} passer ikke i {fane}
 - opptatt | En annen app bruker {taster}
 - kan ikke bruke | {navn} kan ikke bruke {taster}

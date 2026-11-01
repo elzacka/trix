@@ -1,6 +1,13 @@
 # Brukerveiledning for Trix Ultra
 
-Sist oppdatert: 01.11.26. Om prosjektet: [README](README.md).
+Sist oppdatert: 02.11.26. Om prosjektet: [README](README.md).
+
+Trix Ultra er en oppslagsapp du setter sammen selv:
+
+- Fire moduler, som vises som faner: Hurtigtaster, oppslag, kort og steg
+- To vindustyper: «Panel ved ikonet» eller «Vanlig vindu»
+- Eget utseende: Farger for lys og mørk modus, skrift og ikoner
+- Eget innhold i vanlige Markdown-filer
 
 ## 1. Last ned og installer
 
@@ -36,7 +43,7 @@ Menyen («Flere valg» øverst til høyre). Oppsettet bestemmer hvilke valg den 
 | Valg | Gjør |
 |---|---|
 | «Visning» | Mine hurtigtaster, maskinens eller begge. Sortering: A–Å eller rekkefølgen i fila |
-| «Kildedata ‹fane›» | Innholdet i fanen, se [Innhold i appen](#innhold-i-appen) |
+| «Innhold ‹fane›» | Innholdet i fanen, se [Innhold i appen](#innhold-i-appen) |
 | «Tilpass» | Oppsettet, se [I appen](#i-appen-tilpass) |
 | «Endre hurtigåpner» | Trykk den nye kombinasjonen. Backspace fjerner den |
 
@@ -46,13 +53,13 @@ To deler, to måter:
 
 | | I appen | Direkte i filene |
 |---|---|---|
-| Oppsett: Faner, meny, farger, skrift, vindu, ikoner, tekster | «Tilpass», Ctrl+, / ⌘, | `Oppsett.md` |
-| Innhold: Det som står i fanene | «Kildedata ‹fane›», «Se og endre i fila», Ctrl+E / ⌘E | Én `.md`-fil per fane |
+| Oppsett: Moduler, meny, farger, skrift, vindu, ikoner, tekster | «Tilpass», Ctrl+, / ⌘, | `Oppsett.md` |
+| Innhold: Det som står i fanene | «Innhold ‹fane›», «Se og endre i fila», Ctrl+E / ⌘E | Én `.md`-fil per fane |
 | Vises | Oppsett: Med en gang. Innhold: Når du lagrer | Innen ett sekund etter at du lagrer fila |
 
-Typer faner:
+Moduler. Hver fane viser én modul:
 
-| Type           | Passer til                                                                                         |
+| Modul          | Passer til                                                                                         |
 | -------------- | -------------------------------------------------------------------------------------------------- |
 | `hurtigtaster` | Hurtigtaster for et program, med Windows- og Mac-taster. Valget «system» viser også maskinens egne |
 | `oppslag`      | Ordliste, oppslagsverk, spørsmål og svar, telefonliste                                             |
@@ -61,14 +68,14 @@ Typer faner:
 
 ### I appen: «Tilpass»
 
-Et eget vindu ved siden av panelet. Panelet viser hver endring med en gang.
+Et eget vindu ved siden av appen. Appen viser hver endring med en gang.
 
 | Del | Endrer |
 |---|---|
-| «Faner» | Legg til, fjern, flytt. Navn, type, fil, valg, tekst i søkefeltet, antall kort i bredden og høyden |
+| «Moduler» | Legg til, fjern, flytt. Navn, modul, fil, valg, tekst i søkefeltet, antall kort i bredden og høyden |
 | «Meny» | Rekkefølge, valg av og på, skillelinjer |
 | «Farger» | Lys og mørk modus. Varsel når kontrasten er lavere enn 4,5:1. «Bruk standardfargene» |
-| «Skrift og vindu» | Skrift, skrift på taster, størrelse. «Panel ved ikonet» eller «Vanlig vindu», bredde, høyde |
+| «Skrift og vindu» | Skrift, skrift på taster, størrelse. Vindustype: «Panel ved ikonet» eller «Vanlig vindu». Bredde, høyde |
 | «Ikoner» | SVG eller PNG: «Velg fil …» eller dra fila inn. «Standard» |
 | «Tekster» | Alle tekstene i appen |
 
@@ -78,14 +85,14 @@ Et eget vindu ved siden av panelet. Panelet viser hver endring med en gang.
 
 ### Innhold i appen
 
-Menyen → «Kildedata ‹fane›»:
+Menyen → «Innhold ‹fane›»:
 
 | Valg | Gjør |
 |---|---|
-| «Se og endre i fila» | Fila i panelet. «Lagre»: Ctrl+S / ⌘S. «Avbryt»: Esc |
-| «Importer …» | Henter en `.md`- eller `.txt`-fil: «Slå sammen» eller «Erstatt». Resultatet åpnes i panelet og lagres med «Lagre» |
+| «Se og endre i fila» | Fila i appen. «Lagre»: Ctrl+S / ⌘S. «Avbryt»: Esc |
+| «Importer …» | Henter en `.md`- eller `.txt`-fil: «Slå sammen» eller «Erstatt». Resultatet åpnes i appen og lagres med «Lagre» |
 | «Eksporter» | Kopi i Nedlastinger. Overskriver aldri en fil |
-| «Åpne kildemappe» | Mappa med fila |
+| «Åpne datamappen» | Mappa med fila |
 
 Formatet står i kommentaren øverst i fila. Appen lagrer ikke hvis fila er
 endret utenfor appen etter at du åpnet den: Kopier endringene dine, velg
@@ -104,7 +111,7 @@ endret utenfor appen etter at du åpnet den: Kopier endringene dine, velg
 | Fil | Holder |
 |---|---|
 | `Oppsett.md` | Oppsettet |
-| `‹Navn›.md` | Innholdet i en fane. Filnavnet står under `## Visninger` i `Oppsett.md` |
+| `‹Navn›.md` | Innholdet i en fane. Filnavnet står under `## Moduler` i `Oppsett.md` |
 | `.svg`, `.png` | Ikonene under `## Ikoner` |
 | `innstillinger.json` | Hurtigåpner, visning og vindustype for denne maskinen. Endres i appen |
 
@@ -114,7 +121,7 @@ Mappa er skjult som standard.
 
 | Måte | Slik |
 |---|---|
-| Fra appen | «Kildedata ‹fane›» → «Åpne kildemappe». Eller «Tilpass» → «Åpne Oppsett.md» |
+| Fra appen | «Innhold ‹fane›» → «Åpne datamappen». Eller «Tilpass» → «Åpne Oppsett.md» |
 | Mac, Finder | ⇧⌘G, lim inn stien over, Retur. Skjulte filer av og på: ⇧⌘. |
 | Windows | Windows-tasten+R, skriv `%APPDATA%\Trix Ultra`, Enter. Eller lim stien inn i adressefeltet i Filutforsker |
 
