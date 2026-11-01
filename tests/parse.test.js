@@ -126,7 +126,7 @@ test('the templates parse', () => {
   const shortcuts = read('../seed/maler/hurtigtaster.md')
   assert.equal(parseShortcuts(shortcuts, 'windows').length, 2)
   assert.equal(parseShortcuts(shortcuts, 'mac').flatMap(s => s.items).every(i => i.keys.length), true)
-  assert.equal(parseEntries(read('../seed/maler/oppslag.md')).flatMap(s => s.entries).length, 6)
+  assert.equal(parseEntries(read('../seed/maler/oppslag.md')).flatMap(s => s.entries).length, 9)
   for (const kind of ['kort', 'steg']) {
     const entries = parseEntries(read(`../seed/maler/${kind}.md`)).flatMap(s => s.entries)
     assert.ok(entries.length > 1 && entries.every(e => lead(e) && e.blocks.length > 1), kind)

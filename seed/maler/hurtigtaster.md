@@ -14,21 +14,15 @@ Dette er innholdet i fanen. Endre det som du vil.
 - Ord: ctrl, shift, alt, cmd, opt, win, fn, mellomrom, retur, tab, esc, slett, venstre, høyre, opp, ned, F1–F12
 -->
 
-## Appen
+## Krisemøte i Teams
 
-- Avbryt redigering | esc
-- Endre oppsettet | ctrl , | ⌘,
-- Forrige fane | ctrl shift tab
-- Første fane | ctrl 1 | ⌘1
-- Lagre i redigering | ctrl S | ⌘S
-- Lukk, tøm søket eller skjul appen | esc
-- Neste fane | ctrl tab
-- Rediger lista | ctrl E | ⌘E
-- Søk | ctrl F | ⌘F
+- Avslutt samtalen | ctrl shift H | ⌘⇧H
+- Kamera av og på | ctrl shift O | ⌘⇧O
+- Mikrofon av og på | ctrl shift M | ⌘⇧M
+- Rekk opp eller senk hånden | ctrl shift K | ⌘⇧K
 
 ## Mest brukt
 
-- Emoji og symboler | win . | ⌃⌘ mellomrom eller fn E
 - Lim inn uten formatering | ctrl shift V | ⌘⌥⇧V
 - Lås skjermen | win L | ⌃⌘Q
 - Skjermbilde av et utsnitt | win shift S | ⌘⇧4

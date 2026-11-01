@@ -13,34 +13,43 @@ Dette er innholdet i fanen. Endre det som du vil.
 - Rekkefølgen i fila er rekkefølgen i fanen. A–Å sorterer alfabetisk.
 -->
 
-## Filformater
+## Tiltakskort
 
-### CSV
-Tabell som ren tekst
+### Brann
+Røyk eller flammer i bygget
 
-#### Hva det er
-Én rad per linje, og kolonnene skilt med komma eller semikolon.
+#### Gjør dette
+1. Få alle ut av fare.
+2. Ring 110.
+3. Slokk hvis det er trygt.
+4. Lukk dører og vinduer bak deg.
 
-#### Når du bruker det
-Når du flytter tabeller mellom regneark, databaser og andre programmer.
-#tabell
+#### Husk
+Ikke bruk heisen.
+#brann
 
-### Markdown
-Ren tekst med enkle tegn for overskrifter og lister
+### Evakuering
+Alle må ut av bygget
 
-#### Hva det er
-Tekst som er lett å lese både før og etter at den blir vist som formatert tekst.
+#### Gjør dette
+1. Gå ut den nærmeste trygge veien. Følg skiltene.
+2. Hjelp dem som trenger det.
+3. Gå til møteplassen.
+4. Si fra hvis noen mangler.
 
-#### Når du bruker det
-Notater, dokumentasjon og innholdet i denne appen.
-#tekst
+#### Husk
+Ikke gå inn igjen før du får beskjed.
+#evakuering
 
-### PDF
-Dokument som ser likt ut overalt
+### Strømbrudd
+Strømmen er borte i bygget eller området
 
-#### Hva det er
-Et fast oppsett av tekst, bilder og skrift, laget for å leses og skrives ut.
+#### Gjør dette
+1. Sjekk sikringsskapet.
+2. Se om naboene også er uten strøm.
+3. Følg med på nettselskapets nettside eller på radio med batteri.
+4. Slå av ovner og komfyr.
 
-#### Når du bruker det
-Når mottakeren skal lese, ikke endre.
-#dokument
+#### Husk
+Bruk lommelykt, ikke stearinlys.
+#strøm

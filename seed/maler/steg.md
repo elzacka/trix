@@ -13,28 +13,25 @@ Dette er innholdet i fanen. Endre det som du vil.
 - Rekkefølgen i fila er rekkefølgen i fanen. A–Å sorterer alfabetisk.
 -->
 
-## Slik gjør du
+## Egenberedskap
 
-### Lim inn uten formatering
-Lim inn ren tekst, uten skrift, farger og størrelse fra der du kopierte den.
-#tekst
+### Lag et vannlager
+Lagre rundt 20 liter drikkevann per person. Det dekker minimumsbehovet for en uke.
+#vann
 
-#### På Mac
-Trykk ⌘⌥⇧V. Noen apper bruker ⌘⇧V.
+#### Slik gjør du
+1. Fyll rene flasker eller kanner med vann fra springen.
+2. Skriv datoen på.
+3. Sett dem mørkt og kjølig.
 
-#### På Windows
-Trykk Ctrl+Shift+V.
+### Når tyfonen varsler
+Signalet «Viktig melding – søk informasjon» betyr at du skal finne ut hva som skjer.
+#varsling
 
-### Ta et skjermbilde
-Ta bilde av hele skjermen eller bare en del av den.
-#skjerm
+#### Slik gjør du
+1. Hør på radio, eller les nyheter og nettsidene til kommunen.
+2. Følg rådene fra myndighetene.
+3. Ring 112 hvis noen er i fare.
 
-#### På Mac
-1. Trykk ⌘⇧4.
-2. Dra over det du vil ha med.
-3. Bildet havner på skrivebordet.
-
-#### På Windows
-1. Trykk Win+Shift+S.
-2. Dra over det du vil ha med.
-3. Bildet ligger på utklippstavla. Lim det inn der du vil bruke det.
+#### Test
+Sivilforsvaret tester tyfonene kl. 12 den andre onsdagen i januar og juni.

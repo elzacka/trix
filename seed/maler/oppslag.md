@@ -13,38 +13,46 @@ Dette er innholdet i fanen. Endre det som du vil.
 - Rekkefølgen i fila er rekkefølgen i fanen. A–Å sorterer alfabetisk.
 -->
 
-## KI
+## Begreper
 
-### Algoritme
-Nøyaktige, entydige steg-for-steg-instruksjoner som forteller en datamaskin hvordan en bestemt oppgave skal løses.
-Også: Algorithm
-#ki #programmering
+### Egenberedskap
+Det du gjør selv for å klare deg hvis strøm, vann, mobilnett eller butikker ikke virker. Myndighetene anbefaler at flest mulig kan klare seg selv i en uke.
+Også: Beredskap hjemme
+#egenberedskap
 
-### Benchmark
-Standardisert test for å måle og sammenligne ytelsen til KI-modeller. Resultatene sier ikke alltid noe om praktisk nytte.
-Også: Referansetest, evaluation suite
-#ki #analyse
+### Nødvarsel
+Melding fra myndighetene til alle mobiler i et område når liv og helse er i fare der.
+Også: Cell broadcast
+#varsling
 
-### Åpne vekter
-Praksis der vektene til en ferdigtrent modell deles fritt, men ikke nødvendigvis treningskode, datasett eller endringsrett.
+### ROS-analyse
+Oversikt over hva som kan gå galt, hvor sannsynlig det er og hva følgene blir. Grunnlaget for beredskapsplanen.
+Også: Risiko- og sårbarhetsanalyse
+#planlegging
 
-Åpne vekter er ikke det samme som åpen kildekode.
-Også: Open weights
-#ki
+### Tyfon
+Sirene som varsler befolkningen. Signalet «Viktig melding – søk informasjon» er tre serier med tuting, med ett minutts opphold mellom seriene.
+Også: Sirene
+#varsling
 
-## Personvern
+## Nødnumre
 
-### Anonymisering
-Opplysninger som ikke kan knyttes til en enkeltperson overhodet. De faller utenfor GDPR, men slik anonymisering er nesten umulig å oppnå i praksis.
-Også: Anonymization
-#personvern #dataforvaltning
+### Ambulanse
+**113**: Akutt sykdom eller skade.
+#nød
 
-### Behandlingsansvarlig
-Den som bestemmer formålet med behandlingen av personopplysninger og hvilke hjelpemidler som skal brukes.
-Også: Data controller
-#personvern
+### Brann
+**110**: Brann, røyk og ulykker der noen må reddes.
+#nød
 
-### Databehandler
-Den som behandler personopplysninger på oppdrag fra den behandlingsansvarlige.
-Også: Data processor
-#personvern
+### Giftinformasjonen
+**22 59 13 00**: Råd ved forgiftning, hele døgnet.
+#nød
+
+### Legevakt
+**116 117**: Når du trenger lege og det ikke kan vente til fastlegen.
+#nød
+
+### Politi
+**112**: Når noen er i fare. **02800**: Når det ikke haster.
+#nød
