@@ -90,7 +90,7 @@ Menyen → «Innhold ‹fane›»:
 | Valg | Gjør |
 |---|---|
 | «Se og endre i fila» | Fila i appen. «Lagre»: Ctrl+S / ⌘S. «Avbryt»: Esc |
-| «Importer …» | Henter en Word-fil (`.docx`), en RTF-fil (`.rtf`) eller en `.md`- eller `.txt`-fil: «Slå sammen» eller «Erstatt». Resultatet åpnes i appen og lagres med «Lagre» |
+| «Importer …» | Henter en Word-, RTF-, Excel- eller CSV-fil (`.docx`, `.rtf`, `.xlsx`, `.csv`) eller en `.md`- eller `.txt`-fil: «Slå sammen» eller «Erstatt». Resultatet åpnes i appen og lagres med «Lagre» |
 | «Eksporter» | Kopi i Nedlastinger. Overskriver aldri en fil |
 | «Åpne datamappen» | Mappa med fila |
 
@@ -114,6 +114,12 @@ Word og RTF blir Markdown slik:
 - Hurtigtaster: Tabeller med navn, Windows-taster og Mac-taster blir én
   hurtigtast per rad.
 - «Erstatt» beholder tittelen og kommentaren øverst i fila.
+
+Excel og CSV blir alltid tabeller. Hvert ark blir et oppslag, et kort eller en
+veiledning med samme navn som arket. En CSV-fil, eller en Excel-fil med bare
+ett ark, får navnet til fila. Fet og kursiv skrift, lenker og datoer fra Excel
+blir med. Du kan skrive tekst over og under tabellen og formatere den, også inne
+i cellene. I Hurtigtaster blir hver rad en hurtigtast.
 
 Formatet står i kommentaren øverst i fila. Appen lagrer ikke hvis fila er
 endret utenfor appen etter at du åpnet den: Kopier endringene dine, velg

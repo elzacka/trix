@@ -4,7 +4,7 @@ import { deflateRawSync, crc32 } from 'node:zlib'
 import { importText, toMarkdown, replaceContent } from '../ui/import.js'
 import { unzip, parseXml, PART_LIMIT } from '../ui/docx.js'
 import { readRtf } from '../ui/rtf.js'
-import { parseEntries, parseShortcuts, mergeEntries } from '../ui/parse.js'
+import { parseEntries, parseShortcuts, mergeEntries, lead } from '../ui/parse.js'
 
 /** A zip of text parts, deflated unless `store`. */
 function zip(files, store = false) {
@@ -197,4 +197,57 @@ test('heading levels count from the document: one level is entries, the top of s
   const para = text => ({ type: 'paragraph', runs: [{ text }] })
   assert.equal(toMarkdown([heading(1, 'A'), para('a'), heading(1, 'B')], 'kort'), '### A\n\na\n\n### B\n')
   assert.equal(toMarkdown([heading(2, 'G'), heading(4, 'E'), heading(5, 'S')], 'steg'), '## G\n\n### E\n\n#### S\n')
+})
+
+const XLSX = zip({
+  'xl/workbook.xml': '<?xml version="1.0"?>\n<workbook xmlns:r="r"><sheets><sheet name="Nødnumre" sheetId="1" r:id="rId1"/><sheet name="Skjult" sheetId="2" state="hidden" r:id="rId2"/><sheet name="Datoer" sheetId="3" r:id="rId3"/></sheets></workbook>',
+  'xl/_rels/workbook.xml.rels': '<Relationships><Relationship Id="rId1" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Target="/xl/worksheets/sheet3.xml"/></Relationships>',
+  'xl/sharedStrings.xml': '<sst><si><t>Etat</t></si><si><t>Nummer</t></si><si><t>Brann | røyk</t></si><si><r><t xml:space="preserve">Politi </t></r><r><rPr><b/></rPr><t>nød</t></r></si><si><t>DSB</t></si></sst>',
+  'xl/styles.xml': '<styleSheet><numFmts><numFmt numFmtId="164" formatCode="dd/mm/yyyy hh:mm"/></numFmts><fonts><font/><font><b/></font><font><i/></font></fonts>'
+    + '<cellXfs><xf numFmtId="0" fontId="0"/><xf numFmtId="0" fontId="1"/><xf numFmtId="14" fontId="0"/><xf numFmtId="9" fontId="2"/><xf numFmtId="164" fontId="0"/></cellXfs></styleSheet>',
+  'xl/worksheets/sheet1.xml': '<worksheet xmlns:r="r"><sheetData>'
+    + '<row r="1"><c r="A1" t="s" s="1"><v>0</v></c><c r="B1" t="s" s="1"><v>1</v></c></row>'
+    + '<row r="2"><c r="A2" t="s"><v>2</v></c><c r="B2"><v>110</v></c><c r="D2"/></row>'
+    + '<row r="5"><c r="A5" t="s"><v>3</v></c><c r="B5"><v>112</v></c></row>'
+    + '<row r="6"><c r="A6" t="s"><v>4</v></c><c r="B6" t="inlineStr"><is><t>2,5</t></is></c></row>'
+    + '</sheetData><hyperlinks><hyperlink ref="A6" r:id="rId7"/></hyperlinks></worksheet>',
+  'xl/worksheets/_rels/sheet1.xml.rels': '<Relationships><Relationship Id="rId7" Target="https://www.dsb.no/" TargetMode="External"/></Relationships>',
+  'xl/worksheets/sheet2.xml': '<worksheet><sheetData><row><c t="str"><v>hemmelig</v></c></row></sheetData></worksheet>',
+  'xl/worksheets/sheet3.xml': '<worksheet><sheetData><row><c><v>0.1</v></c><c s="2"><v>46284</v></c><c s="3"><v>0.205</v></c><c s="4"><v>46284.5</v></c><c t="b"><v>1</v></c></row></sheetData></worksheet>',
+})
+
+test('xlsx: each visible sheet an entry holding its table; bold, italic, links, dates, percent', async () => {
+  const text = await importText('Beredskap.xlsx', XLSX, 'kort')
+  assert.equal(text, [
+    '### Nødnumre', '', '| Etat | Nummer |', '| --- | --- |', '| Brann \\| røyk | 110 |', '| Politi **nød** | 112 |', '| [DSB](https://www.dsb.no/) | 2,5 |', '',
+    '### Datoer', '', '| 0,1 | 19.09.2026 | *20,5 %* | 19.09.2026 12.00 | SANN |', '| --- | --- | --- | --- | --- |', '',
+  ].join('\n'))
+  const entries = parseEntries(text)[0].entries
+  assert.deepEqual(entries.map(e => [e.title, e.blocks[0].type]), [['Nødnumre', 'table'], ['Datoer', 'table']])
+  assert.equal(lead(entries[0]), '')
+})
+
+test('xlsx: one sheet is named after the file; not Excel refused', async () => {
+  const one = zip({
+    'xl/workbook.xml': '<workbook><sheets><sheet name="Ark1" r:id="rId1"/></sheets></workbook>',
+    'xl/_rels/workbook.xml.rels': '<Relationships><Relationship Id="rId1" Target="worksheets/sheet1.xml"/></Relationships>',
+    'xl/worksheets/sheet1.xml': '<worksheet><sheetData><row><c t="inlineStr"><is><t>A</t></is></c><c t="inlineStr"><is><t>B</t></is></c></row></sheetData></worksheet>',
+  })
+  assert.equal(await importText('Telefonliste.xlsx', one, 'oppslag'), '### Telefonliste\n\n| A | B |\n| --- | --- |\n')
+  await assert.rejects(importText('a.xlsx', WORD, 'oppslag'), /Excel/)
+})
+
+test('csv: semicolon, comma or tab; quoted fields; Windows-1252 from Excel', async () => {
+  const csv = '﻿Navn;Nummer;Merknad\r\nBrann;110;"Røyk; flammer"\r\n"Politi ""nød""";112;"To\r\nlinjer"\r\n;;\r\n'
+  assert.equal(await importText('Nødnumre.csv', new TextEncoder().encode(csv), 'steg'), [
+    '### Nødnumre', '', '| Navn | Nummer | Merknad |', '| --- | --- | --- |', '| Brann | 110 | Røyk; flammer |', '| Politi "nød" | 112 | To linjer |', '',
+  ].join('\n'))
+  assert.equal(await importText('a.csv', rtf('a,b\n1,2'), 'oppslag'), '### a\n\n| a | b |\n| --- | --- |\n| 1 | 2 |\n')
+  assert.equal(await importText('a.csv', rtf('a\tb\n1\t2'), 'oppslag'), '### a\n\n| a | b |\n| --- | --- |\n| 1 | 2 |\n')
+  assert.equal(await importText('a.csv', new Uint8Array([0x42, 0xe5, 0x3b, 0x31]), 'oppslag'), '### a\n\n| Bå | 1 |\n| --- | --- |\n')
+})
+
+test('csv in hurtigtaster: rows become shortcuts under the file name as group', async () => {
+  const text = await importText('Teams.csv', rtf('Navn;Windows;Mac\nKamera;ctrl shift O;⌘⇧O\n'), 'hurtigtaster')
+  assert.equal(text, '## Teams\n\n- Kamera | ctrl shift O | ⌘⇧O\n')
 })

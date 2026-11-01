@@ -6,6 +6,7 @@
 - One term per concept in the app, «Tilpass», `Oppsett.md` and the docs: modules (shown as tabs) under «Moduler» with the column `modul`; «Innhold ‹fane›» in the menu, key `innhold` and placeholder `{fane}`; «Åpne datamappen»; «Rekkefølgen i fila». Older setups with `## Visninger`, `kildedata` and `{visning}` still read
 - The user guide and README open with what the app is: modules, window types, appearance, your own content
 - Import Word (`.docx`) and RTF (`.rtf`) files: headings become groups and entries; lists, tables, bold, italic and links carry over
+- Import Excel (`.xlsx`) and CSV (`.csv`) files as tables: each sheet becomes an entry holding its table, with bold, italic, links and dates
 - Drag a file onto a tab to import it into that tab (window type «Vanlig vindu»)
 
 ## 1.3.1 - 2026-11-01

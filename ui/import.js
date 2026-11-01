@@ -2,8 +2,10 @@
 
 import { readDocx } from './docx.js'
 import { readRtf } from './rtf.js'
+import { readXlsx } from './xlsx.js'
+import { readCsv } from './csv.js'
 
-export const IMPORT_TYPES = ['.md', '.markdown', '.txt', '.rtf', '.docx']
+export const IMPORT_TYPES = ['.md', '.markdown', '.txt', '.rtf', '.docx', '.xlsx', '.csv']
 
 export const FILE_LIMIT = 50 * 1024 * 1024
 
@@ -13,6 +15,10 @@ export async function importText(name, bytes, module) {
   const type = name.toLowerCase().match(/\.[^.]*$/)?.[0]
   if (type === '.docx') return toMarkdown(await readDocx(bytes), module)
   if (type === '.rtf') return toMarkdown(readRtf(bytes), module)
+  // A sheet or a CSV file is an entry named after it, holding the table.
+  const title = name.replace(/\.[^.]*$/, '')
+  if (type === '.xlsx') return toMarkdown(await readXlsx(bytes, title), module)
+  if (type === '.csv') return toMarkdown(readCsv(bytes, title), module)
   if (IMPORT_TYPES.includes(type)) return new TextDecoder().decode(bytes)
   throw new Error(`${name}: ukjent filtype`)
 }
@@ -73,13 +79,15 @@ function entries(blocks, levels) {
     } else if (b.type === 'table' && b.rows.length) {
       const width = Math.max(...b.rows.map(r => r.length))
       const row = r => `| ${Array.from({ length: width }, (_, i) => cell(inline(r[i] ?? []))).join(' | ')} |`
-      lines.push('', row(b.rows[0]), `| ${Array(width).fill('---').join(' | ')} |`, ...b.rows.slice(1).map(row), '')
+      // The header row is bold already; bold on top of it reads heavier and breaks words.
+      const head = b.rows[0].map(runs => runs.map(r => ({ ...r, bold: false })))
+      lines.push('', row(head), `| ${Array(width).fill('---').join(' | ')} |`, ...b.rows.slice(1).map(row), '')
     }
   }
   return lines
 }
 
-/** Blocks from `readDocx` or `readRtf`: `heading` (level 1–), `paragraph`, `item` (ordered), `table` (rows of cells); text in runs. */
+/** Blocks from the readers: `heading` (level 1–), `paragraph`, `item` (ordered), `table` (rows of cells); text in runs. */
 export function toMarkdown(blocks, module) {
   const kept = blocks.filter(b => b.type === 'table' || plainText(b.runs))
   // Levels count from the document's own top heading: a document may start at Overskrift 2.
