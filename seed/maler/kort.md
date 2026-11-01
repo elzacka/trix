@@ -15,16 +15,6 @@ Dette er innholdet i fanen. Endre det som du vil.
 
 ## Filformater
 
-### Markdown
-Ren tekst med enkle tegn for overskrifter og lister
-
-#### Hva det er
-Tekst som er lett å lese både før og etter at den blir vist som formatert tekst.
-
-#### Når du bruker det
-Notater, dokumentasjon og innholdet i denne appen.
-#tekst
-
 ### CSV
 Tabell som ren tekst
 
@@ -34,6 +24,16 @@ Tabell som ren tekst
 #### Når du bruker det
 Når du flytter tabeller mellom regneark, databaser og andre programmer.
 #tabell
+
+### Markdown
+Ren tekst med enkle tegn for overskrifter og lister
+
+#### Hva det er
+Tekst som er lett å lese både før og etter at den blir vist som formatert tekst.
+
+#### Når du bruker det
+Notater, dokumentasjon og innholdet i denne appen.
+#tekst
 
 ### PDF
 Dokument som ser likt ut overalt

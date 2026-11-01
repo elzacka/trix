@@ -20,6 +20,11 @@ Nøyaktige, entydige steg-for-steg-instruksjoner som forteller en datamaskin hvo
 Også: Algorithm
 #ki #programmering
 
+### Benchmark
+Standardisert test for å måle og sammenligne ytelsen til KI-modeller. Resultatene sier ikke alltid noe om praktisk nytte.
+Også: Referansetest, evaluation suite
+#ki #analyse
+
 ### Åpne vekter
 Praksis der vektene til en ferdigtrent modell deles fritt, men ikke nødvendigvis treningskode, datasett eller endringsrett.
 
@@ -27,12 +32,12 @@ Praksis der vektene til en ferdigtrent modell deles fritt, men ikke nødvendigvi
 Også: Open weights
 #ki
 
-### Benchmark
-Standardisert test for å måle og sammenligne ytelsen til KI-modeller. Resultatene sier ikke alltid noe om praktisk nytte.
-Også: Referansetest, evaluation suite
-#ki #analyse
-
 ## Personvern
+
+### Anonymisering
+Opplysninger som ikke kan knyttes til en enkeltperson overhodet. De faller utenfor GDPR, men slik anonymisering er nesten umulig å oppnå i praksis.
+Også: Anonymization
+#personvern #dataforvaltning
 
 ### Behandlingsansvarlig
 Den som bestemmer formålet med behandlingen av personopplysninger og hvilke hjelpemidler som skal brukes.
@@ -43,8 +48,3 @@ Også: Data controller
 Den som behandler personopplysninger på oppdrag fra den behandlingsansvarlige.
 Også: Data processor
 #personvern
-
-### Anonymisering
-Opplysninger som ikke kan knyttes til en enkeltperson overhodet. De faller utenfor GDPR, men slik anonymisering er nesten umulig å oppnå i praksis.
-Også: Anonymization
-#personvern #dataforvaltning

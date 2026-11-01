@@ -15,6 +15,16 @@ Dette er innholdet i fanen. Endre det som du vil.
 
 ## Slik gjør du
 
+### Lim inn uten formatering
+Lim inn ren tekst, uten skrift, farger og størrelse fra der du kopierte den.
+#tekst
+
+#### På Mac
+Trykk ⌘⌥⇧V. Noen apper bruker ⌘⇧V.
+
+#### På Windows
+Trykk Ctrl+Shift+V.
+
 ### Ta et skjermbilde
 Ta bilde av hele skjermen eller bare en del av den.
 #skjerm
@@ -28,13 +38,3 @@ Ta bilde av hele skjermen eller bare en del av den.
 1. Trykk Win+Shift+S.
 2. Dra over det du vil ha med.
 3. Bildet ligger på utklippstavla. Lim det inn der du vil bruke det.
-
-### Lim inn uten formatering
-Lim inn ren tekst, uten skrift, farger og størrelse fra der du kopierte den.
-#tekst
-
-#### På Mac
-Trykk ⌘⌥⇧V. Noen apper bruker ⌘⇧V.
-
-#### På Windows
-Trykk Ctrl+Shift+V.
