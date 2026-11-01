@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- «Tilpass»: a new tab's file never takes the name `Oppsett.md`
+
 ## 1.0.0 - 2026-11-01
 
 - Each version as a GitHub Release with the macOS and Windows app; download links at the top of the README

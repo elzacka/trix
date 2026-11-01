@@ -5,19 +5,7 @@ cd "$(dirname "$0")/.."
 export PATH="$HOME/.cargo/bin:$PATH"
 npm test
 cargo test --manifest-path src-tauri/Cargo.toml --locked --quiet
-mkdir -p dist
 
-# A Developer ID in the keychain: signed and notarized (notarytool profile «trix»). Without one, as in CI: ad hoc.
-IDENTITY=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -n 1)
-[ -n "$IDENTITY" ] && export APPLE_SIGNING_IDENTITY="$IDENTITY"
-
+unset APPLE_SIGNING_IDENTITY
 npx tauri build --target universal-apple-darwin --bundles app
-APP="src-tauri/target/universal-apple-darwin/release/bundle/macos/Trix Ultra.app"
-if [ -n "$IDENTITY" ]; then
-  UPLOAD="${TMPDIR:-/tmp}/trix-ultra-notarize.zip"
-  ditto -c -k --keepParent "$APP" "$UPLOAD"
-  xcrun notarytool submit "$UPLOAD" --keychain-profile trix ${NOTARY_KEYCHAIN:+--keychain "$NOTARY_KEYCHAIN"} --wait
-  xcrun stapler staple "$APP"
-fi
-ditto -c -k --keepParent "$APP" dist/Trix-Ultra-macOS.zip
-ls -lh dist
+scripts/sign.sh

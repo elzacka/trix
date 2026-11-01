@@ -1,8 +1,9 @@
 # Trix Ultra
 
-App for Windows and macOS, built from blocks anyone can choose: views, menu,
-colours, fonts, icons, window and every UI text, all in one Markdown file. The
-content is Markdown files. No installer, no network.
+Build your own quick-reference app for Windows and macOS: Keyboard shortcuts,
+glossary, flip cards and step-by-step guides as tabs, from Markdown files.
+Choose the views, menu, colours, fonts, icons, window and every UI text in one
+file or in «Tilpass». No installer, no network.
 
 ## Get started
 
@@ -21,7 +22,7 @@ A new version: download again and replace the app. The files stay.
 | | |
 |---|---|
 | Files | `Oppsett.md`, one `.md` per view, icons, in `~/Library/Application Support/Trix Ultra` (macOS) or `%APPDATA%\Trix Ultra` (Windows). Created on first launch from [seed/](seed/) |
-| Portable | A folder `Trix Ultra-data` next to the app holds the files instead; in a shared folder, everyone sees the same content |
+| Portable | A folder `Trix Ultra-data` next to the app holds the files instead; in a shared folder, everyone sees the same content. Give others write access to `Trix Ultra-data` only, never to the app beside it |
 | Per device | `innstillinger.json` in the folder above, never in the shared one: hotkey, system list, window type |
 | Setup | Menu «Tilpass» or Ctrl+, / ⌘,: a window beside the panel, each change shows at once, «Lagre» writes `Oppsett.md`. Or the file in any editor («Åpne Oppsett.md» in «Tilpass»): shows when saved, format in its top comment |
 | Content | Each view's file, format in its top comment; menu «Kildedata», or Ctrl+E / ⌘E |

@@ -38,8 +38,6 @@ jobs:
 
   macos:
     runs-on: macos-latest
-    outputs:
-      signed: ${{ steps.signing.outputs.signed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,10 +49,32 @@ jobs:
       - run: rustup toolchain install stable --profile minimal --component clippy --target aarch64-apple-darwin --target x86_64-apple-darwin
       - run: npm ci
       - run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked -- -D warnings
-      # After npm ci, so no install script runs while the certificate is in a keychain
+      - run: scripts/build.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: macos-unsigned
+          path: dist/Trix-Ultra-macOS.zip
+
+  # A job of its own: no build code runs while the Developer ID is in a keychain
+  sign:
+    needs: macos
+    if: github.ref == 'refs/heads/main'
+    runs-on: macos-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      signed: ${{ steps.signing.outputs.signed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: gh run download "$GITHUB_RUN_ID" --name macos-unsigned --dir built
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
       - name: Signing keychain
         id: signing
-        if: github.ref == 'refs/heads/main'
         env:
           CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -77,7 +97,10 @@ jobs:
           rm -f "$RUNNER_TEMP/certificate.p12" "$RUNNER_TEMP/AuthKey.p8"
           echo "NOTARY_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
           echo "signed=true" >> "$GITHUB_OUTPUT"
-      - run: scripts/build.sh
+      - name: Sign and notarize
+        run: |
+          ditto -x -k built/Trix-Ultra-macOS.zip built
+          scripts/sign.sh "built/Trix Ultra.app"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macos
@@ -85,7 +108,7 @@ jobs:
 
   # A new version with its CHANGELOG heading becomes a release; the README's download links follow the latest.
   release:
-    needs: [windows, macos]
+    needs: [windows, sign]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -94,7 +117,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
-      SIGNED: ${{ needs.macos.outputs.signed }}
+      SIGNED: ${{ needs.sign.outputs.signed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

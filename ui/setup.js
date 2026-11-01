@@ -205,7 +205,7 @@ function view(v, i) {
       v.name = e.target.value
       // A new tab's file follows its name until the admin names the file.
       const stem = v.name.replace(/[\\/:*?"<>|]/g, '').trim().replace(/^\.+/, '')
-      if (v.fresh && stem) { v.file = `${stem}.md`; file.value = v.file }
+      if (v.fresh && stem && listName(`${stem}.md`)) { v.file = `${stem}.md`; file.value = v.file }
       if (v.name.trim()) change()
     },
   })

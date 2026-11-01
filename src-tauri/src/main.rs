@@ -2,7 +2,7 @@
 
 use std::{
     fs,
-    io::ErrorKind,
+    io::{ErrorKind, Write},
     path::{Path, PathBuf},
     sync::{
         Mutex,
@@ -198,7 +198,11 @@ fn add_icon(name: String, bytes: Vec<u8>) -> Result<String, String> {
         match fs::read(&path) {
             Ok(existing) if existing == bytes => return Ok(candidate),
             Ok(_) => continue,
-            Err(_) => return fs::write(&path, &bytes).map(|()| candidate).map_err(|e| io_error(&path, e)),
+            Err(_) => match fs::OpenOptions::new().write(true).create_new(true).open(&path) {
+                Ok(mut file) => return file.write_all(&bytes).map(|()| candidate).map_err(|e| io_error(&path, e)),
+                Err(e) if e.kind() == ErrorKind::AlreadyExists => continue,
+                Err(e) => return Err(io_error(&path, e)),
+            },
         }
     }
     unreachable!()
