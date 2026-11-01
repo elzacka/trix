@@ -14,7 +14,7 @@ Dette er innholdet i fanen. Endre det som du vil.
 - Ord: ctrl, shift, alt, cmd, opt, win, fn, mellomrom, retur, tab, esc, slett, venstre, høyre, opp, ned, F1–F12
 -->
 
-## Krisemøte i Teams
+## Teams-møte
 
 - Avslutt samtalen | ctrl shift H | ⌘⇧H
 - Kamera av og på | ctrl shift O | ⌘⇧O

@@ -33,7 +33,7 @@ Mobil, internett eller fasttelefon virker ikke
 
 #### Gjør dette
 1. Prøv en annen vei: mobil, fast internett eller et annet trådløst nett.
-2. Hør på radio for å få informasjon.
+2. Lytt på radio for å få informasjon.
 3. Møt opp der dere har avtalt å møtes.
 
 #### Husk

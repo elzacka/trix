@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.2.1 - 2026-11-01
 
 - Kort: every card in a row is as tall as the tallest card in it
+- Demo content: clearer explanations in Oppslag, shorter titles in Hurtigtaster and Steg
 
 ## 1.2.0 - 2026-11-01
 

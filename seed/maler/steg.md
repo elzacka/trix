@@ -15,7 +15,7 @@ Dette er innholdet i fanen. Endre det som du vil.
 
 ## Egenberedskap
 
-### Forbered deg på problemer med mobilnett eller internett
+### Forbered deg på ekombortfall
 Alle bør være forberedt på lengre perioder uten mobilnett og internett. Det kan skyldes ekstremvær, uhell eller sabotasje, for eksempel et cyberangrep.
 
 [DSB](https://www.dsb.no/) anbefaler dette:

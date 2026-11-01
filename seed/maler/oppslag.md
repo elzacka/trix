@@ -16,22 +16,22 @@ Dette er innholdet i fanen. Endre det som du vil.
 ## Begreper
 
 ### Egenberedskap
-Det du gjør selv for å klare deg hvis strøm, vann, mobilnett eller butikker ikke virker. Myndighetene anbefaler at flest mulig kan klare seg selv i en uke.
+Egenberedskap handler om å være forberedt på kriser. Det er det du gjør selv for å klare deg hvis for eksempel strøm, vann eller mobilnett ikke virker. Myndighetene anbefaler at flest mulig kan klare seg selv i en uke.
 Også: Beredskap hjemme
 #egenberedskap
 
 ### Nødvarsel
-Melding fra myndighetene til alle mobiler i et område når liv og helse er i fare der.
+Varsel til alle mobiler i et område om akutte og alvorlige hendelser som truer liv og helse. Et nødvarsel inneholder informasjon om hva som skjer, og hva du bør gjøre for å beskytte deg selv.
 Også: Cell broadcast
 #varsling
 
 ### ROS-analyse
-Oversikt over hva som kan gå galt, hvor sannsynlig det er og hva følgene blir. Grunnlaget for beredskapsplanen.
+I beredskapssammenheng: En analyse som kartlegger hva som kan gå galt, hvor sannsynlig det er, hva det kan føre til, og hvilke tiltak som kan redusere konsekvensene. Grunnlag for en beredskapsplan.
 Også: Risiko- og sårbarhetsanalyse
 #planlegging
 
 ### Tyfon
-Sirene som varsler befolkningen. Signalet «Viktig melding – søk informasjon» er tre serier med tuting, med ett minutts opphold mellom seriene.
+Sirene som varsler befolkningen ved akutt fare for liv og helse. Signalet «Viktig melding – søk informasjon» er tre serier med tuting, med ett minutts opphold mellom seriene.
 Også: Sirene
 #varsling
 
