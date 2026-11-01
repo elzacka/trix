@@ -179,6 +179,15 @@ export function filterShortcuts(sections, query) {
     .filter(s => s.items.length)
 }
 
+/** `| a | b |` as cells; `\|` is a pipe inside a cell. */
+function tableCells(line) {
+  const cells = line.split(/(?<!\\)\|/).slice(1).map(c => c.trim().replace(/\\\|/g, '|'))
+  if (cells.at(-1) === '') cells.pop()
+  return cells
+}
+
+const alignment = c => c.endsWith(':') ? (c.startsWith(':') ? 'center' : 'right') : ''
+
 /** `## Group`, `### Entry`, then its blocks, `Også: a, b` and `#tag` lines, in file order. */
 export function parseEntries(text) {
   const sections = []
@@ -195,8 +204,10 @@ export function parseEntries(text) {
     else entry.blocks.push({ type, items: [item] })
   }
   const closeList = () => { const last = entry?.blocks.at(-1); if (last?.items) last.closed = true }
+  let table = null
   for (const line of comments(text.split(/\r?\n/))) {
     if (line === null) continue
+    if (!line.startsWith('|')) table = null
     if (/^###\s/.test(line)) {
       endParagraph()
       if (!sections.length) sections.push({ title: '', entries: [] })
@@ -217,6 +228,12 @@ export function parseEntries(text) {
     } else if (/^#[^\s#]/.test(line) && line.split(/\s+/).every(t => /^#[^\s#]/.test(t))) {
       endParagraph()
       entry.tags.push(...line.split(/\s+/).map(t => t.slice(1).toLocaleLowerCase('nb')))
+    } else if (line.startsWith('|')) {
+      endParagraph()
+      const row = tableCells(line)
+      if (!table) entry.blocks.push(table = { type: 'table', head: row, align: [], rows: [] })
+      else if (!table.rows.length && !table.align.length && row.every(c => /^:?-+:?$/.test(c))) table.align = row.map(alignment)
+      else table.rows.push(row)
     } else if (/^[-*]\s/.test(line)) {
       listItem('ul', line.slice(2).trim())
     } else if (/^\d+[.)]\s/.test(line)) {
@@ -244,7 +261,7 @@ export function lead(entry) {
   return entry.blocks[0]?.type === 'p' ? entry.blocks[0].text : ''
 }
 
-const blockText = b => b.text ?? b.items.join(' ')
+const blockText = b => b.text ?? b.items?.join(' ') ?? [b.head, ...b.rows].flat().join(' ')
 
 const collator = new Intl.Collator('nb')
 

@@ -392,6 +392,10 @@ kbd {
 
 .body a, .guide a { color: var(--accent); }
 
+:is(.body, .guide, .back) table { margin: 0 0 8px; border-collapse: collapse; }
+
+:is(.body, .guide, .back) :is(th, td) { padding: 4px 12px 4px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+
 :is(.body, .guide, .flip) code { padding: 0 4px; background: var(--key); border-radius: 4px; font: 0.86em ui-monospace, monospace; }
 
 /* A card face has its own colours: the code ground follows its text */
@@ -472,7 +476,11 @@ kbd {
 /* The front's text sits centred above the icon: the free space splits above the title and above the icon */
 .front > .title { margin-top: auto; }
 
-.back p, .back ul, .back ol { margin: 0; }
+.back p, .back ul, .back ol, .back table { margin: 0; }
+
+.back table { width: 100%; }
+
+.back :is(th, td) { border-color: color-mix(in srgb, currentColor 30%, transparent); }
 
 .back ul, .back ol { padding-left: 18px; }
 

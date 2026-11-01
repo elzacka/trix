@@ -8,6 +8,7 @@ Dette er innholdet i fanen. Endre det som du vil.
 - Første avsnitt under tittelen: Ingressen, som også står i lista
 - #### Overskrift: Et steg eller en del av veiledningen
 - Avsnitt, - punktliste, 1. nummerert liste. Tom linje: Nytt avsnitt.
+- | Navn | Nummer |: Tabell med én rad per linje. Etter overskriftsraden: | --- | --- |
 - #emneknagg #flere
 - **fet**, *kursiv*, [lenke](https://…)
 - Rekkefølgen i fila er rekkefølgen i fanen. A–Å sorterer alfabetisk.
@@ -31,6 +32,12 @@ Alle bør være forberedt på lengre perioder uten mobilnett og internett. Det k
 
 ### Lag et vannlager
 Lagre rundt 20 liter drikkevann per person. Det dekker minimumsbehovet for en uke.
+
+| Personer | Liter for en uke |
+| --- | ---: |
+| 1 | 20 |
+| 2 | 40 |
+| 4 | 80 |
 
 #### Vask beholderne
 1. Vask beholderne med såpe og vann. Skyll dem.

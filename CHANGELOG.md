@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Tables in Markdown (`| a | b |`, `| --- | --- |`) on a card back, in a guide in Steg and in an Oppslag entry; text in tables is searchable; the Kort and Steg templates show one each
+
 ## 1.3.1 - 2026-11-01
 
 - Saving a file, and creating a missing one, never writes through a symbolic link someone else placed in a shared data folder

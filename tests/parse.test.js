@@ -102,6 +102,21 @@ test('entries with subheadings and lists: a card\'s back, a guide\'s steps', () 
   assert.deepEqual(searchEntries(parseEntries(text), 'så').map(e => e.title), ['Kort'])
 })
 
+test('tables: header, alignment, rows; a pipe inside a cell; searchable', () => {
+  const text = '### Kort\nForside\n| Hvem | Nummer |\n| :-- | --: |\n| Brann | 110 |\n| a \\| b | 112\nEtter'
+  const [card] = parseEntries(text)[0].entries
+  assert.deepEqual(card.blocks, [
+    { type: 'p', text: 'Forside' },
+    { type: 'table', head: ['Hvem', 'Nummer'], align: ['', 'right'], rows: [['Brann', '110'], ['a | b', '112']] },
+    { type: 'p', text: 'Etter' },
+  ])
+  assert.deepEqual(parseEntries('### A\n| x |\n| y |\n\n| z |')[0].entries[0].blocks, [
+    { type: 'table', head: ['x'], align: [], rows: [['y']] },
+    { type: 'table', head: ['z'], align: [], rows: [] },
+  ])
+  assert.deepEqual(searchEntries(parseEntries(text), '110').map(e => e.title), ['Kort'])
+})
+
 test('A–Å groups by first letter with Å last', () => {
   assert.deepEqual(alphabetical(parseEntries(sheet)).map(s => s.title), ['A', 'B', 'Å'])
 })

@@ -367,13 +367,25 @@ function rich(text, links = true) {
   })
 }
 
-/** Paragraphs, headings at `level` and lists. */
+/** Paragraphs, headings at `level`, lists and tables. */
 function blocks(list, level) {
   return list.map(b => {
     if (b.type === 'p') return h('p', {}, rich(b.text))
     if (b.type === 'h') return h(`h${level}`, { class: 'subheading' }, rich(b.text))
+    if (b.type === 'table') {
+      return h('table', {},
+        h('thead', {}, h('tr', {}, b.head.map((c, i) => tableCell('th', c, b.align[i])))),
+        h('tbody', {}, b.rows.map(row => h('tr', {}, b.head.map((_, i) => tableCell('td', row[i] ?? '', b.align[i]))))))
+    }
     return h(b.type, {}, b.items.map(item => h('li', {}, rich(item))))
   })
+}
+
+/** Alignment through CSSOM: the CSP has no 'unsafe-inline'. */
+function tableCell(tag, text, align) {
+  const el = h(tag, tag === 'th' ? { scope: 'col' } : {}, rich(text))
+  if (align) el.style.textAlign = align
+  return el
 }
 
 function tagButtons(view, e) {

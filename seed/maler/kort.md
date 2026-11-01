@@ -8,6 +8,7 @@ Dette er innholdet i fanen. Endre det som du vil.
 - Første avsnitt under kortet: Forsiden
 - Resten: Baksiden. Trykk på kortet for å snu det.
 - #### Overskrift, - punktliste, 1. nummerert liste
+- | Navn | Nummer |: Tabell med én rad per linje. Etter overskriftsraden: | --- | --- |
 - #emneknagg #flere
 - **fet**, *kursiv*, [lenke](https://…)
 - Rekkefølgen i fila er rekkefølgen i fanen. A–Å sorterer alfabetisk.
@@ -37,6 +38,13 @@ Mobil, internett eller fasttelefon virker ikke
 1. Prøv et annet alternativ: Mobil, fast internett eller et annet trådløst nett.
 2. Lytt på radio for å få informasjon.
 3. Møt opp der dere har avtalt å møtes.
+
+#### Nødnumre
+| Nødetat | Nummer |
+| --- | --- |
+| Brann | 110 |
+| Politi | 112 |
+| Ambulanse | 113 |
 
 #### Husk
 Nødnumrene kan virke selv om ditt eget mobilnett er nede, hvis et annet nett er tilgjengelig. Ha viktige telefonnumre på papir.
