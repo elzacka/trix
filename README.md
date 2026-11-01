@@ -1,7 +1,7 @@
 # Trix
 
-Desktop app for Windows and macOS: own keyboard shortcuts and a cheat sheet,
-read from two Markdown files you edit. No installer, no network.
+Portable tray app for Windows and macOS: Your own keyboard shortcuts and a
+cheat sheet from Markdown files you edit. No installer, no network.
 
 | | |
 |---|---|
@@ -18,13 +18,16 @@ read from two Markdown files you edit. No installer, no network.
 
 ## Run
 
-- macOS 15 or later: unzip, move `Trix.app` to Applications, open. The CI build
-  is ad hoc signed: first launch needs System Settings → Privacy & Security →
-  Open Anyway.
+Download [Trix-macOS.zip](https://github.com/elzacka/trix/releases/latest/download/Trix-macOS.zip)
+or [Trix-Windows.zip](https://github.com/elzacka/trix/releases/latest/download/Trix-Windows.zip);
+each release lists their SHA-256.
+
+- macOS 15 or later: unzip, move `Trix.app` to Applications, open. Signed with
+  Apple Developer ID and notarized.
 - Windows: unzip and run `Trix\Trix.exe`: unsigned, so SmartScreen → More info
   → Run anyway. winget: `winget install elzacka.Trix`, then `trix` (Win+R),
-  once the package passes winget's review. Needs WebView2, built into Windows
-  10 and 11.
+  once the package passes winget's review; winget checks the zip's SHA-256.
+  Needs WebView2, built into Windows 10 and 11.
 
 ## Build
 
@@ -39,13 +42,8 @@ npm run build:mac   # dist/Trix-macOS.zip, universal
 `notarytool` profile `trix`; without a Developer ID it signs ad hoc.
 
 CI: [build.yml](.github/workflows/build.yml) on each push to `main`, artifacts
-`Trix-Windows.zip` and `Trix-macOS.zip`. winget manifests for a release:
-`scripts/winget.sh <version>`.
-
-## Code signing
-
-- macOS: Apple Developer ID, notarized.
-- Windows: `Trix.exe` unsigned. winget checks the zip's SHA-256; each release
-  lists its checksums.
+`Trix-Windows.zip` and `Trix-macOS.zip` (ad hoc signed). A release holds
+`Trix-macOS.zip` from `build:mac` and `Trix-Windows.zip` from CI. winget
+manifests for a release: `scripts/winget.sh <version>`.
 
 Credits: [TREDJEPART.md](TREDJEPART.md). Security: [SECURITY.md](SECURITY.md).

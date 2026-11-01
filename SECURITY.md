@@ -2,6 +2,11 @@
 
 Report a vulnerability: hei@tazk.no.
 
+Reviewed against OWASP ASVS 5.0.0 Level 1 (no personal data), TCASVS 5.0.2 L1
+and the Tauri 2 security model; the build against OWASP Top 10 CI/CD Security
+Risks; tests per WSTG 4.2. Last review: 2026-10-31, version 1.0.0. The
+mitigations below are its result.
+
 ## Threat model
 
 One process with the user's rights, no elevated parts, no network, no listening port.
@@ -19,6 +24,6 @@ One process with the user's rights, no elevated parts, no network, no listening 
 | Lists found next to the app                                    | Disk → Rust              | Lost or overwritten list                   | Moved once, only into an empty data folder; a failed move copies and keeps the original                                                                                                                                           |
 | App folder                                                     | User-writable folder     | Planted DLL (Windows)                      | Keep Trix in its own `Trix\` folder; unsigned                                                                                                                                                                                     |
 | Single-instance socket `/tmp/no_tazk_trix_si.sock` (macOS)     | Other local accounts     | Block start, read the app's working folder | Accepted: needs a hostile account on the same Mac                                                                                                                                                                                 |
-| Downloaded build                                               | Distribution             | Tampered app                               | macOS: Developer ID, notarized ([build.sh](scripts/build.sh)); Windows: unsigned, SHA-256 in each release, checked by winget once the package is in winget; CI builds both from `main` ([build.yml](.github/workflows/build.yml)) |
+| Downloaded build                                               | Distribution             | Tampered app                               | macOS: Developer ID, notarized ([build.sh](scripts/build.sh)); Windows: unsigned, SHA-256 in each release, checked by winget once the package is in winget, built by CI from `main` ([build.yml](.github/workflows/build.yml)) |
 
 Reverse engineering, memory tampering and debuggers: the binary holds no secret and no licence check, so nothing to protect.
