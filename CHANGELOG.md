@@ -4,6 +4,7 @@
 
 - View type `steg`, default tab «Steg»: guides in steps
 - Demo content on emergency preparedness (Beredskap): groups and entries in A–Å order, Tiltakskort in scenario order
+- Kort: the card name on the back stands out from its headings; each card is as tall as its own content
 
 ## 1.1.0 - 2026-11-01
 
