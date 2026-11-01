@@ -116,6 +116,7 @@ jobs:
     permissions:
       contents: write
       actions: read
+      security-events: read
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -133,6 +134,16 @@ jobs:
             echo "No CHANGELOG heading for $version"; exit 0
           fi
           if [ "$SIGNED" != true ]; then echo "macOS build is not signed: add the APPLE_* secrets (README, Develop)"; exit 1; fi
+          # SAST: CodeQL (default setup) done on this commit, and no open high or critical alert
+          for _ in $(seq 40); do
+            state=$(gh run list --commit "$GITHUB_SHA" --json workflowName,status,conclusion --jq '[.[] | select(.workflowName == "CodeQL")][0] // {status: "not started"} | "\(.status) \(.conclusion // "")"')
+            case "$state" in completed*) break ;; esac
+            sleep 30
+          done
+          if [ "$state" != "completed success" ]; then echo "CodeQL on $GITHUB_SHA: $state"; exit 1; fi
+          alerts=$(gh api --paginate "repos/$GH_REPO/code-scanning/alerts?state=open" --jq '.[] | select(.rule.security_severity_level == "high" or .rule.security_severity_level == "critical") | .html_url')
+          if [ -n "$alerts" ]; then echo "Open CodeQL alerts: $alerts"; exit 1; fi
           gh run download "$GITHUB_RUN_ID" --dir dist
-          gh release create "v$version" dist/windows/Trix-Ultra-Windows.zip dist/macos/Trix-Ultra-macOS.dmg \
+          gh api "repos/$GH_REPO/dependency-graph/sbom" --jq .sbom > dist/Trix-Ultra-SBOM.spdx.json
+          gh release create "v$version" dist/windows/Trix-Ultra-Windows.zip dist/macos/Trix-Ultra-macOS.dmg dist/Trix-Ultra-SBOM.spdx.json \
             --title "Trix Ultra $version" --notes-file notes.md --target "$GITHUB_SHA"

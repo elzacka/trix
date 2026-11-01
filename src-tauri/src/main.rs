@@ -132,10 +132,15 @@ fn io_error(path: &Path, error: std::io::Error) -> String {
     }
 }
 
+/// Never through a link at `path`, dangling or planted in a shared folder, which `fs::write` would follow.
+fn write_new(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
+    fs::OpenOptions::new().write(true).create_new(true).open(path)?.write_all(bytes)
+}
+
 fn read_or_seed(path: &Path, seed: &str) -> Result<String, String> {
     match fs::read_to_string(path) {
         Err(e) if e.kind() == ErrorKind::NotFound => {
-            fs::write(path, seed).map_err(|e| io_error(path, e))?;
+            write_new(path, seed.as_bytes()).map_err(|e| io_error(path, e))?;
             Ok(seed.to_string())
         }
         result => result.map_err(|e| io_error(path, e)),
@@ -289,7 +294,11 @@ fn write_checked(path: PathBuf, original: &str, text: String) -> Result<String, 
     }
     let text = if original.contains("\r\n") { text.replace('\n', "\r\n") } else { text };
     let temp = path.with_extension("md.tmp");
-    fs::write(&temp, &text).map_err(|e| io_error(&temp, e))?;
+    match fs::remove_file(&temp) {
+        Err(e) if e.kind() != ErrorKind::NotFound => return Err(io_error(&temp, e)),
+        _ => {}
+    }
+    write_new(&temp, text.as_bytes()).map_err(|e| io_error(&temp, e))?;
     fs::rename(&temp, &path).map_err(|e| io_error(&path, e))?;
     Ok(text)
 }
@@ -829,6 +838,22 @@ mod tests {
         assert!(same_file(&dir.join("Lenke.md"), &dir.join("Oppsett.md")));
         fs::write(dir.join("Annen.md"), "").unwrap();
         assert!(!same_file(&dir.join("Annen.md"), &dir.join("Oppsett.md")));
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn writes_never_follow_a_planted_link() {
+        let dir = std::env::temp_dir().join(format!("trix-ultra-links-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let outside = dir.join("utenfor");
+        fs::write(dir.join("Liste.md"), "før").unwrap();
+        std::os::unix::fs::symlink(&outside, dir.join("Liste.md.tmp")).unwrap();
+        assert!(write_checked(dir.join("Liste.md"), "før", "etter".into()).is_ok());
+        assert_eq!(fs::read_to_string(dir.join("Liste.md")).unwrap(), "etter");
+        std::os::unix::fs::symlink(&outside, dir.join("Ny.md")).unwrap();
+        assert!(read_or_seed(&dir.join("Ny.md"), "mal").is_err());
+        assert!(!outside.exists());
         let _ = fs::remove_dir_all(&dir);
     }
 

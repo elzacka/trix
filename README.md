@@ -31,9 +31,10 @@ Name and identifier: `productName`, `identifier` in
 2. Bump `version` in [Cargo.toml](src-tauri/Cargo.toml), rename `Unreleased`
    in [CHANGELOG.md](CHANGELOG.md) to that version, commit.
 3. Push to `main`. [build.yml](.github/workflows/build.yml) tests and builds
-   both platforms, and publishes release `v<version>` when CHANGELOG.md has a
-   heading for it. The download links in the user guide follow the latest
-   release.
+   both platforms, and publishes release `v<version>` with an SBOM when
+   CHANGELOG.md has a heading for it and CodeQL passed on the commit with no
+   open high or critical alert. The download links in the user guide follow
+   the latest release.
 
 The release's macOS app is signed and notarized in CI from repository secrets;
 without them the build is ad hoc and no release goes out:
