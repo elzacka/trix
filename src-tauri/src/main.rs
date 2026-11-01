@@ -183,7 +183,7 @@ fn load(app: AppHandle) -> Result<Loaded, String> {
     })
 }
 
-/// An icon the admin chose or dropped, copied into the data folder; its name there, never over another file.
+/// An icon the user chose or dropped, copied into the data folder; its name there, never over another file.
 #[tauri::command]
 fn add_icon(name: String, bytes: Vec<u8>) -> Result<String, String> {
     let name = Path::new(&name).file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
