@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.0 - 2026-11-01
 
 - «Tilpass», Farger: the colours grouped by where they show (Generelt, Knapper og lenker, Kort) under plain names; the contrast warning uses the same names
 - Kort, light mode: the front is dark blue (#1e293b) with white text by default
