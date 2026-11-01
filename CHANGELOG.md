@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Jukselapp: a long line full of `[` shows at once
+
 ## 1.0.0 - 2026-10-31
 
 - Hurtigtaster: text in quotes in the keys field shows as text, like «eller» ("hold inne" ⌘W); lookup finds the keys

@@ -268,7 +268,7 @@ export function searchCheatSheet(sections, query, tags = []) {
 /** **bold**, *italic*, `code` and [text](url) as segments; everything else is plain text. */
 export function inline(text) {
   const out = []
-  const pattern = /\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`|\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g
+  const pattern = /\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`|\[([^[\]]+)\]\((https?:\/\/[^\s)]+)\)/g
   let last = 0
   for (const m of text.matchAll(pattern)) {
     if (m.index > last) out.push({ type: 'text', text: text.slice(last, m.index) })

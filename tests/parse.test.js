@@ -106,6 +106,12 @@ test('inline Markdown', () => {
   assert.deepEqual(inline('[x](javascript:alert(1))'), [{ type: 'text', text: '[x](javascript:alert(1))' }])
 })
 
+test('a long line of unclosed links parses in linear time', () => {
+  const start = performance.now()
+  inline('[a'.repeat(50000))
+  assert.ok(performance.now() - start < 200)
+})
+
 test('the seed files parse', () => {
   const shortcuts = readFileSync(new URL('../seed/Hurtigtaster.md', import.meta.url), 'utf8')
   const cheat = readFileSync(new URL('../seed/Jukselapp.md', import.meta.url), 'utf8')
