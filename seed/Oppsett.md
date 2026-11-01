@@ -84,8 +84,8 @@ En seksjon du sletter, får standardverdiene tilbake.
 - dempet | #5a687c | #9aa3ae
 - aksent | #00466a | #7598ad
 - på aksent | #ffffff | #0b1218
-- forside | #ffffff | #1a1e23
-- på forside | #1e293b | #e5e7eb
+- forside | #1e293b | #1a1e23
+- på forside | #ffffff | #e5e7eb
 - bakside | #00466a | #7598ad
 - på bakside | #ffffff | #0b1218
 
