@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 - 2026-11-01
 
 - Kort: options «N i bredden» and «N i høyden» (1–6) and the same choices in «Tilpass»; cards share the width and fill the height, and follow the window size
 - View type `steg`, default tab «Steg»: guides in steps
