@@ -6,6 +6,8 @@ import { h, svg } from './dom.js'
 
 const { invoke } = window.__TAURI__.core
 const { listen, emitTo } = window.__TAURI__.event
+/** Events sent to this window only; `listen` hears those sent to any window. */
+const own = window.__TAURI__.webviewWindow.getCurrentWebviewWindow()
 
 const hasEntries = text => parseEntries(text).length > 0
 
@@ -509,7 +511,11 @@ function editSetup() {
   invoke('open_setup').catch(error => { state.problems = [String(error)]; render() })
 }
 
-listen('preview', async ({ payload: setup }) => {
+/** Counts previews, so a slower one that finishes late does not show an older draft's warnings. */
+let previews = 0
+
+own.listen('preview', async ({ payload: setup }) => {
+  const n = ++previews
   state.setupOpen = true
   state.setup = setup
   const loaded = new Map(state.views.map(v => [v.file, v]))
@@ -517,12 +523,13 @@ listen('preview', async ({ payload: setup }) => {
   if (state.tab >= state.views.length) state.tab = 0
   const problems = applySetup()
   await loadIcons(setup, problems)
+  if (n !== previews) return
   render()
   emitTo('tilpass', 'problems', problems)
 })
 
 // «Tilpass» closed, saved or not: the files decide again.
-listen('restore', () => { state.setupOpen = false; load() })
+own.listen('restore', () => { state.setupOpen = false; load() })
 
 function closeEditor() {
   state.editing = null

@@ -74,8 +74,10 @@ jobs:
         run: |
           version=$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -n 1)
           if gh release view "v$version" > /dev/null 2>&1; then echo "v$version is out"; exit 0; fi
-          awk -v v="$version" '/^## / { f = index($0, v) > 0; next } f' CHANGELOG.md > notes.md
-          if ! awk -v v="$version" '/^## / && index($0, v) { found = 1 } END { exit !found }' CHANGELOG.md; then echo "No CHANGELOG heading for $version"; exit 0; fi
+          # Notes: the lines under «## <version>» or «## [<version>]»; without that heading, no release
+          if ! awk -v v="$version" '/^## / { t = substr($0, 4); sub(/^\[/, "", t); sub(/[] ].*$/, "", t); f = (t == v); if (f) found = 1; next } f { print } END { exit !found }' CHANGELOG.md > notes.md; then
+            echo "No CHANGELOG heading for $version"; exit 0
+          fi
           gh run download "$GITHUB_RUN_ID" --dir dist
           gh release create "v$version" dist/windows/Trix-Ultra-Windows.zip dist/macos/Trix-Ultra-macOS.zip \
             --title "Trix Ultra $version" --notes-file notes.md --target "$GITHUB_SHA"

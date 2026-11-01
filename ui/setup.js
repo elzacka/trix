@@ -8,7 +8,7 @@ import { h, svg } from './dom.js'
 
 const { invoke } = window.__TAURI__.core
 const { listen, emitTo } = window.__TAURI__.event
-const win = window.__TAURI__.window.getCurrentWindow()
+const win = window.__TAURI__.webviewWindow.getCurrentWebviewWindow()
 
 const $ = id => document.getElementById(id)
 
@@ -415,7 +415,7 @@ win.onCloseRequested(e => {
 })
 
 // The panel's warnings for the draft: contrast and icons it could not read.
-listen('problems', e => show(e.payload))
+win.listen('problems', e => show(e.payload))
 // `Oppsett.md` changed in an editor: shown here too, unless this window holds changes of its own.
 listen('files-changed', () => { if (!dirty) start() })
 window.__TAURI__.webview.getCurrentWebview().onDragDropEvent(event => dropped(event.payload))

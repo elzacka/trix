@@ -26,7 +26,6 @@ use tauri_plugin_opener::OpenerExt;
 
 mod system;
 
-#[cfg(target_os = "macos")]
 use tauri::RunEvent;
 
 /// Written when missing; after that the files are the user's.
@@ -205,10 +204,16 @@ fn add_icon(name: String, bytes: Vec<u8>) -> Result<String, String> {
     unreachable!()
 }
 
+/// The files last dropped on «Tilpass»: `read_dropped` reads no other path.
+struct Dropped(Mutex<Vec<PathBuf>>);
+
 /// A dropped file, read for `add_icon`.
 #[tauri::command]
-fn read_dropped(path: String) -> Result<tauri::ipc::Response, String> {
+fn read_dropped(dropped: tauri::State<Dropped>, path: String) -> Result<tauri::ipc::Response, String> {
     let path = PathBuf::from(path);
+    if !dropped.0.lock().expect("lock").contains(&path) {
+        return Err(format!("Ukjent fil: {}", path.display()));
+    }
     let size = fs::metadata(&path).map_err(|e| io_error(&path, e))?.len();
     if size > ICON_LIMIT {
         return Err(format!("{} er større enn 1 MB", path.display()));
@@ -258,10 +263,16 @@ fn export_list(app: AppHandle, name: String) -> Result<(), String> {
 /// A view's file from the panel's editor; `Oppsett.md` only from «Tilpass».
 #[tauri::command]
 fn save(name: String, original: String, text: String) -> Result<String, String> {
-    if name.eq_ignore_ascii_case(SETUP.0) {
+    let path = file_path(&name)?;
+    if name.eq_ignore_ascii_case(SETUP.0) || same_file(&path, &data_dir().join(SETUP.0)) {
         return Err(format!("Ukjent fil: {name}"));
     }
-    write_checked(file_path(&name)?, &original, text)
+    write_checked(path, &original, text)
+}
+
+/// Also through a link or a Windows short name.
+fn same_file(a: &Path, b: &Path) -> bool {
+    matches!((fs::canonicalize(a), fs::canonicalize(b)), (Ok(a), Ok(b)) if a == b)
 }
 
 /// Refuses when the file changed on disk since `original` was read, so nothing is lost.
@@ -448,6 +459,9 @@ struct Holding(AtomicBool);
 /// Set while «Tilpass» is open, so the panel stays beside it to show each change.
 struct KeepOpen(AtomicBool);
 
+/// Set when the app should quit once «Tilpass» has closed, after it asked about unsaved changes.
+struct Quitting(AtomicBool);
+
 /// A normal window in the Dock or taskbar instead of the panel at the tray icon.
 struct WindowMode(AtomicBool);
 
@@ -565,6 +579,7 @@ fn show(app: &AppHandle) {
     if !windowed(app) {
         place(app, &window);
     }
+    app.state::<Quitting>().0.store(false, Ordering::Relaxed);
     #[cfg(target_os = "macos")]
     let _ = app.show();
     let _ = window.unminimize();
@@ -596,6 +611,15 @@ fn toggle(app: &AppHandle) {
 #[tauri::command]
 fn quit(app: AppHandle) {
     app.exit(0);
+}
+
+/// «Avslutt», ⌘Q or closing the window while «Tilpass» is open: it closes first and asks about unsaved changes; the app quits after it.
+fn close_setup_first(app: &AppHandle) -> bool {
+    let Some(setup) = app.get_webview_window(SETUP_WINDOW) else { return false };
+    app.state::<Quitting>().0.store(true, Ordering::Relaxed);
+    let _ = setup.set_focus();
+    let _ = setup.close();
+    true
 }
 
 /// A window that shows only the app; links that would open in it go to the browser.
@@ -674,6 +698,8 @@ fn main() {
         .manage(LastHidden(Mutex::new(None)))
         .manage(Holding(AtomicBool::new(false)))
         .manage(KeepOpen(AtomicBool::new(false)))
+        .manage(Quitting(AtomicBool::new(false)))
+        .manage(Dropped(Mutex::new(Vec::new())))
         .manage(WindowMode(AtomicBool::new(false)))
         .setup(|app| {
             build_panel(app.handle())?;
@@ -726,12 +752,21 @@ fn main() {
         .on_window_event(|window, event| match event {
             WindowEvent::Destroyed if window.label() == SETUP_WINDOW => {
                 window.state::<KeepOpen>().0.store(false, Ordering::Relaxed);
+                if window.state::<Quitting>().0.load(Ordering::Relaxed) {
+                    window.app_handle().exit(0);
+                }
                 let _ = window.app_handle().emit_to("main", "restore", ());
+            }
+            WindowEvent::DragDrop(tauri::DragDropEvent::Drop { paths, .. }) if window.label() == SETUP_WINDOW => {
+                window.state::<Dropped>().0.lock().expect("lock").clone_from(paths);
             }
             _ if window.label() != "main" => {}
             // A window on Windows closes the app, like other apps there; on a Mac the Dock icon opens it again.
             WindowEvent::CloseRequested { api, .. } => {
                 if windowed(window.app_handle()) && cfg!(windows) {
+                    if close_setup_first(window.app_handle()) {
+                        api.prevent_close();
+                    }
                     return;
                 }
                 api.prevent_close();
@@ -751,11 +786,11 @@ fn main() {
         })
         .build(tauri::generate_context!())
         .expect("the app starts")
-        .run(|_app, _event| {
+        .run(|app, event| match event {
+            RunEvent::ExitRequested { api, .. } if close_setup_first(app) => api.prevent_exit(),
             #[cfg(target_os = "macos")]
-            if let RunEvent::Reopen { .. } = _event {
-                show(_app);
-            }
+            RunEvent::Reopen { .. } => show(app),
+            _ => {}
         });
 }
 
@@ -778,6 +813,19 @@ mod tests {
     #[test]
     fn the_panel_cannot_write_the_setup() {
         assert_eq!(save("oppsett.md".into(), String::new(), String::new()), Err("Ukjent fil: oppsett.md".into()));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_link_to_a_file_is_the_same_file() {
+        let dir = std::env::temp_dir().join(format!("trix-ultra-test-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join("Oppsett.md"), "").unwrap();
+        let _ = std::os::unix::fs::symlink(dir.join("Oppsett.md"), dir.join("Lenke.md"));
+        assert!(same_file(&dir.join("Lenke.md"), &dir.join("Oppsett.md")));
+        fs::write(dir.join("Annen.md"), "").unwrap();
+        assert!(!same_file(&dir.join("Annen.md"), &dir.join("Oppsett.md")));
+        let _ = fs::remove_dir_all(&dir);
     }
 
     #[test]

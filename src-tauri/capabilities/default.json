@@ -6,7 +6,7 @@
     "main"
   ],
   "permissions": [
-    "core:default",
+    "core:event:default",
     "allow-load",
     "allow-read-list",
     "allow-system-list",
