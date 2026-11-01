@@ -23,6 +23,7 @@ One process with the user's rights, no elevated parts, no network, no listening 
 | Data folder | Other local accounts | Read the files | Per-user: `~/Library/Application Support/Trix Ultra` (`~/Library` is `700`), `%APPDATA%\Trix Ultra`; `Trix Ultra-data` next to the app only when the user makes it |
 | App folder | User-writable folder | Planted DLL (Windows) | Keep the app in its own folder; unsigned |
 | Single-instance socket in `/tmp` (macOS) | Other local accounts | Block start | Accepted: needs a hostile account on the same Mac |
-| Downloaded build | Distribution | Tampered app | Release assets only from CI on `main` ([build.yml](.github/workflows/build.yml)); macOS ad hoc signed there, Developer ID and notarized only from a local [build.sh](scripts/build.sh); Windows unsigned. Release job: no npm, write token only there |
+| Downloaded build | Distribution | Tampered app | Release assets only from CI on `main` ([build.yml](.github/workflows/build.yml)); macOS: Developer ID and notarized ([build.sh](scripts/build.sh)), no release without it; Windows unsigned. Release job: no npm, write token only there |
+| Signing secrets in CI | Workflow → certificate, API key | Leaked certificate | Repository secrets, read only on `main` in the macOS job; temporary keychain made after `npm ci`; files deleted after import; the API key is a revocable team key, not the Apple ID password |
 
 Reverse engineering, memory tampering and debuggers: the binary holds no secret and no licence check, so nothing to protect.

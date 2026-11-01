@@ -16,7 +16,7 @@ APP="src-tauri/target/universal-apple-darwin/release/bundle/macos/Trix Ultra.app
 if [ -n "$IDENTITY" ]; then
   UPLOAD="${TMPDIR:-/tmp}/trix-ultra-notarize.zip"
   ditto -c -k --keepParent "$APP" "$UPLOAD"
-  xcrun notarytool submit "$UPLOAD" --keychain-profile trix --wait
+  xcrun notarytool submit "$UPLOAD" --keychain-profile trix ${NOTARY_KEYCHAIN:+--keychain "$NOTARY_KEYCHAIN"} --wait
   xcrun stapler staple "$APP"
 fi
 ditto -c -k --keepParent "$APP" dist/Trix-Ultra-macOS.zip

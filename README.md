@@ -9,8 +9,7 @@ content is Markdown files. No installer, no network.
 1. Download [Trix-Ultra-macOS.zip](https://github.com/elzacka/trix-ultra/releases/latest/download/Trix-Ultra-macOS.zip)
    or [Trix-Ultra-Windows.zip](https://github.com/elzacka/trix-ultra/releases/latest/download/Trix-Ultra-Windows.zip).
 2. Open it.
-   - macOS 15 or later: double-click the zip, then `Trix Ultra.app`. First
-     time: System Settings → Privacy & Security → Open Anyway (not notarized).
+   - macOS 15 or later: double-click the zip, then `Trix Ultra.app`.
    - Windows: Extract all, then `Trix Ultra\Trix Ultra.exe`. First time:
      SmartScreen → More info → Run anyway (unsigned). Needs WebView2, built
      into Windows 10 and 11.
@@ -74,8 +73,18 @@ Name and identifier: `productName`, `identifier` in
    both platforms, and publishes release `v<version>` when CHANGELOG.md has a
    heading for it. The links in *Get started* follow the latest release.
 
+The release's macOS app is signed and notarized in CI from repository secrets;
+without them the build is ad hoc and no release goes out:
+
+| Secret | Holds |
+|---|---|
+| `APPLE_CERTIFICATE` | The Developer ID Application certificate with its key, `.p12`, base64 |
+| `APPLE_CERTIFICATE_PASSWORD` | The `.p12` password |
+| `APPLE_API_KEY` | App Store Connect API key, `.p8`, base64 |
+| `APPLE_API_KEY_ID`, `APPLE_API_ISSUER` | Its Key ID and Issuer ID |
+
 `npm run build:mac` builds `dist/Trix-Ultra-macOS.zip` locally: signed with the
 Developer ID in the keychain and notarized with the `notarytool` profile
-`trix`, else ad hoc as in CI.
+`trix`, else ad hoc.
 
 Credits: [TREDJEPART.md](TREDJEPART.md). Security: [SECURITY.md](SECURITY.md).

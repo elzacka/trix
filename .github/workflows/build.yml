@@ -38,6 +38,8 @@ jobs:
 
   macos:
     runs-on: macos-latest
+    outputs:
+      signed: ${{ steps.signing.outputs.signed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -49,6 +51,32 @@ jobs:
       - run: rustup toolchain install stable --profile minimal --component clippy --target aarch64-apple-darwin --target x86_64-apple-darwin
       - run: npm ci
       - run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked -- -D warnings
+      # After npm ci, so no install script runs while the certificate is in a keychain
+      - name: Signing keychain
+        id: signing
+        if: github.ref == 'refs/heads/main'
+        env:
+          CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          API_KEY: ${{ secrets.APPLE_API_KEY }}
+          API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: |
+          if [ -z "$CERTIFICATE" ]; then echo "No signing secrets: ad hoc"; exit 0; fi
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password=$(openssl rand -base64 24)
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          printf '%s' "$CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security import "$RUNNER_TEMP/certificate.p12" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          printf '%s' "$API_KEY" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
+          xcrun notarytool store-credentials trix --key "$RUNNER_TEMP/AuthKey.p8" --key-id "$API_KEY_ID" --issuer "$API_ISSUER" --keychain "$keychain"
+          rm -f "$RUNNER_TEMP/certificate.p12" "$RUNNER_TEMP/AuthKey.p8"
+          echo "NOTARY_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+          echo "signed=true" >> "$GITHUB_OUTPUT"
       - run: scripts/build.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -66,6 +94,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
+      SIGNED: ${{ needs.macos.outputs.signed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -78,6 +107,7 @@ jobs:
           if ! awk -v v="$version" '/^## / { t = substr($0, 4); sub(/^\[/, "", t); sub(/[] ].*$/, "", t); f = (t == v); if (f) found = 1; next } f { print } END { exit !found }' CHANGELOG.md > notes.md; then
             echo "No CHANGELOG heading for $version"; exit 0
           fi
+          if [ "$SIGNED" != true ]; then echo "macOS build is not signed: add the APPLE_* secrets (README, Develop)"; exit 1; fi
           gh run download "$GITHUB_RUN_ID" --dir dist
           gh release create "v$version" dist/windows/Trix-Ultra-Windows.zip dist/macos/Trix-Ultra-macOS.zip \
             --title "Trix Ultra $version" --notes-file notes.md --target "$GITHUB_SHA"

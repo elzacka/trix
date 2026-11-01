@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.0.0 - 2026-11-01
+
 - Each version as a GitHub Release with the macOS and Windows app; download links at the top of the README
 - Setup in `Oppsett.md`: views in any order and number, menu items, colours for light and dark mode, fonts, window size, icons and every UI text; warnings name the line, and contrast under 4.5:1
 - View types: `hurtigtaster` (from Trix), `oppslag` (Trix's Jukselapp, with headings and lists), `kort` (flip cards with their own front and back colours and a flip icon), `artikler` (read in the panel); a template per type
