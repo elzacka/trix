@@ -409,18 +409,19 @@ export const MENU = ['visning', 'kildedata', 'oppsett', 'hurtigåpner', 'avslutt
 const DEFAULT_MENU = ['visning', 'kildedata', '---', 'oppsett', 'hurtigåpner', '---', 'avslutt', 'versjon']
 
 /** Icon names in the setup; `menylinje` (tray) and `app` (window and taskbar) are PNG only. */
-export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'valgt', 'undermeny', 'fjern']
+export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'valgt', 'undermeny', 'fjern', 'snu']
 
 export const PNG_ONLY = ['app', 'menylinje']
 
 /** An image file in the data folder, as `data_file` in `main.rs` checks it. */
 export const iconName = (name, kind) => /^[^\\/:*?"<>|.][^\\/:*?"<>|]*\.(svg|png)$/i.test(name) && (!PNG_ONLY.includes(kind) || /\.png$/i.test(name))
 
-export const COLORS = ['bakgrunn', 'flate', 'linje', 'tekst', 'dempet', 'aksent', 'på aksent']
+export const COLORS = ['bakgrunn', 'flate', 'linje', 'tekst', 'dempet', 'aksent', 'på aksent', 'forside', 'på forside', 'bakside', 'på bakside']
 
 /** The setup's colour names as the stylesheet's tokens. */
 export const TOKENS = {
   bakgrunn: 'bg', flate: 'surface', linje: 'line', tekst: 'text', dempet: 'muted', aksent: 'accent', 'på aksent': 'on-accent',
+  forside: 'front', 'på forside': 'on-front', bakside: 'back', 'på bakside': 'on-back',
 }
 
 export const WINDOW = { bredde: [320, 1200], høyde: [400, 1000] }
@@ -603,7 +604,8 @@ export function contrast(a, b) {
 }
 
 // Text against what it stands on: WCAG AA for normal text.
-const PAIRS = [['tekst', 'bakgrunn'], ['tekst', 'flate'], ['dempet', 'bakgrunn'], ['dempet', 'flate'], ['aksent', 'flate'], ['på aksent', 'aksent']]
+const PAIRS = [['tekst', 'bakgrunn'], ['tekst', 'flate'], ['dempet', 'bakgrunn'], ['dempet', 'flate'], ['aksent', 'flate'], ['på aksent', 'aksent'],
+  ['på forside', 'forside'], ['på bakside', 'bakside']]
 
 /** `modes` holds the colours as [r, g, b] per mode: { lys: { tekst: [...] }, mørk: {...} }. */
 export function contrastProblems(modes) {
@@ -613,7 +615,9 @@ export function contrastProblems(modes) {
       const ratio = contrast(colors[text], colors[ground])
       if (ratio < 4.5) {
         const shown = ratio.toFixed(1).replace('.', ',')
-        problems.push(`${SETUP_FILE}: ${text[0].toUpperCase()}${text.slice(1)} på ${ground} har kontrast ${shown}:1 i ${mode} modus. Den bør være minst 4,5:1.`)
+        // «på aksent» names the text that stands on aksent
+        const pair = text === `på ${ground}` ? `Teksten ${text}` : `${text[0].toUpperCase()}${text.slice(1)} på ${ground}`
+        problems.push(`${SETUP_FILE}: ${pair} har kontrast ${shown}:1 i ${mode} modus. Den bør være minst 4,5:1.`)
       }
     }
   }

@@ -15,6 +15,7 @@ const OPTION_NAMES = {
 const ICON_NAMES = {
   logo: 'Logo', app: 'Vinduet (Windows)', menylinje: 'Menylinjen (Mac) og oppgavelinjen (Windows)', meny: 'Flere valg', 'søk': 'Søk',
   'tøm': 'Tøm søk', tasteoppslag: 'Slå opp hurtigtast', tilbake: 'Tilbake', valgt: 'Valgt', undermeny: 'Undermeny', fjern: 'Fjern merke',
+  snu: 'Snu kortet',
 }
 const FONTS = ['Syne', 'Inter', 'Georgia', 'Helvetica', 'Arial', 'Verdana', 'Times New Roman', 'Segoe UI', 'Calibri']
 const GRIP = ['M8 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0', 'M8 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0', 'M8 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0',
@@ -273,15 +274,35 @@ function hex(name, mode) {
   return `#${rgb.map(n => Math.round(n).toString(16).padStart(2, '0')).join('')}`
 }
 
+const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i
+
 function colors() {
   const { h } = ctx
-  const input = (name, mode) => h('input', {
-    type: 'color', value: hex(name, mode), 'aria-label': `${name}, ${mode === 'light' ? 'lys' : 'mørk'} modus`,
-    oninput: e => {
-      draft.colors[name] = { light: hex(name, 'light'), dark: hex(name, 'dark'), [mode]: e.target.value }
+  // A picker and its hex code: either one sets the colour and shows in the other.
+  const input = (name, mode) => {
+    const label = `${name}, ${mode === 'light' ? 'lys' : 'mørk'} modus`
+    const set = value => {
+      draft.colors[name] = { light: hex(name, 'light'), dark: hex(name, 'dark'), [mode]: value }
       change()
-    },
-  })
+    }
+    const picker = h('input', {
+      type: 'color', value: hex(name, mode), 'aria-label': label,
+      oninput: e => { code.value = e.target.value; code.removeAttribute('aria-invalid'); set(e.target.value) },
+    })
+    const code = h('input', {
+      class: 'hex', value: picker.value, maxlength: 7, spellcheck: 'false', 'aria-label': `${label}, hex-kode`,
+      oninput: e => {
+        const match = e.target.value.trim().match(HEX)
+        e.target.setAttribute('aria-invalid', !match)
+        if (!match) return
+        const digits = match[1].toLowerCase()
+        picker.value = `#${digits.length === 3 ? [...digits].map(d => d + d).join('') : digits}`
+        set(picker.value)
+      },
+      onchange: e => { e.target.value = picker.value; e.target.removeAttribute('aria-invalid') },
+    })
+    return h('span', { class: 'color' }, picker, code)
+  }
   return [
     h('table', { class: 'colors' },
       h('thead', {}, h('tr', {}, h('th', {}), h('th', {}, 'Lys'), h('th', {}, 'Mørk'))),

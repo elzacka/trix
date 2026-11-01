@@ -19,6 +19,10 @@
   --muted-light: #64748b;
   --accent-light: #00466a;
   --on-accent-light: #ffffff;
+  --front-light: #ffffff;
+  --on-front-light: #1e293b;
+  --back-light: #00466a;
+  --on-back-light: #ffffff;
   --bg-dark: #111418;
   --surface-dark: #1a1e23;
   --line-dark: #2b3138;
@@ -26,6 +30,10 @@
   --muted-dark: #9aa3ae;
   --accent-dark: #6f93a8;
   --on-accent-dark: #0b1218;
+  --front-dark: #1a1e23;
+  --on-front-dark: #e5e7eb;
+  --back-dark: #6f93a8;
+  --on-back-dark: #0b1218;
   --font-text: "Syne", "Inter", system-ui, sans-serif;
   --font-keys: "Inter", system-ui, sans-serif;
   --font-size: 14px;
@@ -36,6 +44,10 @@
   --muted: var(--muted-light);
   --accent: var(--accent-light);
   --on-accent: var(--on-accent-light);
+  --front: var(--front-light);
+  --on-front: var(--on-front-light);
+  --back: var(--back-light);
+  --on-back: var(--on-back-light);
   --line-soft: color-mix(in srgb, var(--line) 50%, var(--surface));
   --hover: color-mix(in srgb, var(--text) 5%, var(--surface));
   --key: color-mix(in srgb, var(--text) 6%, var(--surface));
@@ -52,6 +64,10 @@
     --muted: var(--muted-dark);
     --accent: var(--accent-dark);
     --on-accent: var(--on-accent-dark);
+    --front: var(--front-dark);
+    --on-front: var(--on-front-dark);
+    --back: var(--back-dark);
+    --on-back: var(--on-back-dark);
   }
 }
 
@@ -414,12 +430,13 @@ kbd {
 .flip-toggle:focus-visible { outline-offset: 2px; }
 
 .face {
+  position: relative;
   grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-height: 120px;
-  padding: 14px 12px;
+  padding: 14px 12px 24px;
   border: 1px solid var(--line);
   border-radius: 12px;
   backface-visibility: hidden;
@@ -430,13 +447,16 @@ kbd {
 
 .face a, .face button { pointer-events: auto; }
 
-.front { justify-content: center; align-items: center; text-align: center; background: var(--surface); }
+.front { justify-content: center; align-items: center; text-align: center; background: var(--front); color: var(--on-front); }
 
-.flip:hover .front { background: var(--hover); }
+.flip:hover .front { background: color-mix(in srgb, var(--on-front) 5%, var(--front)); }
 
-.front .lead { color: var(--muted); font-size: 0.86em; }
+.front .lead { font-size: 0.86em; }
 
-.back { background: var(--accent); color: var(--on-accent); transform: rotateY(180deg); font-size: 0.86em; user-select: text; -webkit-user-select: text; }
+.back { background: var(--back); color: var(--on-back); transform: rotateY(180deg); font-size: 0.86em; user-select: text; -webkit-user-select: text; }
+
+/* A hint that the card turns, fainter than the text */
+.face > .turn { position: absolute; right: 8px; bottom: 8px; width: 14px; height: 14px; opacity: 0.7; }
 
 .back p, .back ul, .back ol { margin: 0; }
 
@@ -594,7 +614,13 @@ kbd {
 
 .colors thead th { color: var(--muted); font-size: 0.86em; }
 
-.colors input { width: 44px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; }
+.colors td { padding: 2px 8px 2px 0; }
+
+.color { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+
+.colors input[type="color"] { flex: none; width: 36px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; }
+
+#setup-body .colors .hex { width: 6.5em; font-family: var(--font-keys); }
 
 .icon-name { flex: 1; }
 

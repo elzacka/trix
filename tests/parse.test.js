@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseEntries, lead, alphabetical, searchEntries, inline,
-  mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, listName, iconName, TEXTS, KINDS,
+  mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, listName, iconName, TEXTS, TOKENS, KINDS,
   formatSetup, setupHeader,
 } from '../ui/parse.js'
 
@@ -148,9 +148,9 @@ test('the seed setup is the default setup, with every text', () => {
 test('the seed colours, fonts and window are the stylesheet\'s and the config\'s', () => {
   const seed = parseSetup(read('../seed/Oppsett.md'))
   const css = read('../ui/style.css')
-  const token = { bakgrunn: 'bg', flate: 'surface', linje: 'line', tekst: 'text', dempet: 'muted', aksent: 'accent', 'på aksent': 'on-accent' }
+  assert.deepEqual(Object.keys(seed.colors), Object.keys(TOKENS))
   for (const [name, { light, dark }] of Object.entries(seed.colors)) {
-    assert.ok(css.includes(`--${token[name]}-light: ${light};`) && css.includes(`--${token[name]}-dark: ${dark};`), name)
+    assert.ok(css.includes(`--${TOKENS[name]}-light: ${light};`) && css.includes(`--${TOKENS[name]}-dark: ${dark};`), name)
   }
   assert.ok(css.includes(`--font-text: "${seed.fonts.tekst}"`) && css.includes(`--font-keys: "${seed.fonts.taster}"`))
   assert.ok(css.includes(`--font-size: ${seed.fonts.størrelse}px;`))
@@ -249,11 +249,15 @@ test('placeholders', () => {
 test('contrast: WCAG ratio, problems below 4.5:1', () => {
   assert.equal(contrast([0, 0, 0], [255, 255, 255]), 21)
   assert.equal(contrast([255, 255, 255], [255, 255, 255]), 1)
-  const good = { tekst: [0, 0, 0], bakgrunn: [255, 255, 255], flate: [255, 255, 255], dempet: [80, 80, 80], aksent: [0, 70, 106], 'på aksent': [255, 255, 255] }
+  const good = { tekst: [0, 0, 0], bakgrunn: [255, 255, 255], flate: [255, 255, 255], dempet: [80, 80, 80], aksent: [0, 70, 106], 'på aksent': [255, 255, 255],
+    forside: [255, 255, 255], 'på forside': [0, 0, 0], bakside: [0, 70, 106], 'på bakside': [255, 255, 255] }
   assert.deepEqual(contrastProblems({ lys: good }), [])
   assert.deepEqual(contrastProblems({ mørk: { ...good, dempet: [170, 170, 170] } }), [
     'Oppsett.md: Dempet på bakgrunn har kontrast 2,3:1 i mørk modus. Den bør være minst 4,5:1.',
     'Oppsett.md: Dempet på flate har kontrast 2,3:1 i mørk modus. Den bør være minst 4,5:1.',
+  ])
+  assert.deepEqual(contrastProblems({ lys: { ...good, 'på bakside': [0, 0, 0] } }), [
+    'Oppsett.md: Teksten på bakside har kontrast 2,1:1 i lys modus. Den bør være minst 4,5:1.',
   ])
 })
 

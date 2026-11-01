@@ -39,7 +39,7 @@ copied is the admin's platform: a mixed team gets the other build beside it
 |---|---|
 | `## Visninger` | Tabs in order: `Name \| type \| file \| options \| search placeholder`. A type can repeat with its own file |
 | `## Meny` | Menu items in order: `visning`, `kildedata`, `oppsett`, `hurtigåpner`, `avslutt`, `versjon`, `---` |
-| `## Farger` | `bakgrunn`, `flate`, `linje`, `tekst`, `dempet`, `aksent`, `på aksent`: light and dark. Contrast under 4.5:1 shows a warning |
+| `## Farger` | `bakgrunn`, `flate`, `linje`, `tekst`, `dempet`, `aksent`, `på aksent`, and the cards' `forside`, `på forside`, `bakside`, `på bakside`: light and dark. Contrast under 4.5:1 shows a warning |
 | `## Skrift` | Text and key fonts (Syne, Inter or any installed font), size |
 | `## Vindu` | `type`: panel at the tray icon, or a normal window in the Dock or taskbar; width, height |
 | `## Ikoner` | SVG or PNG from the data folder: logo, menu bar/tray icon, window icon (Windows), the icons in the app |
@@ -52,7 +52,7 @@ line number and is left out.
 |---|---|---|---|
 | `hurtigtaster` | Actions and keys per OS; lookup by pressing or typing a combination; the system's own shortcuts | Shortcuts for any program | `søk`\*, `tasteoppslag`\*, `system`, `a–å` |
 | `oppslag` | Entries: name, explanation, other names, tags | Glossary, cheat sheet, FAQ, phone list | `søk`\*, `emneknagger`\*, `a–å` |
-| `kort` | Cards: front (name, first paragraph), back (the rest); flip on click | Tool overview, flashcards | as `oppslag` |
+| `kort` | Cards: front (name, first paragraph), back (the rest); flip on click, flip icon on both faces | Tool overview, flashcards | as `oppslag` |
 | `artikler` | Title, lead, sections; opens to read in the panel | How-tos, guides | as `oppslag` |
 
 `system` reads, on macOS, System Settings → Keyboard Shortcuts and App

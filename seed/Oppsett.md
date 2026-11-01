@@ -43,7 +43,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 
 ## Ikoner
 - Navn | fil: Et .svg- eller .png-bilde i samme mappe som denne fila
-- Navn: logo, app, menylinje, meny, søk, tøm, tasteoppslag, tilbake, valgt, undermeny, fjern
+- Navn: logo, app, menylinje, meny, søk, tøm, tasteoppslag, tilbake, valgt, undermeny, fjern, snu
 - Ikonene i appen får tekstfargen. Det er bare formen i bildet som teller.
 - logo: Vises i sine egne farger.
 - app: Ikonet på vinduet og oppgavelinjen i Windows, bare .png.
@@ -81,6 +81,10 @@ En seksjon du sletter, får standardverdiene tilbake.
 - dempet | #64748b | #9aa3ae
 - aksent | #00466a | #6f93a8
 - på aksent | #ffffff | #0b1218
+- forside | #ffffff | #1a1e23
+- på forside | #1e293b | #e5e7eb
+- bakside | #00466a | #6f93a8
+- på bakside | #ffffff | #0b1218
 
 ## Skrift
 
