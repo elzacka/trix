@@ -402,7 +402,6 @@ function renderCards(view) {
   renderEntries(view, entrySections(view), entries => {
     const cards = h('div', { class: 'cards' }, entries.map(e => flipCard(view, e)))
     if (view.columns) cards.style.gridTemplateColumns = `repeat(${view.columns}, minmax(0, 1fr))`
-    if (view.rows) cards.style.alignItems = 'stretch'
     return cards
   })
   fitCards(view)

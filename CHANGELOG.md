@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Kort: every card in a row is as tall as the tallest card in it
+
 ## 1.2.0 - 2026-11-01
 
 - Kort: options «N i bredden» and «N i høyden» (1–6) and the same choices in «Tilpass»; cards share the width and fill the height, and follow the window size

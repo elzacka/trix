@@ -428,9 +428,9 @@ kbd {
 
 .chip :is(svg, .icon) { width: 12px; height: 12px; }
 
-/* Cards: both faces share one grid cell, so the card is as tall as its longer side, not its row */
+/* Cards: both faces share one grid cell, and every card in a row is as tall as the tallest side in it */
 
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); align-items: start; gap: 8px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
 
 .flip { position: relative; display: grid; perspective: 900px; }
 
