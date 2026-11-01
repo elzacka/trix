@@ -23,6 +23,6 @@ One process with the user's rights, no elevated parts, no network, no listening 
 | Data folder | Other local accounts | Read the files | Per-user: `~/Library/Application Support/Trix Ultra` (`~/Library` is `700`), `%APPDATA%\Trix Ultra`; `Trix Ultra-data` next to the app only when the user makes it |
 | App folder | User-writable folder | Planted DLL (Windows) | Keep the app in its own folder; unsigned |
 | Single-instance socket in `/tmp` (macOS) | Other local accounts | Block start | Accepted: needs a hostile account on the same Mac |
-| Downloaded build | Distribution | Tampered app | macOS: Developer ID, notarized ([build.sh](scripts/build.sh)), or ad hoc from CI; Windows: unsigned; CI builds both from `main` ([build.yml](.github/workflows/build.yml)) |
+| Downloaded build | Distribution | Tampered app | Release assets only from CI on `main` ([build.yml](.github/workflows/build.yml)); macOS ad hoc signed there, Developer ID and notarized only from a local [build.sh](scripts/build.sh); Windows unsigned. Release job: no npm, write token only there |
 
 Reverse engineering, memory tampering and debuggers: the binary holds no secret and no licence check, so nothing to protect.

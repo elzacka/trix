@@ -4,6 +4,21 @@ App for Windows and macOS, built from blocks anyone can choose: views, menu,
 colours, fonts, icons, window and every UI text, all in one Markdown file. The
 content is Markdown files. No installer, no network.
 
+## Get started
+
+1. Download [Trix-Ultra-macOS.zip](https://github.com/elzacka/trix-ultra/releases/latest/download/Trix-Ultra-macOS.zip)
+   or [Trix-Ultra-Windows.zip](https://github.com/elzacka/trix-ultra/releases/latest/download/Trix-Ultra-Windows.zip).
+2. Open it.
+   - macOS 15 or later: double-click the zip, then `Trix Ultra.app`. First
+     time: System Settings → Privacy & Security → Open Anyway (not notarized).
+   - Windows: Extract all, then `Trix Ultra\Trix Ultra.exe`. First time:
+     SmartScreen → More info → Run anyway (unsigned). Needs WebView2, built
+     into Windows 10 and 11.
+3. The icon sits in the menu bar or the taskbar. Menu «Tilpass» customizes;
+   «Åpne Oppsett.md» there opens the file instead.
+
+A new version: download again and replace the app. The files stay.
+
 | | |
 |---|---|
 | Files | `Oppsett.md`, one `.md` per view, icons, in `~/Library/Application Support/Trix Ultra` (macOS) or `%APPDATA%\Trix Ultra` (Windows). Created on first launch from [seed/](seed/) |
@@ -50,26 +65,17 @@ src-tauri/icons/tray.png`, keep the files `tauri.conf.json` lists, and build.
 Name and identifier: `productName`, `identifier` in
 [tauri.conf.json](src-tauri/tauri.conf.json).
 
-## Run
+## Develop
 
-- macOS 15 or later: unzip, move `Trix Ultra.app` to Applications, open. The
-  CI build is ad hoc signed: first launch needs System Settings → Privacy &
-  Security → Open Anyway.
-- Windows: unzip and run `Trix Ultra\Trix Ultra.exe`: unsigned, so SmartScreen
-  → More info → Run anyway. Needs WebView2, built into Windows 10 and 11.
+1. Change, then `npm test` and `TRIX_ULTRA_DATA_DIR=/tmp/tu npm run dev`.
+2. Bump `version` in [Cargo.toml](src-tauri/Cargo.toml), rename `Unreleased`
+   in [CHANGELOG.md](CHANGELOG.md) to that version, commit.
+3. Push to `main`. [build.yml](.github/workflows/build.yml) tests and builds
+   both platforms, and publishes release `v<version>` when CHANGELOG.md has a
+   heading for it. The links in *Get started* follow the latest release.
 
-## Build
-
-```sh
-npm ci
-npm test                                  # parsers and setup
-TRIX_ULTRA_DATA_DIR=/tmp/tu npm run dev   # without it: your own files
-npm run build:mac                         # dist/Trix-Ultra-macOS.zip, universal
-```
-
-`build:mac` signs with the Developer ID in the keychain and notarizes with the
-`notarytool` profile `trix`; without a Developer ID it signs ad hoc. CI:
-[build.yml](.github/workflows/build.yml) on each push to `main`, artifacts
-`Trix-Ultra-Windows.zip` and `Trix-Ultra-macOS.zip`.
+`npm run build:mac` builds `dist/Trix-Ultra-macOS.zip` locally: signed with the
+Developer ID in the keychain and notarized with the `notarytool` profile
+`trix`, else ad hoc as in CI.
 
 Credits: [TREDJEPART.md](TREDJEPART.md). Security: [SECURITY.md](SECURITY.md).
