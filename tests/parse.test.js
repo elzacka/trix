@@ -246,6 +246,11 @@ test('the setup screen writes what the parser reads, under the file\'s own comme
   const again = parseSetup(formatSetup(setup, setupHeader(text)))
   for (const part of ['views', 'menu', 'fonts', 'window', 'texts']) assert.deepEqual(again[part], setup[part], part)
   assert.deepEqual(again.views[0].name, 'Telefon | SMS')
+  // A backslash needs no escape of its own: only one right before a pipe is read as one
+  for (const name of ['a\\', 'a\\|b', 'x\\\\|y', '\\']) {
+    const back = parseSetup(formatSetup({ ...setup, views: [{ ...setup.views[0], name }], texts: { søk: name } }, '# Oppsett'))
+    assert.deepEqual([back.views[0].name, back.texts.søk], [name, name], name)
+  }
   assert.deepEqual(again.window, { type: 'vindu', bredde: 700 })
   assert.deepEqual(Object.keys(again.icons), ['menylinje', 'app'])
   assert.equal(again.icons.menylinje.color, true)
