@@ -635,7 +635,9 @@ kbd {
 
 .colors th { padding: 3px 10px 3px 0; text-align: left; font-weight: 400; }
 
-.colors thead th { color: var(--muted); font-size: 0.86em; }
+.colors thead th, .colors .group { color: var(--muted); font-size: 0.86em; }
+
+.colors .group { padding-top: 12px; }
 
 .colors td { padding: 2px 8px 2px 0; }
 

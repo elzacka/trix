@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- «Tilpass», Farger: the colours grouped by where they show (Generelt, Knapper og lenker, Kort) under plain names; the contrast warning uses the same names
+
 ## 1.2.2 - 2026-11-01
 
 - Kort: the turn icon sits in the same place on the front and the back, at the foot of the card

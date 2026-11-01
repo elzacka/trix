@@ -1,7 +1,7 @@
 // «Tilpass»: a window of its own. Each change shows in the open panel at once, and «Lagre» writes `Oppsett.md`.
 
 import {
-  parseSetup, formatSetup, setupHeader, fill, KINDS, MENU, COLORS, ICONS, PNG_ONLY, TEXTS, WINDOW, FONT_SIZE, FONT_PATTERN, OPTIONS,
+  parseSetup, formatSetup, setupHeader, fill, KINDS, MENU, ICONS, PNG_ONLY, TEXTS, WINDOW, FONT_SIZE, FONT_PATTERN, OPTIONS,
   DEFAULT_OPTIONS, TOKENS, CARD_COUNT, listName, iconName,
 } from './parse.js'
 import { h, svg } from './dom.js'
@@ -17,6 +17,12 @@ const OPTION_NAMES = {
   'søk': 'Søkefelt', tasteoppslag: 'Slå opp hurtigtaster', system: 'Maskinens egne hurtigtaster', emneknagger: 'Emneknagger',
   'a–å': 'Sorter A–Å fra start',
 }
+// The colours by where they show, under the names «Tilpass» gives them
+const COLOR_GROUPS = [
+  ['Generelt', { bakgrunn: 'Bakgrunn', flate: 'Lister og felt', linje: 'Linjer', tekst: 'Tekst', dempet: 'Dempet tekst' }],
+  ['Knapper og lenker', { aksent: 'Farge', 'på aksent': 'Tekst på knapper' }],
+  ['Kort', { forside: 'Forside', 'på forside': 'Tekst på forsiden', bakside: 'Bakside', 'på bakside': 'Tekst på baksiden' }],
+]
 const ICON_NAMES = {
   logo: 'Logo', app: 'Vinduet (Windows)', menylinje: 'Menylinjen (Mac) og oppgavelinjen (Windows)', meny: 'Flere valg', 'søk': 'Søk',
   'tøm': 'Tøm søk', tasteoppslag: 'Slå opp hurtigtast', tilbake: 'Tilbake', valgt: 'Valgt', undermeny: 'Undermeny', fjern: 'Fjern merke',
@@ -272,8 +278,8 @@ const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i
 
 function colors() {
     // A picker and its hex code: either one sets the colour and shows in the other.
-  const input = (name, mode) => {
-    const label = `${name}, ${mode === 'light' ? 'lys' : 'mørk'} modus`
+  const input = (name, title, mode) => {
+    const label = `${title}, ${mode === 'light' ? 'lys' : 'mørk'} modus`
     const set = value => {
       draft.colors[name] = { light: hex(name, 'light'), dark: hex(name, 'dark'), [mode]: value }
       change()
@@ -299,8 +305,10 @@ function colors() {
   return [
     h('table', { class: 'colors' },
       h('thead', {}, h('tr', {}, h('th', {}), h('th', {}, 'Lys'), h('th', {}, 'Mørk'))),
-      h('tbody', {}, COLORS.map(name => h('tr', {},
-        h('th', { scope: 'row' }, name[0].toLocaleUpperCase('nb') + name.slice(1)), h('td', {}, input(name, 'light')), h('td', {}, input(name, 'dark')))))),
+      COLOR_GROUPS.map(([group, names]) => h('tbody', {},
+        h('tr', {}, h('th', { class: 'group', colspan: 3, scope: 'colgroup' }, group)),
+        Object.entries(names).map(([name, label]) => h('tr', {},
+          h('th', { scope: 'row' }, label), h('td', {}, input(name, `${group}: ${label}`, 'light')), h('td', {}, input(name, `${group}: ${label}`, 'dark'))))))),
     h('div', { class: 'add' }, h('button', { class: 'button', onclick: () => { draft.colors = {}; change(true) } }, 'Bruk standardfargene')),
   ]
 }

@@ -619,8 +619,13 @@ export function contrast(a, b) {
 }
 
 // Text against what it stands on: WCAG AA for normal text.
-const PAIRS = [['tekst', 'bakgrunn'], ['tekst', 'flate'], ['dempet', 'bakgrunn'], ['dempet', 'flate'], ['aksent', 'bakgrunn'], ['aksent', 'flate'],
-  ['på aksent', 'aksent'], ['på forside', 'forside'], ['på bakside', 'bakside']]
+// Named as «Tilpass» shows the colours (COLOR_GROUPS in setup.js).
+const PAIRS = [
+  ['tekst', 'bakgrunn', 'Tekst på bakgrunnen'], ['tekst', 'flate', 'Tekst på lister og felt'],
+  ['dempet', 'bakgrunn', 'Dempet tekst på bakgrunnen'], ['dempet', 'flate', 'Dempet tekst på lister og felt'],
+  ['aksent', 'bakgrunn', 'Knapper og lenker på bakgrunnen'], ['aksent', 'flate', 'Knapper og lenker på lister og felt'],
+  ['på aksent', 'aksent', 'Tekst på knapper'], ['på forside', 'forside', 'Tekst på forsiden av kort'], ['på bakside', 'bakside', 'Tekst på baksiden av kort'],
+]
 
 const mix = (a, b, share) => a.map((v, i) => v * share + b[i] * (1 - share))
 
@@ -635,13 +640,11 @@ const shades = (c, ground) => ({
 export function contrastProblems(modes) {
   const problems = []
   for (const [mode, colors] of Object.entries(modes)) {
-    for (const [text, ground] of PAIRS) {
+    for (const [text, ground, name] of PAIRS) {
       const ratio = Math.min(...shades(colors, ground).map(shade => contrast(colors[text], shade)))
       if (ratio < 4.5) {
         const shown = ratio.toFixed(1).replace('.', ',')
-        // «på aksent» names the text that stands on aksent
-        const pair = text === `på ${ground}` ? `Teksten ${text}` : `${text[0].toUpperCase()}${text.slice(1)} på ${ground}`
-        problems.push(`${SETUP_FILE}: ${pair} har kontrast ${shown}:1 i ${mode} modus. Den bør være minst 4,5:1.`)
+        problems.push(`${SETUP_FILE}: ${name} har kontrast ${shown}:1 i ${mode} modus. Den bør være minst 4,5:1.`)
       }
     }
   }

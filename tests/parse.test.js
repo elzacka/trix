@@ -264,15 +264,15 @@ test('contrast: WCAG ratio, problems below 4.5:1', () => {
     forside: [255, 255, 255], 'på forside': [0, 0, 0], bakside: [0, 70, 106], 'på bakside': [255, 255, 255] }
   assert.deepEqual(contrastProblems({ lys: good }), [])
   assert.deepEqual(contrastProblems({ mørk: { ...good, dempet: [170, 170, 170] } }), [
-    'Oppsett.md: Dempet på bakgrunn har kontrast 2,3:1 i mørk modus. Den bør være minst 4,5:1.',
-    'Oppsett.md: Dempet på flate har kontrast 2,0:1 i mørk modus. Den bør være minst 4,5:1.',
+    'Oppsett.md: Dempet tekst på bakgrunnen har kontrast 2,3:1 i mørk modus. Den bør være minst 4,5:1.',
+    'Oppsett.md: Dempet tekst på lister og felt har kontrast 2,0:1 i mørk modus. Den bør være minst 4,5:1.',
   ])
   assert.deepEqual(contrastProblems({ lys: { ...good, 'på bakside': [0, 0, 0] } }), [
-    'Oppsett.md: Teksten på bakside har kontrast 2,0:1 i lys modus. Den bør være minst 4,5:1.',
+    'Oppsett.md: Tekst på baksiden av kort har kontrast 2,0:1 i lys modus. Den bør være minst 4,5:1.',
   ])
   // 4.8:1 on flate itself, 4.0:1 on the accent-tinted shade an open entry has
   assert.deepEqual(contrastProblems({ lys: { ...good, tekst: [30, 41, 59], dempet: [100, 116, 139] } }), [
-    'Oppsett.md: Dempet på flate har kontrast 4,0:1 i lys modus. Den bør være minst 4,5:1.',
+    'Oppsett.md: Dempet tekst på lister og felt har kontrast 4,0:1 i lys modus. Den bør være minst 4,5:1.',
   ])
 })
 
