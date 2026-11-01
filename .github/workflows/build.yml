@@ -108,7 +108,7 @@ jobs:
           name: macos
           path: dist/Trix-Ultra-macOS.dmg
 
-  # A new version with its CHANGELOG heading becomes a release; the README's download links follow the latest.
+  # A new version with its CHANGELOG heading becomes a release; the user guide's download links follow the latest.
   release:
     needs: [windows, sign]
     if: github.ref == 'refs/heads/main'

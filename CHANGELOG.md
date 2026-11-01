@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- User guide in Norwegian, `BRUKERVEILEDNING.md`: download to uninstall, both ways to customize, where the files are
 - macOS: download as a disk image (`.dmg`); drag the app to Applications
 - «Tilpass»: a new tab's file never takes the name `Oppsett.md`
 
