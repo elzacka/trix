@@ -4,9 +4,9 @@
 Dette er innholdet i fanen. Endre det som du vil.
 
 - ## Navn: Gruppe
-- ### Tittel: Artikkel
+- ### Tittel: Veiledning
 - Første avsnitt under tittelen: Ingressen, som også står i lista
-- #### Overskrift: Et steg eller en del av artikkelen
+- #### Overskrift: Et steg eller en del av veiledningen
 - Avsnitt, - punktliste, 1. nummerert liste. Tom linje: Nytt avsnitt.
 - #emneknagg #flere
 - **fet**, *kursiv*, [lenke](https://…)

@@ -89,7 +89,7 @@ test('entries with paragraphs, aliases and tags', () => {
   assert.deepEqual(personvern.entries.map(e => e.id), [1, 2])
 })
 
-test('entries with subheadings and lists: a card\'s back, an article\'s steps', () => {
+test('entries with subheadings and lists: a card\'s back, a guide\'s steps', () => {
   const text = '## G\n### Kort\nForside\n#### Hva\n- en\n\n- to\nTekst\n1. først\n2) så\n#emne'
   const [card] = parseEntries(text)[0].entries
   assert.equal(lead(card), 'Forside')
@@ -127,7 +127,7 @@ test('the templates parse', () => {
   assert.equal(parseShortcuts(shortcuts, 'windows').length, 2)
   assert.equal(parseShortcuts(shortcuts, 'mac').flatMap(s => s.items).every(i => i.keys.length), true)
   assert.equal(parseEntries(read('../seed/maler/oppslag.md')).flatMap(s => s.entries).length, 6)
-  for (const kind of ['kort', 'artikler']) {
+  for (const kind of ['kort', 'steg']) {
     const entries = parseEntries(read(`../seed/maler/${kind}.md`)).flatMap(s => s.entries)
     assert.ok(entries.length > 1 && entries.every(e => lead(e) && e.blocks.length > 1), kind)
   }
@@ -199,7 +199,7 @@ test('setup problems name the line, and a bad line is left out', () => {
     '## Skrift', '- tekst | "x"; }', '## Vindu', '- bredde | 5000', '## Ikoner', '- menylinje | ikon.svg', '## Tema',
   ].join('\n'))
   assert.deepEqual(setup.problems, [
-    'Oppsett.md, linje 2: «kart» er ikke en type. Bruk hurtigtaster, oppslag, kort eller artikler.',
+    'Oppsett.md, linje 2: «kart» er ikke en type. Bruk hurtigtaster, oppslag, kort eller steg.',
     'Oppsett.md, linje 3: «../hemmelig.md» må være et filnavn som slutter på .md',
     'Oppsett.md, linje 4: Skriv navn, type og fil, skilt med |',
     'Oppsett.md, linje 5: «tasteoppslag» passer ikke til typen oppslag',

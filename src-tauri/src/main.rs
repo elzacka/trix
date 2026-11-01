@@ -35,7 +35,7 @@ const TEMPLATES: [(&str, &str); 4] = [
     ("hurtigtaster", include_str!("../../seed/maler/hurtigtaster.md")),
     ("oppslag", include_str!("../../seed/maler/oppslag.md")),
     ("kort", include_str!("../../seed/maler/kort.md")),
-    ("artikler", include_str!("../../seed/maler/artikler.md")),
+    ("steg", include_str!("../../seed/maler/steg.md")),
 ];
 const SETTINGS: &str = "innstillinger.json";
 /// A folder by this name next to the app holds the files instead, so they travel with it.

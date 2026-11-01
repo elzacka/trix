@@ -15,7 +15,7 @@ const KINDS = {
   hurtigtaster: { has: text => ['mac', 'windows'].some(os => parseShortcuts(text, os).length), merge: mergeShortcuts, render: renderShortcuts },
   oppslag: { has: hasEntries, merge: mergeEntries, render: renderLookup },
   kort: { has: hasEntries, merge: mergeEntries, render: renderCards },
-  artikler: { has: hasEntries, merge: mergeEntries, render: renderArticles },
+  steg: { has: hasEntries, merge: mergeEntries, render: renderGuides },
 }
 
 const state = {
@@ -237,7 +237,7 @@ function render() {
   const view = current()
   renderTabs()
   $('view').setAttribute('aria-labelledby', `tab-${state.tab}`)
-  const reading = view?.kind === 'artikler' && view.reading != null
+  const reading = view?.kind === 'steg' && view.reading != null
   $('search').hidden = !has(view, 'søk') || reading
   $('query').placeholder = state.capturing ? t('trykk hurtigtasten') : view?.placeholder || t('søk')
   if (view && $('query').value !== view.query) $('query').value = view.query
@@ -322,7 +322,7 @@ function renderShortcuts(view) {
   )
 }
 
-/** Oppslag, kort and artikler: groups or A–Å, narrowed by the search and the chosen tags. */
+/** Oppslag, kort and steg: groups or A–Å, narrowed by the search and the chosen tags. */
 function entrySections(view) {
   const parsed = parseEntries(view.text)
   const tags = has(view, 'emneknagger') ? view.tags : []
@@ -419,17 +419,17 @@ function flipCard(view, e) {
   )
 }
 
-// Articles: a list of titles and leads; one opens to read in the panel.
+// Steg: a list of guides, title and lead; one opens to read in the panel.
 
-function renderArticles(view) {
+function renderGuides(view) {
   const sections = entrySections(view)
   const reading = sections.flatMap(s => s.entries).find(e => e.id === view.reading)
     ?? parseEntries(view.text).flatMap(s => s.entries).find(e => e.id === view.reading)
   if (reading) {
     $('tools').replaceChildren()
-    $('list').replaceChildren(h('article', { class: 'article' },
-      h('button', { class: 'back-link', onclick: () => closeArticle(view) }, backIcon(), t('tilbake')),
-      h('h1', { tabindex: -1, id: 'article-title' }, reading.title),
+    $('list').replaceChildren(h('article', { class: 'guide' },
+      h('button', { class: 'back-link', onclick: () => closeGuide(view) }, backIcon(), t('tilbake')),
+      h('h1', { tabindex: -1, id: 'guide-title' }, reading.title),
       blocks(reading.blocks, 2),
       tagButtons(view, reading)))
     return
@@ -437,20 +437,20 @@ function renderArticles(view) {
   view.reading = null
   renderEntries(view, sections, entries => h('div', { class: 'card' }, entries.map(e => {
     const preview = plain(lead(e))
-    return h('div', { class: 'entry' }, h('button', { id: `entry-${e.id}`, onclick: () => openArticle(view, e.id) },
+    return h('div', { class: 'entry' }, h('button', { id: `entry-${e.id}`, onclick: () => openGuide(view, e.id) },
       h('span', { class: 'title' }, e.title),
       preview && h('span', { class: 'preview' }, preview)))
   })))
 }
 
-function openArticle(view, id) {
+function openGuide(view, id) {
   view.reading = id
   render()
   $('view').scrollTop = 0
-  $('article-title')?.focus()
+  $('guide-title')?.focus()
 }
 
-function closeArticle(view) {
+function closeGuide(view) {
   const id = view.reading
   view.reading = null
   render()
@@ -767,7 +767,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Escape') {
     e.preventDefault()
     if (!$('menu').hidden) { closeMenu(); $('more').focus() }
-    else if (view?.reading != null) closeArticle(view)
+    else if (view?.reading != null) closeGuide(view)
     else if (view?.open != null) { view.open = null; render() }
     else if (view?.tags.length) { view.tags = []; render() }
     else if (view?.query) clearAll()

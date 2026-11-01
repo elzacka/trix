@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- View type `steg`, default tab «Steg»: guides in steps
+
 ## 1.1.0 - 2026-11-01
 
 - User guide in Norwegian, `BRUKERVEILEDNING.md`: download to uninstall, both ways to customize, where the files are

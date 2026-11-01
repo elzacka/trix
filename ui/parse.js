@@ -239,7 +239,7 @@ export function parseEntries(text) {
   return sections.filter(s => s.entries.length)
 }
 
-/** The entry's first paragraph, when nothing comes before it: a card's front, an article's lead. */
+/** The entry's first paragraph, when nothing comes before it: a card's front, a guide's lead. */
 export function lead(entry) {
   return entry.blocks[0]?.type === 'p' ? entry.blocks[0].text : ''
 }
@@ -379,20 +379,20 @@ export const mergeEntries = (current, imported) => merge(current, imported, entr
 
 // Setup: `Oppsett.md` decides the views, the menu, the colours, the fonts, the window and the texts.
 
-export const KINDS = ['hurtigtaster', 'oppslag', 'kort', 'artikler']
+export const KINDS = ['hurtigtaster', 'oppslag', 'kort', 'steg']
 
 export const OPTIONS = {
   hurtigtaster: ['søk', 'tasteoppslag', 'system', 'a–å'],
   oppslag: ['søk', 'emneknagger', 'a–å'],
   kort: ['søk', 'emneknagger', 'a–å'],
-  artikler: ['søk', 'emneknagger', 'a–å'],
+  steg: ['søk', 'emneknagger', 'a–å'],
 }
 
 export const DEFAULT_OPTIONS = {
   hurtigtaster: ['søk', 'tasteoppslag'],
   oppslag: ['søk', 'emneknagger'],
   kort: ['søk', 'emneknagger'],
-  artikler: ['søk', 'emneknagger'],
+  steg: ['søk', 'emneknagger'],
 }
 
 export const SETUP_FILE = 'Oppsett.md'
@@ -401,7 +401,7 @@ const DEFAULT_VIEWS = [
   { name: 'Hurtigtaster', kind: 'hurtigtaster', file: 'Hurtigtaster.md', options: ['søk', 'tasteoppslag', 'system'], placeholder: '' },
   { name: 'Oppslag', kind: 'oppslag', file: 'Oppslag.md', options: DEFAULT_OPTIONS.oppslag, placeholder: '' },
   { name: 'Kort', kind: 'kort', file: 'Kort.md', options: DEFAULT_OPTIONS.kort, placeholder: '' },
-  { name: 'Artikler', kind: 'artikler', file: 'Artikler.md', options: DEFAULT_OPTIONS.artikler, placeholder: '' },
+  { name: 'Steg', kind: 'steg', file: 'Steg.md', options: DEFAULT_OPTIONS.steg, placeholder: '' },
 ]
 
 export const MENU = ['visning', 'kildedata', 'oppsett', 'hurtigåpner', 'avslutt', 'versjon', '---']
@@ -516,7 +516,7 @@ export function parseSetup(text) {
     if (section === 'visninger') {
       const [title, kind = '', file = '', options, placeholder = ''] = parts
       if (!title || !kind || !file) return problem(i, 'Skriv navn, type og fil, skilt med |')
-      if (!KINDS.includes(key(kind))) return problem(i, `«${kind}» er ikke en type. Bruk hurtigtaster, oppslag, kort eller artikler.`)
+      if (!KINDS.includes(key(kind))) return problem(i, `«${kind}» er ikke en type. Bruk hurtigtaster, oppslag, kort eller steg.`)
       if (!listName(file)) return problem(i, `«${file}» må være et filnavn som slutter på .md`)
       const chosen = options === undefined || (!options && placeholder) ? DEFAULT_OPTIONS[key(kind)] : options.split(',').map(key).filter(Boolean)
       const wrong = chosen.find(o => !OPTIONS[key(kind)].includes(o))

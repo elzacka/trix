@@ -28,7 +28,7 @@ Første oppstart:
 | Slå opp en hurtigtast | Tastaturknappen i søkefeltet, trykk kombinasjonen |
 | Se alt med samme emne | Trykk på en #emneknagg |
 | Snu et kort | Trykk på kortet |
-| Lese en artikkel | Trykk på den. Esc: Tilbake |
+| Lese en veiledning | Trykk på den. Esc: Tilbake |
 | Avslutte | «Avslutt Trix Ultra» i menyen, eller høyreklikk på ikonet |
 
 Menyen («Flere valg» øverst til høyre). Oppsettet bestemmer hvilke valg den har.
@@ -52,12 +52,12 @@ To deler, to måter:
 
 Typer faner:
 
-| Type | Passer til |
-|---|---|
+| Type           | Passer til                                                                                         |
+| -------------- | -------------------------------------------------------------------------------------------------- |
 | `hurtigtaster` | Hurtigtaster for et program, med Windows- og Mac-taster. Valget «system» viser også maskinens egne |
-| `oppslag` | Ordliste, jukselapp, spørsmål og svar, telefonliste |
-| `kort` | Kort med forside og bakside: Verktøyoversikt, pugg |
-| `artikler` | Veiledninger med steg |
+| `oppslag`      | Ordliste, oppslagsverk, spørsmål og svar, telefonliste                                             |
+| `kort`         | «Snu-kort» med forside og bakside: Tiltakskort, opplæring                                          |
+| `steg`         | Veiledninger med steg                                                                              |
 
 ### I appen: «Tilpass»
 

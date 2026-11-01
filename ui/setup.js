@@ -12,7 +12,7 @@ const win = window.__TAURI__.webviewWindow.getCurrentWebviewWindow()
 
 const $ = id => document.getElementById(id)
 
-const KIND_NAMES = { hurtigtaster: 'Hurtigtaster', oppslag: 'Oppslag', kort: 'Kort', artikler: 'Artikler' }
+const KIND_NAMES = { hurtigtaster: 'Hurtigtaster', oppslag: 'Oppslag', kort: 'Kort', steg: 'Steg' }
 const OPTION_NAMES = {
   'søk': 'Søkefelt', tasteoppslag: 'Slå opp hurtigtaster', system: 'Maskinens egne hurtigtaster', emneknagger: 'Emneknagger',
   'a–å': 'Sorter A–Å fra start',

@@ -12,14 +12,14 @@ En seksjon du sletter, får standardverdiene tilbake.
   - hurtigtaster: Handlinger med tastene for Windows og Mac. Du kan slå opp en tastekombinasjon.
   - oppslag: Ord og begreper med forklaring, andre navn og emneknagger. Til ordliste, jukselapp og spørsmål og svar.
   - kort: Kort med forside og bakside. Trykk på kortet for å snu det.
-  - artikler: Lengre tekster delt i steg. Til veiledninger og «slik gjør du».
+  - steg: Veiledninger delt i steg. Til «slik gjør du».
 - Samme type flere ganger: Gi hver fane sin egen fil.
 - Fil: Et filnavn som slutter på .md, i samme mappe som denne fila. Appen lager fila fra malen for typen hvis den mangler.
 - Valg, skilt med komma. Uten valg får hurtigtaster søk og tasteoppslag, de andre søk og emneknagger.
   - søk: Søkefelt
   - tasteoppslag: Slår opp en hurtigtast du trykker eller skriver, og viser knappen med tastaturet i søkefeltet (hurtigtaster)
   - system: Viser også maskinens egne hurtigtaster (hurtigtaster)
-  - emneknagger: Trykk på en #emneknagg for å se alt med samme emne (oppslag, kort, artikler)
+  - emneknagger: Trykk på en #emneknagg for å se alt med samme emne (oppslag, kort, steg)
   - a–å: Sorterer alfabetisk når appen starter
 - Tekst i søkefeltet: Står i feltet før du skriver. Uten tekst: «søk» under Tekster.
 - Eksempel: - Telefonliste | oppslag | Telefonliste.md | søk | Søk etter navn eller nummer
@@ -60,7 +60,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 - Hurtigtaster | hurtigtaster | Hurtigtaster.md | søk, tasteoppslag, system
 - Oppslag | oppslag | Oppslag.md | søk, emneknagger
 - Kort | kort | Kort.md | søk, emneknagger
-- Artikler | artikler | Artikler.md | søk, emneknagger
+- Steg | steg | Steg.md | søk, emneknagger
 
 ## Meny
 

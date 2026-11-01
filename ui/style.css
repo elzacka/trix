@@ -380,13 +380,13 @@ kbd {
 
 .entry .body { padding: 0 12px 12px; user-select: text; -webkit-user-select: text; }
 
-.body p, .body ul, .body ol, .article p, .article ul, .article ol { margin: 0 0 8px; }
+.body p, .body ul, .body ol, .guide p, .guide ul, .guide ol { margin: 0 0 8px; }
 
-.body ul, .body ol, .article ul, .article ol { padding-left: 20px; }
+.body ul, .body ol, .guide ul, .guide ol { padding-left: 20px; }
 
-.body a, .article a { color: var(--accent); }
+.body a, .guide a { color: var(--accent); }
 
-:is(.body, .article, .flip) code { padding: 0 4px; background: var(--key); border-radius: 4px; font: 0.86em ui-monospace, monospace; }
+:is(.body, .guide, .flip) code { padding: 0 4px; background: var(--key); border-radius: 4px; font: 0.86em ui-monospace, monospace; }
 
 /* A card face has its own colours: the code ground follows its text */
 .flip code { background: color-mix(in srgb, currentColor 15%, transparent); }
@@ -479,15 +479,15 @@ kbd {
 
 @media (prefers-reduced-motion: reduce) { .face { transition: none; } }
 
-/* Articles */
+/* Steg */
 
-.article { user-select: text; -webkit-user-select: text; }
+.guide { user-select: text; -webkit-user-select: text; }
 
-.article h1 { margin: 10px 0 8px; font-size: 1.3em; line-height: 1.25; }
+.guide h1 { margin: 10px 0 8px; font-size: 1.3em; line-height: 1.25; }
 
-.article h1:focus { outline: none; }
+.guide h1:focus { outline: none; }
 
-.article .subheading { margin-top: 18px; font-size: 1.07em; }
+.guide .subheading { margin-top: 18px; font-size: 1.07em; }
 
 .back-link {
   display: inline-flex;
