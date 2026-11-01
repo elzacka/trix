@@ -3,7 +3,7 @@
 ## Unreleased
 
 - View type `steg`, default tab «Steg»: guides in steps
-- Demo content on emergency preparedness (Beredskap), in A–Å order: groups, then entries within each group
+- Demo content on emergency preparedness (Beredskap): groups and entries in A–Å order, Tiltakskort in scenario order
 
 ## 1.1.0 - 2026-11-01
 
