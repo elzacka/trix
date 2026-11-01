@@ -3,7 +3,7 @@ import {
   searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, fill, contrastProblems, SETUP_FILE, TOKENS,
 } from './parse.js'
 import { h, svg } from './dom.js'
-import { importText, replaceContent, IMPORT_TYPES } from './import.js'
+import { importText, importable, replaceContent, IMPORT_TYPES } from './import.js'
 
 const { invoke } = window.__TAURI__.core
 const { listen, emitTo } = window.__TAURI__.event
@@ -654,7 +654,9 @@ async function readImport(file) {
   const tab = current()
   const views = MODULE_VIEWS[tab.module]
   state.error = ''
-  const text = await importText(file.name, new Uint8Array(await file.arrayBuffer()), tab.module).catch(() => '')
+  // Name and size first: a dropped file can be anything, of any size.
+  const text = !importable(file.name, file.size) ? ''
+    : await file.arrayBuffer().then(bytes => importText(file.name, new Uint8Array(bytes), tab.module)).catch(() => '')
   if (!views.has(text)) {
     state.error = t('passer ikke', { fil: file.name, fane: tab.name })
     return render()

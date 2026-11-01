@@ -7,6 +7,9 @@ const SKIP = new Set([
   'colorschememapping', 'latentstyles', 'datastore', 'xmlnstbl', 'mmathPr', 'expandedcolortbl', 'shp', 'nonshppict',
 ])
 
+// Real documents nest a few dozen groups; each level holds a copy of the state.
+const DEPTH_LIMIT = 1000
+
 const SYMBOLS = {
   emdash: '—', endash: '–', bullet: '•', lquote: '‘', rquote: '’', ldblquote: '“', rdblquote: '”',
   emspace: ' ', enspace: ' ', qmspace: ' ', tab: ' ', line: ' ',
@@ -146,6 +149,7 @@ export function readRtf(bytes) {
     const c = bytes[at]
     if (c === 0x7b) {
       flushBytes()
+      if (stack.length >= DEPTH_LIMIT) throw new Error('For mange nivåer i fila')
       stack.push(state)
       state = { ...state, dest: state.dest === 'stylesheet' ? 'stylesheet' : '' }
       groupStart = true

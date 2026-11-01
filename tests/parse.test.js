@@ -345,3 +345,10 @@ test('shortcuts A–Å: groups and their lines, ungrouped lines first', () => {
     ['', ['Bord', 'Ånd']], ['Chrome', ['Å']], ['Øvrig', ['A', 'B']],
   ])
 })
+
+test('inline: linear on a long line of unclosed marks', () => {
+  const started = performance.now()
+  for (const c of ['[', '*', '`', '**a', '[a](', '[a](https://x']) inline(c.repeat(200000))
+  assert.ok(performance.now() - started < 1000)
+  assert.deepEqual(inline('**a** *b* `c` [d](https://e.no)').map(s => s.type), ['strong', 'text', 'em', 'text', 'code', 'text', 'link'])
+})

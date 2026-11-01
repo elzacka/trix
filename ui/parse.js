@@ -312,7 +312,8 @@ export function searchEntries(sections, query, tags = []) {
 /** **bold**, *italic*, `code` and [text](url) as segments; everything else is plain text. */
 export function inline(text) {
   const out = []
-  const pattern = /\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`|\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g
+  // A span never runs past its own delimiter, and a URL's parentheses pair up: each try stops early, so a long line stays linear.
+  const pattern = /\*\*((?:[^*]|\*(?!\*))+)\*\*|\*([^*]+)\*|`([^`]+)`|\[([^[\]]+)\]\((https?:\/\/(?:[^\s()]|\([^\s()]*\))+)\)/g
   let last = 0
   for (const m of text.matchAll(pattern)) {
     if (m.index > last) out.push({ type: 'text', text: text.slice(last, m.index) })

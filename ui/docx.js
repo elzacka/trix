@@ -1,13 +1,20 @@
 // Word (.docx): a zip of XML parts. Only the parts named here are read; macros, images and embedded objects never are.
 
 export const PART_LIMIT = 20 * 1024 * 1024
-const ENTRY_LIMIT = 1000
+export const ENTRY_LIMIT = 1000
+/** Table cells per import, padding included: a few rows can claim a huge width. */
+export const CELL_LIMIT = 100000
+
+/** What one import may unpack in all, shared by every `unzip` call: parts can point at the same data. */
+export const budget = () => ({ bytes: 5 * PART_LIMIT, cells: CELL_LIMIT })
+
+const tooLarge = () => new Error('Fila er for stor')
 
 const u16 = (b, at) => b[at] | (b[at + 1] << 8)
 const u32 = (b, at) => (u16(b, at) | (u16(b, at + 2) << 16)) >>> 0
 
-/** Inflates raw deflate data, refusing more than `PART_LIMIT` bytes whatever the header claims. */
-async function inflate(data) {
+/** Inflates raw deflate data, refusing more than `PART_LIMIT` bytes or the budget, whatever the header claims. */
+async function inflate(data, left) {
   const reader = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader()
   const chunks = []
   let size = 0
@@ -15,9 +22,9 @@ async function inflate(data) {
     const { done, value } = await reader.read()
     if (done) break
     size += value.length
-    if (size > PART_LIMIT) {
+    if (size > Math.min(PART_LIMIT, left)) {
       await reader.cancel()
-      throw new Error('En del av fila er for stor')
+      throw tooLarge()
     }
     chunks.push(value)
   }
@@ -31,7 +38,8 @@ async function inflate(data) {
 }
 
 /** The named parts of a zip as text, by name; a missing part is left out. Not a zip: throws. */
-export async function unzip(bytes, names) {
+export async function unzip(bytes, names, limits = budget()) {
+  const wanted = new Set(names)
   let end = -1
   for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
     if (u32(bytes, i) === 0x06054b50) { end = i; break }
@@ -49,13 +57,15 @@ export async function unzip(bytes, names) {
     const name = new TextDecoder().decode(bytes.subarray(at + 46, at + 46 + nameLength))
     const local = u32(bytes, at + 42)
     at += 46 + nameLength + u16(bytes, at + 30) + u16(bytes, at + 32)
-    if (!names.includes(name)) continue
+    if (!wanted.has(name) || Object.hasOwn(parts, name)) continue
     if (u32(bytes, local) !== 0x04034b50) throw new Error('Ødelagt zip-fil')
     const start = local + 30 + u16(bytes, local + 26) + u16(bytes, local + 28)
     const data = bytes.subarray(start, start + size)
-    if (method === 0 && size > PART_LIMIT) throw new Error('En del av fila er for stor')
+    if (method === 0 && size > Math.min(PART_LIMIT, limits.bytes)) throw tooLarge()
     if (method !== 0 && method !== 8) throw new Error(`Ukjent komprimering i ${name}`)
-    parts[name] = new TextDecoder().decode(method === 0 ? data : await inflate(data))
+    const raw = method === 0 ? data : await inflate(data, limits.bytes)
+    limits.bytes -= raw.length
+    parts[name] = new TextDecoder().decode(raw)
   }
   return parts
 }
@@ -64,7 +74,7 @@ const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }
 
 function decode(text) {
   return text.replace(/&(\w+|#\d+|#x[\da-f]+);/gi, (all, name) => {
-    if (name[0] !== '#') return ENTITIES[name] ?? all
+    if (name[0] !== '#') return Object.hasOwn(ENTITIES, name) ? ENTITIES[name] : all
     const code = name[1] === 'x' || name[1] === 'X' ? parseInt(name.slice(2), 16) : Number(name.slice(1))
     return code <= 0x10ffff ? String.fromCodePoint(code) : ''
   })

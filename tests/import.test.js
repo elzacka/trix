@@ -1,10 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { deflateRawSync, crc32 } from 'node:zlib'
-import { importText, toMarkdown, replaceContent } from '../ui/import.js'
+import { importText, importable, toMarkdown, replaceContent } from '../ui/import.js'
 import { unzip, parseXml, PART_LIMIT } from '../ui/docx.js'
 import { readRtf } from '../ui/rtf.js'
-import { parseEntries, parseShortcuts, mergeEntries, lead } from '../ui/parse.js'
+import { readCsv } from '../ui/csv.js'
+import { parseEntries, parseShortcuts, mergeEntries, lead, inline } from '../ui/parse.js'
 
 /** A zip of text parts, deflated unless `store`. */
 function zip(files, store = false) {
@@ -250,4 +251,51 @@ test('csv: semicolon, comma or tab; quoted fields; Windows-1252 from Excel', asy
 test('csv in hurtigtaster: rows become shortcuts under the file name as group', async () => {
   const text = await importText('Teams.csv', rtf('Navn;Windows;Mac\nKamera;ctrl shift O;⌘⇧O\n'), 'hurtigtaster')
   assert.equal(text, '## Teams\n\n- Kamera | ctrl shift O | ⌘⇧O\n')
+})
+
+test('limits: shared unpack budget, repeated parts, wide tables, deep RTF', async () => {
+  const sheet = '<worksheet><sheetData>' + '<row><c t="inlineStr"><is><t>x</t></is></c></row>'.repeat(10) + '</sheetData></worksheet>'
+  const many = { 'xl/_rels/workbook.xml.rels': '<Relationships><Relationship Id="r1" Target="worksheets/s.xml"/></Relationships>', 'xl/worksheets/s.xml': sheet }
+  many['xl/workbook.xml'] = `<workbook><sheets>${'<sheet name="A" r:id="r1"/>'.repeat(4000)}</sheets></workbook>`
+  assert.equal((await importText('a.xlsx', zip(many), 'oppslag')).match(/^### /gm).length, 1)
+  // Six parts of 20 MB: more than one import may unpack in all.
+  const big = 'a'.repeat(PART_LIMIT - 10)
+  await assert.rejects(unzip(zip({ a: big, b: big, c: big, d: big, e: big, f: big }), ['a', 'b', 'c', 'd', 'e', 'f']), /for stor/)
+  const wide = 'a' + ';'.repeat(2000) + '\n' + 'a\n'.repeat(2000)
+  await assert.rejects(importText('a.csv', rtf(wide), 'oppslag'), /celler/)
+  assert.throws(() => readRtf(rtf('{\\rtf1 ' + '{'.repeat(5000))), /nivåer/)
+  assert.equal(importable('film.mov', 10), false)
+  assert.equal(importable('a.docx', 60 * 1024 * 1024), false)
+  assert.equal(parseXml('<a>&constructor;</a>').children[0].children[0], '&constructor;')
+})
+
+test('limits: a long value used many times; a long CSV row', async () => {
+  const long = 'x'.repeat(30 * 1024 * 1024)
+  const reused = zip({
+    'xl/workbook.xml': '<workbook><sheets><sheet name="A" r:id="r1"/></sheets></workbook>',
+    'xl/_rels/workbook.xml.rels': '<Relationships><Relationship Id="r1" Target="worksheets/s.xml"/></Relationships>',
+    'xl/sharedStrings.xml': `<sst><si><t>${long}</t></si></sst>`,
+    'xl/worksheets/s.xml': `<worksheet><sheetData>${'<row><c t="s"><v>0</v></c></row>'.repeat(5)}</sheetData></worksheet>`,
+  })
+  await assert.rejects(importText('a.xlsx', reused, 'oppslag'), /for stor/)
+  const heading = { type: 'heading', level: 1, runs: [{ text: 'A' }] }
+  const linked = text => ({ type: 'paragraph', runs: [{ text, href: `https://x.no/${'a'.repeat(3000)}` }] })
+  assert.equal(toMarkdown([heading, linked('lenke')], 'oppslag'), '### A\n\nlenke\n')
+  assert.throws(() => readCsv(rtf('a' + ';'.repeat(200000))), /celler/)
+})
+
+test('inline: bold around italic, links with brackets and parentheses', () => {
+  assert.deepEqual(inline('**a *b* c**'), [{ type: 'strong', text: 'a *b* c' }])
+  assert.deepEqual(inline('[x](https://x.no/a?b=[1])').map(s => s.type), ['link'])
+  assert.deepEqual(inline('[Oslo](https://no.wikipedia.org/wiki/Oslo_(by))'), [{ type: 'link', text: 'Oslo', href: 'https://no.wikipedia.org/wiki/Oslo_(by)' }])
+})
+
+test('links: plain, one per run of the same address, within the output budget', () => {
+  const heading = { type: 'heading', level: 1, runs: [{ text: 'A' }] }
+  const href = 'https://x.no/'
+  const split = { type: 'paragraph', runs: [{ text: 'Se ', href }, { text: 'her', bold: true, href }] }
+  assert.equal(toMarkdown([heading, split], 'oppslag'), '### A\n\n[Se her](https://x.no/)\n')
+  const long = `https://x.no/${'a'.repeat(2000)}`
+  const many = Array.from({ length: 60000 }, () => ({ type: 'paragraph', runs: [{ text: 'x', href: long }] }))
+  assert.throws(() => toMarkdown([heading, ...many], 'oppslag'), /for stor/)
 })
