@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.1 - 2026-11-01
 
 - Saving a file, and creating a missing one, never writes through a symbolic link someone else placed in a shared data folder
 - Each release carries an SBOM, `Trix-Ultra-SBOM.spdx.json`, and goes out only after CodeQL finds no open high or critical alert
