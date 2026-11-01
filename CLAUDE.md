@@ -3,7 +3,7 @@
 Tauri 2 app (Windows, macOS), a configurable shell built on Trix (`~/dev/trix`): views, menu, colours, fonts, icons, window and texts from `Oppsett.md`, content from one Markdown file per view. Anyone customizes it, in «Tilpass» or in `Oppsett.md`. Overview: `README.md`.
 
 - Verify: `npm test`, then `npm run build:mac` (also runs `cargo test`) and open the app with `TRIX_ULTRA_DATA_DIR` set to a scratch folder. Windows: CI only (`build.yml`).
-- Version: `src-tauri/Cargo.toml`; Tauri reads it. A new version with its CHANGELOG heading on `main`: `build.yml` publishes release `v<version>` with both zips, the macOS one signed and notarized from the `APPLE_*` secrets (README, Develop); README links to `releases/latest/download/`.
+- Version: `src-tauri/Cargo.toml`; Tauri reads it. A new version with its CHANGELOG heading on `main`: `build.yml` publishes release `v<version>` with the Windows zip and the macOS `.dmg`, app and dmg signed and notarized from the `APPLE_*` secrets (README, Develop); README links to `releases/latest/download/`.
 - Frontend: plain ES modules in `ui/`, no bundler, no npm runtime dependencies. Parsers and setup (`parseSetup`, `TEXTS`) in `ui/parse.js`, pure, tested with `node --test`.
 - One fact, one place, held by tests: `seed/Oppsett.md` equals `parseSetup('')` and lists every key in `TEXTS`; its colours, fonts and window match `ui/style.css` and `tauri.conf.json`.
 - View types: `hurtigtaster`, `oppslag`, `kort`, `artikler`; template per type in `seed/maler/`, `{navn}` filled with the view's name. Generic type names; the user names the tabs.

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Portable macOS build: dist/Trix-Ultra-macOS.zip. Windows: .github/workflows/build.yml
+# macOS build: dist/Trix-Ultra-macOS.dmg. Windows: .github/workflows/build.yml
 set -eu
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.cargo/bin:$PATH"

@@ -53,7 +53,7 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macos-unsigned
-          path: dist/Trix-Ultra-macOS.zip
+          path: dist/Trix-Ultra-macOS.dmg
 
   # A job of its own: no build code runs while the Developer ID is in a keychain
   sign:
@@ -99,12 +99,14 @@ jobs:
           echo "signed=true" >> "$GITHUB_OUTPUT"
       - name: Sign and notarize
         run: |
-          ditto -x -k built/Trix-Ultra-macOS.zip built
+          hdiutil attach -readonly -nobrowse -mountpoint built/image built/Trix-Ultra-macOS.dmg
+          ditto "built/image/Trix Ultra.app" "built/Trix Ultra.app"
+          hdiutil detach built/image
           scripts/sign.sh "built/Trix Ultra.app"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macos
-          path: dist/Trix-Ultra-macOS.zip
+          path: dist/Trix-Ultra-macOS.dmg
 
   # A new version with its CHANGELOG heading becomes a release; the README's download links follow the latest.
   release:
@@ -132,5 +134,5 @@ jobs:
           fi
           if [ "$SIGNED" != true ]; then echo "macOS build is not signed: add the APPLE_* secrets (README, Develop)"; exit 1; fi
           gh run download "$GITHUB_RUN_ID" --dir dist
-          gh release create "v$version" dist/windows/Trix-Ultra-Windows.zip dist/macos/Trix-Ultra-macOS.zip \
+          gh release create "v$version" dist/windows/Trix-Ultra-Windows.zip dist/macos/Trix-Ultra-macOS.dmg \
             --title "Trix Ultra $version" --notes-file notes.md --target "$GITHUB_SHA"

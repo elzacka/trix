@@ -7,10 +7,11 @@ file or in «Tilpass». No installer, no network.
 
 ## Get started
 
-1. Download [Trix-Ultra-macOS.zip](https://github.com/elzacka/trix-ultra/releases/latest/download/Trix-Ultra-macOS.zip)
+1. Download [Trix-Ultra-macOS.dmg](https://github.com/elzacka/trix-ultra/releases/latest/download/Trix-Ultra-macOS.dmg)
    or [Trix-Ultra-Windows.zip](https://github.com/elzacka/trix-ultra/releases/latest/download/Trix-Ultra-Windows.zip).
 2. Open it.
-   - macOS 15 or later: double-click the zip, then `Trix Ultra.app`.
+   - macOS 15 or later: double-click the dmg, drag `Trix Ultra` to
+     Applications, open it from there.
    - Windows: Extract all, then `Trix Ultra\Trix Ultra.exe`. First time:
      SmartScreen → More info → Run anyway (unsigned). Needs WebView2, built
      into Windows 10 and 11.
@@ -84,7 +85,7 @@ without them the build is ad hoc and no release goes out:
 | `APPLE_API_KEY` | App Store Connect API key, `.p8`, base64 |
 | `APPLE_API_KEY_ID`, `APPLE_API_ISSUER` | Its Key ID and Issuer ID |
 
-`npm run build:mac` builds `dist/Trix-Ultra-macOS.zip` locally: signed with the
+`npm run build:mac` builds `dist/Trix-Ultra-macOS.dmg` locally: signed with the
 Developer ID in the keychain and notarized with the `notarytool` profile
 `trix`, else ad hoc.
 
