@@ -1,9 +1,14 @@
-// The setup screen: the admin ticks, chooses and drags; each change shows in the app at once, and «Lagre» writes `Oppsett.md`.
+// «Tilpass»: a window of its own. Each change shows in the open panel at once, and «Lagre» writes `Oppsett.md`.
 
 import {
-  formatSetup, setupHeader, KINDS, MENU, COLORS, ICONS, PNG_ONLY, TEXTS, WINDOW, FONT_SIZE, FONT_PATTERN, OPTIONS, DEFAULT_OPTIONS,
-  TOKENS, SETUP_FILE, listName, iconName,
+  parseSetup, formatSetup, setupHeader, fill, KINDS, MENU, COLORS, ICONS, PNG_ONLY, TEXTS, WINDOW, FONT_SIZE, FONT_PATTERN, OPTIONS,
+  DEFAULT_OPTIONS, TOKENS, listName, iconName,
 } from './parse.js'
+import { h, svg } from './dom.js'
+
+const { invoke } = window.__TAURI__.core
+const { listen, emitTo } = window.__TAURI__.event
+const win = window.__TAURI__.window.getCurrentWindow()
 
 const $ = id => document.getElementById(id)
 
@@ -24,7 +29,8 @@ const UP = ['M12 5l0 14', 'M18 11l-6 -6', 'M6 11l6 -6']
 const DOWN = ['M12 5l0 14', 'M18 13l-6 6', 'M6 13l6 6']
 const REMOVE = ['M18 6l-12 12', 'M6 6l12 12']
 
-let ctx = null
+/** `Oppsett.md` as last read or written, for the changed-on-disk check. */
+let original = ''
 let draft = null
 /** Menu items in their order, the ones left out last: { key, on }. */
 let menuRows = []
@@ -32,9 +38,13 @@ let dirty = false
 let discarding = false
 let open = new Set(['faner'])
 
-export function openSetup(context) {
-  ctx = context
-  draft = structuredClone(ctx.state.setup)
+const t = (key, values) => fill(draft.texts[key], { navn: draft.texts.navn, ...values })
+const mod = e => (/Mac/.test(navigator.userAgent) ? e.metaKey : e.ctrlKey)
+
+async function start() {
+  original = await invoke('read_setup')
+  draft = parseSetup(original)
+  const problems = draft.problems
   draft.problems = []
   menuRows = [
     ...draft.menu.map(key => ({ key, on: true })),
@@ -42,72 +52,56 @@ export function openSetup(context) {
   ]
   dirty = false
   discarding = false
-  ctx.state.setupOpen = true
-  ctx.invoke('keep_open', { open: true })
-  $('view').hidden = true
-  $('setup').hidden = false
-  $('setup-save').textContent = ctx.t('lagre')
-  $('setup-cancel').textContent = ctx.t('avbryt')
-  $('setup-problems').replaceChildren()
+  document.title = `${t('oppsett')}: ${draft.texts.navn}`
+  win.setTitle(document.title)
+  $('setup-title').textContent = t('oppsett')
+  $('setup-save').textContent = t('lagre')
+  $('setup-cancel').textContent = t('avbryt')
+  show(problems)
   render()
-  $('setup-title').focus()
 }
 
-function finish() {
-  ctx.state.setupOpen = false
-  ctx.invoke('keep_open', { open: false })
-  $('setup').hidden = true
-  $('view').hidden = false
-}
-
-export async function closeSetup() {
-  if (!ctx?.state.setupOpen) return
+/** Closes the window; the panel reads the files again. A first try with unsaved changes asks to discard them. */
+function close() {
   if (dirty && !discarding) {
     discarding = true
-    $('setup-cancel').textContent = ctx.t('forkast')
+    $('setup-cancel').textContent = t('forkast')
+    $('setup-cancel').focus()
     return
   }
-  finish()
-  await ctx.restore()
+  dirty = false
+  win.close()
 }
 
 /** Writes `Oppsett.md` through the same changed-on-disk check as the editor. */
-async function write() {
-  const text = formatSetup(draft, setupHeader(ctx.state.setupText))
+async function save() {
+  const text = formatSetup(draft, setupHeader(original))
   try {
-    ctx.state.setupText = await ctx.invoke('save', { name: SETUP_FILE, original: ctx.state.setupText, text })
+    original = await invoke('save_setup', { original, text })
     dirty = false
-    return true
+    win.close()
   } catch (error) {
-    show([error === 'changed' ? ctx.t('endret utenfor') : String(error)])
-    return false
+    show([error === 'changed' ? t('endret utenfor') : String(error)])
   }
 }
 
-async function save() {
-  if (!(await write())) return
-  finish()
-  await ctx.saved()
-}
-
 function show(problems) {
-  $('setup-problems').replaceChildren(...problems.map(p => ctx.h('p', {}, p)))
+  $('setup-problems').replaceChildren(...problems.map(p => h('p', {}, p)))
 }
 
-/** Each change: the app shows the draft; `again` builds the screen anew after a change in its structure. */
-async function change(again) {
+/** Each change: the panel shows the draft; `again` builds the screen anew after a change in its structure. */
+function change(again) {
   dirty = true
   discarding = false
-  $('setup-cancel').textContent = ctx.t('avbryt')
+  $('setup-cancel').textContent = t('avbryt')
   if (again) render()
-  show(await ctx.preview(structuredClone(draft)))
+  emitTo('main', 'preview', draft)
 }
 
 // Building blocks of the screen
 
 function render() {
-  const { h } = ctx
-  const scroll = $('setup-body').scrollTop
+    const scroll = $('setup-body').scrollTop
   $('setup-body').replaceChildren(
     section('faner', 'Faner', views()),
     section('meny', 'Meny', menu()),
@@ -115,34 +109,32 @@ function render() {
     section('skrift', 'Skrift og vindu', fonts()),
     section('ikoner', 'Ikoner', icons()),
     section('tekster', 'Tekster', texts()),
-    section('team', 'Del med teamet', team()),
-    h('button', { class: 'link', onclick: editText }, 'Rediger som tekst'),
+    h('button', { class: 'link', onclick: () => invoke('open_setup_file').catch(e => show([String(e)])) }, 'Åpne Oppsett.md'),
   )
   $('setup-body').scrollTop = scroll
 }
 
 function section(id, title, body) {
-  const details = ctx.h('details', { open: open.has(id) }, ctx.h('summary', {}, title), ctx.h('div', { class: 'setup-section' }, body))
+  const details = h('details', { open: open.has(id) }, h('summary', {}, title), h('div', { class: 'setup-section' }, body))
   details.addEventListener('toggle', () => { if (details.open) open.add(id); else open.delete(id) })
   return details
 }
 
-const field = (label, control) => ctx.h('label', { class: 'field' }, ctx.h('span', {}, label), control)
+const field = (label, control) => h('label', { class: 'field' }, h('span', {}, label), control)
 
 function checkbox(label, checked, onchange) {
-  return ctx.h('label', { class: 'check' },
-    ctx.h('input', { type: 'checkbox', checked, onchange: e => onchange(e.target.checked) }), label)
+  return h('label', { class: 'check' },
+    h('input', { type: 'checkbox', checked, onchange: e => onchange(e.target.checked) }), label)
 }
 
 function iconButton(label, paths, onclick, disabled) {
-  return ctx.h('button', { class: 'icon-button', 'aria-label': label, title: label, onclick, disabled }, ctx.icon('', paths))
+  return h('button', { class: 'icon-button', 'aria-label': label, title: label, onclick, disabled }, svg(paths))
 }
 
 /** Rows that move by dragging the grip or with the buttons beside them. */
 function rows(items, row, apply) {
-  const { h } = ctx
-  const list = h('ol', { class: 'rows' }, items.map((item, i) => h('li', { class: 'row', 'data-index': i },
-    h('span', { class: 'handle' }, ctx.icon('', GRIP)),
+    const list = h('ol', { class: 'rows' }, items.map((item, i) => h('li', { class: 'row', 'data-index': i },
+    h('span', { class: 'handle' }, svg(GRIP)),
     h('div', { class: 'row-main' }, row(item, i)),
     h('div', { class: 'row-buttons' },
       iconButton('Flytt opp', UP, () => apply(swap(items, i, i - 1)), i === 0),
@@ -187,8 +179,7 @@ function unique(base, taken) {
 }
 
 function views() {
-  const { h } = ctx
-  const list = rows(draft.views, view, order => { draft.views = order; change(true) })
+    const list = rows(draft.views, view, order => { draft.views = order; change(true) })
   const kind = h('select', { 'aria-label': 'Type' }, KINDS.map(k => h('option', { value: k }, KIND_NAMES[k])))
   const add = () => {
     const name = unique(KIND_NAMES[kind.value], draft.views.map(v => v.name.toLocaleLowerCase('nb')))
@@ -200,8 +191,7 @@ function views() {
 }
 
 function view(v, i) {
-  const { h } = ctx
-  const file = h('input', {
+    const file = h('input', {
     value: v.file, 'aria-label': 'Fil', spellcheck: 'false',
     onchange: e => {
       const ok = listName(e.target.value.trim())
@@ -232,7 +222,7 @@ function view(v, i) {
       change(o === 'søk')
     }))),
     v.options.includes('søk') && field('Tekst i søkefeltet', h('input', {
-      value: v.placeholder, placeholder: ctx.t('søk'), oninput: e => { v.placeholder = e.target.value.trim(); change() },
+      value: v.placeholder, placeholder: t('søk'), oninput: e => { v.placeholder = e.target.value.trim(); change() },
     })),
     field('Fil', file),
   ]
@@ -240,15 +230,14 @@ function view(v, i) {
 
 function menuLabel(key) {
   const labels = {
-    visning: ctx.t('visning'), kildedata: ctx.t('kildedata', { visning: '' }).trim(), oppsett: ctx.t('oppsett'),
-    hurtigåpner: ctx.t('endre hurtigåpner'), avslutt: ctx.t('avslutt'), versjon: 'Versjon', '---': 'Skillelinje',
+    visning: t('visning'), kildedata: t('kildedata', { visning: '' }).trim(), oppsett: t('oppsett'),
+    hurtigåpner: t('endre hurtigåpner'), avslutt: t('avslutt'), versjon: 'Versjon', '---': 'Skillelinje',
   }
   return labels[key]
 }
 
 function menu() {
-  const { h } = ctx
-  const apply = order => {
+    const apply = order => {
     menuRows = order
     draft.menu = menuRows.filter(r => r.on || r.key === '---').map(r => r.key)
     change(true)
@@ -264,7 +253,7 @@ function menu() {
 function hex(name, mode) {
   const value = draft.colors[name]?.[mode === 'light' ? 'light' : 'dark']
     ?? getComputedStyle(document.documentElement).getPropertyValue(`--${TOKENS[name]}-${mode}`).trim()
-  const probe = ctx.h('span', { hidden: true })
+  const probe = h('span', { hidden: true })
   document.body.append(probe)
   probe.style.color = value
   const color = getComputedStyle(probe).color
@@ -277,8 +266,7 @@ function hex(name, mode) {
 const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i
 
 function colors() {
-  const { h } = ctx
-  // A picker and its hex code: either one sets the colour and shows in the other.
+    // A picker and its hex code: either one sets the colour and shows in the other.
   const input = (name, mode) => {
     const label = `${name}, ${mode === 'light' ? 'lys' : 'mørk'} modus`
     const set = value => {
@@ -313,8 +301,7 @@ function colors() {
 }
 
 function fonts() {
-  const { h } = ctx
-  const font = key => h('input', {
+    const font = key => h('input', {
     value: draft.fonts[key] ?? '', list: 'setup-fonts', placeholder: key === 'tekst' ? 'Syne' : 'Inter', spellcheck: 'false',
     oninput: e => {
       const value = e.target.value.trim()
@@ -355,7 +342,7 @@ async function addIcon(key, name, bytes) {
     return
   }
   try {
-    const file = await ctx.invoke('add_icon', { name, bytes: Array.from(new Uint8Array(bytes)) })
+    const file = await invoke('add_icon', { name, bytes: Array.from(new Uint8Array(bytes)) })
     draft.icons[key] = { file, color: draft.icons[key]?.color ?? false }
     change(true)
   } catch (error) {
@@ -364,8 +351,7 @@ async function addIcon(key, name, bytes) {
 }
 
 function icons() {
-  const { h } = ctx
-  return h('ul', { class: 'rows' }, ICONS.map(key => {
+    return h('ul', { class: 'rows' }, ICONS.map(key => {
     const chooser = h('input', {
       type: 'file', hidden: true, accept: PNG_ONLY.includes(key) ? '.png' : '.svg,.png',
       onchange: async e => { const f = e.target.files[0]; if (f) addIcon(key, f.name, await f.arrayBuffer()) },
@@ -383,53 +369,14 @@ function icons() {
 }
 
 function texts() {
-  const { h } = ctx
-  return Object.keys(TEXTS).map(key => field(key, h('input', {
+    return Object.keys(TEXTS).map(key => field(key, h('input', {
     value: draft.texts[key] === TEXTS[key] ? '' : draft.texts[key], placeholder: TEXTS[key],
     oninput: e => { draft.texts[key] = e.target.value || TEXTS[key]; change() },
   })))
 }
 
-/** The files a team's copy needs: the setup, each view's file, each icon. */
-const files = () => [SETUP_FILE, ...draft.views.map(v => v.file), ...Object.values(draft.icons).map(i => i.file)]
-
-function team() {
-  const { h } = ctx
-  const target = h('input', { id: 'setup-target', value: ctx.state.publishTo, placeholder: 'Slipp mappen her', spellcheck: 'false' })
-  const status = h('p', { class: 'status', role: 'status' })
-  const run = async (command, args, done) => {
-    if (dirty && !(await write())) return false
-    await ctx.saved()
-    try {
-      await ctx.invoke(command, { files: files(), ...args })
-      status.textContent = done
-      return true
-    } catch (error) {
-      status.textContent = String(error)
-      return false
-    }
-  }
-  return [
-    h('div', { 'data-drop': 'folder' }, field('Mappen til teamet', target)),
-    h('div', { class: 'add' },
-      h('button', {
-        class: 'button primary',
-        onclick: async () => { if (await run('publish', { target: target.value }, `Publisert til ${target.value}`)) ctx.state.publishTo = target.value },
-      }, 'Publiser'),
-      h('button', { class: 'button', onclick: () => run('export_team', { name: draft.texts.navn }, 'Zip-fila ligger i Nedlastinger') }, 'Lag zip')),
-    status,
-  ]
-}
-
-async function editText() {
-  finish()
-  await ctx.restore()
-  ctx.editText()
-}
-
-/** Files and folders dropped from Finder or Explorer: an icon on its row, a folder on the team field. */
-export async function dropped({ type, paths, position }) {
-  if (!ctx?.state.setupOpen) return
+/** Files dropped from Finder or Explorer: an icon on its row. */
+async function dropped({ type, paths, position }) {
   document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'))
   if (type === 'leave') return
   const at = position && document.elementFromPoint(position.x / devicePixelRatio, position.y / devicePixelRatio)?.closest('[data-drop]')
@@ -439,13 +386,9 @@ export async function dropped({ type, paths, position }) {
   }
   if (type !== 'drop' || !at || !paths?.length) return
   const path = paths[0]
-  const [what, key] = at.dataset.drop.split(':')
-  if (what === 'folder') {
-    $('setup-target').value = path
-    return
-  }
+  const key = at.dataset.drop.split(':')[1]
   try {
-    const bytes = await ctx.invoke('read_dropped', { path })
+    const bytes = await invoke('read_dropped', { path })
     await addIcon(key, path.split(/[\\/]/).pop(), bytes)
   } catch (error) {
     show([String(error)])
@@ -453,4 +396,28 @@ export async function dropped({ type, paths, position }) {
 }
 
 $('setup-save').addEventListener('click', save)
-$('setup-cancel').addEventListener('click', closeSetup)
+$('setup-cancel').addEventListener('click', close)
+
+document.addEventListener('keydown', e => {
+  if (mod(e) && e.key.toLowerCase() === 's') { e.preventDefault(); save() }
+  else if ((mod(e) && e.key.toLowerCase() === 'w') || (e.key === 'Escape' && !e.target.closest('input, select'))) { e.preventDefault(); close() }
+})
+
+document.addEventListener('contextmenu', e => {
+  if (!e.target.closest('input, textarea')) e.preventDefault()
+})
+
+win.onCloseRequested(e => {
+  if (dirty && !discarding) {
+    e.preventDefault()
+    close()
+  }
+})
+
+// The panel's warnings for the draft: contrast and icons it could not read.
+listen('problems', e => show(e.payload))
+// `Oppsett.md` changed in an editor: shown here too, unless this window holds changes of its own.
+listen('files-changed', () => { if (!dirty) start() })
+window.__TAURI__.webview.getCurrentWebview().onDragDropEvent(event => dropped(event.payload))
+
+start()

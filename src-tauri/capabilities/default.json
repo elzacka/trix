@@ -1,6 +1,30 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "windows": ["main"],
-  "permissions": ["core:default"]
+  "description": "The panel: content, its own settings and opening «Tilpass»",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "allow-load",
+    "allow-read-list",
+    "allow-system-list",
+    "allow-save",
+    "allow-reveal-file",
+    "allow-open-url",
+    "allow-set-hotkey",
+    "allow-set-view",
+    "allow-set-tray",
+    "allow-set-size",
+    "allow-set-tray-icon",
+    "allow-read-icon",
+    "allow-export-list",
+    "allow-hold",
+    "allow-hide",
+    "allow-quit",
+    "allow-set-mode",
+    "allow-set-app-icon",
+    "allow-open-setup"
+  ]
 }

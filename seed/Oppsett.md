@@ -2,7 +2,8 @@
 
 <!--
 Appen lager fanene, menyen, fargene, skriftene og tekstene sine ut fra denne fila.
-Du kan endre fila her eller i «Endre oppsettet» i menyen (Ctrl+, eller ⌘,), som skriver den samme fila.
+Du kan endre fila her eller i «Tilpass» i menyen (Ctrl+, eller ⌘,).
+Appen viser endringene med en gang du lagrer fila. I «Tilpass» ser du dem før du lagrer.
 En seksjon du sletter, får standardverdiene tilbake.
 
 ## Visninger
@@ -128,7 +129,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 - eksporter | Eksporter
 - importer | Importer …
 - åpne mappe | Åpne kildemappe
-- oppsett | Endre oppsettet
+- oppsett | Tilpass
 - velg hurtigåpner | Velg hurtigåpner
 - endre hurtigåpner | Endre hurtigåpner
 - ny hurtigtast | Trykk ny hurtigtast …

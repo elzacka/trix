@@ -461,7 +461,7 @@ export const TEXTS = {
   'eksporter': 'Eksporter',
   'importer': 'Importer …',
   'åpne mappe': 'Åpne kildemappe',
-  'oppsett': 'Endre oppsettet',
+  'oppsett': 'Tilpass',
   'velg hurtigåpner': 'Velg hurtigåpner',
   'endre hurtigåpner': 'Endre hurtigåpner',
   'ny hurtigtast': 'Trykk ny hurtigtast …',

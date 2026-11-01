@@ -19,12 +19,12 @@ use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     webview::{NewWindowResponse, Url},
+    WebviewUrl,
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 use tauri_plugin_opener::OpenerExt;
 
 mod system;
-mod team;
 
 #[cfg(target_os = "macos")]
 use tauri::RunEvent;
@@ -42,6 +42,7 @@ const SETTINGS: &str = "innstillinger.json";
 /// A folder by this name next to the app holds the files instead, so they travel with it.
 const PORTABLE: &str = "Trix Ultra-data";
 const DEFAULT_HOTKEY: &str = "CommandOrControl+Alt+U";
+const SETUP_WINDOW: &str = "tilpass";
 
 #[derive(Serialize, Deserialize, Default)]
 struct Settings {
@@ -54,9 +55,6 @@ struct Settings {
     /// The setup's window type, kept so the app starts in it: «panel» or «vindu».
     #[serde(rename = "vindu", skip_serializing_if = "Option::is_none")]
     mode: Option<String>,
-    /// The team folder the admin last published to.
-    #[serde(rename = "publiser til", skip_serializing_if = "Option::is_none")]
-    publish_to: Option<String>,
 }
 
 const VIEWS: [&str; 3] = ["mine", "system", "begge"];
@@ -70,9 +68,6 @@ struct Loaded {
     hotkey: String,
     hotkey_taken: bool,
     view: String,
-    /// A published copy: content only, no editing.
-    team: bool,
-    publish_to: String,
 }
 
 /// The folder the app sits in: next to the .exe, or next to the .app.
@@ -91,7 +86,7 @@ fn user_dir() -> PathBuf {
     }
 }
 
-/// Settings are per device: a team's shared data folder holds none of them.
+/// Settings are per device: a shared data folder holds none of them.
 fn settings_dir() -> PathBuf {
     std::env::var_os("TRIX_ULTRA_DATA_DIR").map_or_else(user_dir, PathBuf::from)
 }
@@ -186,51 +181,7 @@ fn load(app: AppHandle) -> Result<Loaded, String> {
         hotkey,
         hotkey_taken,
         view: current_view(),
-        team: is_team(),
-        publish_to: settings().publish_to.unwrap_or_default(),
     })
-}
-
-fn is_team() -> bool {
-    data_dir().join(team::MARK).is_file()
-}
-
-/// The admin's files that make up the team's copy: names checked like any other.
-fn team_files(names: &[String]) -> Result<Vec<PathBuf>, String> {
-    if is_team() {
-        return Err("Dette er teamets kopi. Publiser fra din egen.".into());
-    }
-    names.iter().map(|name| data_file(name, &[".md", ".svg", ".png"])).filter(|p| p.as_ref().map_or(true, |p| p.is_file())).collect()
-}
-
-/// The app and a copy of its data into a team folder: empty, or published to before.
-#[tauri::command]
-fn publish(files: Vec<String>, target: String) -> Result<(), String> {
-    let files = team_files(&files)?;
-    let target = PathBuf::from(target.trim());
-    team::check_target(&target, PORTABLE)?;
-    team::publish(&files, &target, PORTABLE, env!("CARGO_PKG_VERSION"))?;
-    write_settings(&Settings { publish_to: Some(target.display().to_string()), ..settings() })
-}
-
-/// The same as `publish`, as a zip in Downloads, shown in Finder or Explorer.
-#[tauri::command]
-fn export_team(app: AppHandle, files: Vec<String>, name: String) -> Result<(), String> {
-    let files = team_files(&files)?;
-    let name = team::folder_name(&name);
-    let staging = std::env::temp_dir().join(format!("trix-ultra-{}", std::process::id()));
-    let folder = staging.join(&name);
-    let _ = fs::remove_dir_all(&staging);
-    fs::create_dir_all(&folder).map_err(|e| io_error(&folder, e))?;
-    let downloads = app.path().download_dir().map_err(|e| e.to_string())?;
-    let zip = (1..)
-        .map(|n| downloads.join(if n == 1 { format!("{name}.zip") } else { format!("{name} {n}.zip") }))
-        .find(|path| !path.exists())
-        .expect("a free name");
-    let result = team::publish(&files, &folder, PORTABLE, env!("CARGO_PKG_VERSION")).and_then(|()| team::zip(&folder, &zip));
-    let _ = fs::remove_dir_all(&staging);
-    result?;
-    app.opener().reveal_item_in_dir(zip).map_err(|e| e.to_string())
 }
 
 /// An icon the admin chose or dropped, copied into the data folder; its name there, never over another file.
@@ -304,10 +255,17 @@ fn export_list(app: AppHandle, name: String) -> Result<(), String> {
     app.opener().reveal_item_in_dir(target).map_err(|e| e.to_string())
 }
 
-/// Refuses when the file changed on disk since `original` was read, so nothing is lost.
+/// A view's file from the panel's editor; `Oppsett.md` only from «Tilpass».
 #[tauri::command]
 fn save(name: String, original: String, text: String) -> Result<String, String> {
-    let path = file_path(&name)?;
+    if name.eq_ignore_ascii_case(SETUP.0) {
+        return Err(format!("Ukjent fil: {name}"));
+    }
+    write_checked(file_path(&name)?, &original, text)
+}
+
+/// Refuses when the file changed on disk since `original` was read, so nothing is lost.
+fn write_checked(path: PathBuf, original: &str, text: String) -> Result<String, String> {
     // Through a symbolic link: replace the file it points to, so the link stays.
     let path = if path.is_symlink() { fs::canonicalize(&path).unwrap_or(path) } else { path };
     let current = fs::read_to_string(&path).map_err(|e| io_error(&path, e))?;
@@ -319,6 +277,74 @@ fn save(name: String, original: String, text: String) -> Result<String, String> 
     fs::write(&temp, &text).map_err(|e| io_error(&temp, e))?;
     fs::rename(&temp, &path).map_err(|e| io_error(&path, e))?;
     Ok(text)
+}
+
+/// `Oppsett.md` for «Tilpass»; seeded like the panel does.
+#[tauri::command]
+fn read_setup() -> Result<String, String> {
+    let dir = data_dir();
+    fs::create_dir_all(&dir).map_err(|e| io_error(&dir, e))?;
+    read_or_seed(&dir.join(SETUP.0), SETUP.1)
+}
+
+#[tauri::command]
+fn save_setup(original: String, text: String) -> Result<String, String> {
+    write_checked(data_dir().join(SETUP.0), &original, text)
+}
+
+/// `Oppsett.md` in the user's own editor; where none is set for `.md`, shown in Finder or Explorer.
+#[tauri::command]
+fn open_setup_file(app: AppHandle) -> Result<(), String> {
+    let path = data_dir().join(SETUP.0);
+    app.opener()
+        .open_path(path.to_string_lossy(), None::<&str>)
+        .or_else(|_| app.opener().reveal_item_in_dir(&path))
+        .map_err(|e| e.to_string())
+}
+
+/// «Tilpass»: a normal window beside the panel, which stays open to show each change.
+#[tauri::command]
+fn open_setup(app: AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window(SETUP_WINDOW) {
+        let _ = window.unminimize();
+        return window.set_focus().map_err(|e| e.to_string());
+    }
+    app.state::<KeepOpen>().0.store(true, Ordering::Relaxed);
+    show(&app);
+    let window = guarded(&app, WebviewWindowBuilder::new(&app, SETUP_WINDOW, WebviewUrl::App("setup.html".into())))
+        .title("Tilpass")
+        .inner_size(560.0, 720.0)
+        .min_inner_size(360.0, 400.0)
+        .center()
+        .build()
+        .map_err(|e| e.to_string())?;
+    if let Some(main) = app.get_webview_window("main") {
+        beside(&main, &window);
+    }
+    window.set_focus().map_err(|e| e.to_string())
+}
+
+/// To the left of the panel, else to its right, so the changes stay in view; without room, at the edge with the most.
+fn beside(main: &WebviewWindow, window: &WebviewWindow) {
+    let (Ok(at), Ok(size), Ok(own)) = (main.outer_position(), main.outer_size(), window.outer_size()) else { return };
+    let Some(area) = main.current_monitor().ok().flatten().map(|m| *m.work_area()) else { return };
+    let gap = (12.0 * main.scale_factor().unwrap_or(1.0)).round() as i32;
+    let (left, top) = (area.position.x, area.position.y);
+    #[allow(clippy::cast_possible_wrap)]
+    let (right, bottom) = (left + area.size.width as i32, top + area.size.height as i32);
+    #[allow(clippy::cast_possible_wrap)]
+    let (width, height, main_width) = (own.width as i32, own.height as i32, size.width as i32);
+    let x = if at.x - gap - width >= left {
+        at.x - gap - width
+    } else if at.x + main_width + gap + width <= right {
+        at.x + main_width + gap
+    } else if at.x - left >= right - (at.x + main_width) {
+        left
+    } else {
+        right - width
+    };
+    let y = at.y.min(bottom - height).max(top);
+    let _ = window.set_position(PhysicalPosition::new(x, y));
 }
 
 #[tauri::command]
@@ -419,13 +445,8 @@ fn set_hotkey(app: AppHandle, hotkey: String) -> Result<(), String> {
 /// Set while a file dialog has focus, so the panel stays open behind it.
 struct Holding(AtomicBool);
 
-/// Set while the setup screen is open, so a colour picker or a drag from Finder does not hide the panel.
+/// Set while «Tilpass» is open, so the panel stays beside it to show each change.
 struct KeepOpen(AtomicBool);
-
-#[tauri::command]
-fn keep_open(keep: tauri::State<KeepOpen>, open: bool) {
-    keep.0.store(open, Ordering::Relaxed);
-}
 
 /// A normal window in the Dock or taskbar instead of the panel at the tray icon.
 struct WindowMode(AtomicBool);
@@ -577,11 +598,11 @@ fn quit(app: AppHandle) {
     app.exit(0);
 }
 
-/// The panel shows only the app; links that would open in it go to the browser.
-fn build_panel(app: &AppHandle) -> tauri::Result<WebviewWindow> {
+/// A window that shows only the app; links that would open in it go to the browser.
+fn guarded<'a>(app: &AppHandle, builder: WebviewWindowBuilder<'a, tauri::Wry, AppHandle>) -> WebviewWindowBuilder<'a, tauri::Wry, AppHandle> {
     let dev = app.config().build.dev_url.clone();
     let (navigating, opening) = (app.clone(), app.clone());
-    WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?
+    builder
         .on_navigation(move |url| {
             let own = own_page(url) || dev.as_ref().is_some_and(|dev| dev.origin() == url.origin());
             if !own {
@@ -593,7 +614,39 @@ fn build_panel(app: &AppHandle) -> tauri::Result<WebviewWindow> {
             to_browser(&opening, &url);
             NewWindowResponse::Deny
         })
-        .build()
+}
+
+fn build_panel(app: &AppHandle) -> tauri::Result<WebviewWindow> {
+    guarded(app, WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?).build()
+}
+
+/// Names, sizes and times of the data folder's files, to notice a change made in another program.
+fn snapshot() -> Vec<(std::ffi::OsString, u64, Option<std::time::SystemTime>)> {
+    let mut files: Vec<_> = fs::read_dir(data_dir())
+        .map(|entries| {
+            entries
+                .flatten()
+                .filter_map(|e| e.metadata().ok().map(|m| (e.file_name(), m.len(), m.modified().ok())))
+                .collect()
+        })
+        .unwrap_or_default();
+    files.sort();
+    files
+}
+
+/// Each second: a change in the data folder reloads both windows, so an edit in another program shows at once.
+fn watch(app: AppHandle) {
+    std::thread::spawn(move || {
+        let mut last = snapshot();
+        loop {
+            std::thread::sleep(Duration::from_secs(1));
+            let now = snapshot();
+            if now != last {
+                last = now;
+                let _ = app.emit("files-changed", ());
+            }
+        }
+    });
 }
 
 /// The origin Tauri serves the app from; any other port or scheme on that host is a local server.
@@ -615,8 +668,8 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             load, read_list, system_list, save, reveal_file, open_url, set_hotkey, set_view, set_tray,
-            set_size, set_tray_icon, read_icon, export_list, hold, hide, quit, keep_open, set_mode, set_app_icon,
-            publish, export_team, add_icon, read_dropped
+            set_size, set_tray_icon, read_icon, export_list, hold, hide, quit, set_mode, set_app_icon,
+            open_setup, read_setup, save_setup, open_setup_file, add_icon, read_dropped
         ])
         .manage(LastHidden(Mutex::new(None)))
         .manage(Holding(AtomicBool::new(false)))
@@ -667,9 +720,15 @@ fn main() {
                 }
             }
             show(app.handle());
+            watch(app.handle().clone());
             Ok(())
         })
         .on_window_event(|window, event| match event {
+            WindowEvent::Destroyed if window.label() == SETUP_WINDOW => {
+                window.state::<KeepOpen>().0.store(false, Ordering::Relaxed);
+                let _ = window.app_handle().emit_to("main", "restore", ());
+            }
+            _ if window.label() != "main" => {}
             // A window on Windows closes the app, like other apps there; on a Mac the Dock icon opens it again.
             WindowEvent::CloseRequested { api, .. } => {
                 if windowed(window.app_handle()) && cfg!(windows) {
@@ -714,6 +773,11 @@ mod tests {
         }
         assert!(data_file("logo.SVG", &[".svg", ".png"]).is_ok());
         assert!(data_file("../logo.png", &[".svg", ".png"]).is_err() && data_file("logo.md", &[".png"]).is_err());
+    }
+
+    #[test]
+    fn the_panel_cannot_write_the_setup() {
+        assert_eq!(save("oppsett.md".into(), String::new(), String::new()), Err("Ukjent fil: oppsett.md".into()));
     }
 
     #[test]

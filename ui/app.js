@@ -2,10 +2,10 @@ import {
   parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseEntries, lead, alphabetical, sortShortcuts,
   searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, fill, contrastProblems, SETUP_FILE, TOKENS,
 } from './parse.js'
-import { openSetup, closeSetup, dropped } from './setup.js'
+import { h, svg } from './dom.js'
 
 const { invoke } = window.__TAURI__.core
-const { listen } = window.__TAURI__.event
+const { listen, emitTo } = window.__TAURI__.event
 
 const hasEntries = text => parseEntries(text).length > 0
 
@@ -41,9 +41,6 @@ const state = {
   appIcon: '',
   size: '',
   mode: '',
-  /** A published copy: content only, no editing. */
-  team: false,
-  publishTo: '',
   setupOpen: false,
 }
 
@@ -51,17 +48,6 @@ const $ = id => document.getElementById(id)
 const current = () => state.views[state.tab]
 const has = (view, option) => view?.options.includes(option)
 const t = (key, values) => fill(state.setup.texts[key], { navn: state.setup.texts.navn, ...values })
-
-function h(tag, attrs = {}, ...children) {
-  const el = document.createElement(tag)
-  for (const [key, value] of Object.entries(attrs)) {
-    if (key.startsWith('on')) el.addEventListener(key.slice(2), value)
-    else if (key.startsWith('aria-')) el.setAttribute(key, String(value))
-    else if (value !== false && value != null) el.setAttribute(key, value === true ? '' : value)
-  }
-  el.append(...children.flat().filter(c => c != null && c !== false && c !== ''))
-  return el
-}
 
 /** The setup's own icons as data URLs, by name. */
 const icons = new Map()
@@ -75,12 +61,9 @@ function icon(name, paths) {
     el.style.webkitMaskImage = mask
     return el
   }
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-  svg.setAttribute('viewBox', '0 0 24 24')
-  svg.setAttribute('aria-hidden', 'true')
-  if (name) svg.dataset.icon = name
-  svg.innerHTML = paths.map(d => `<path d="${d}"/>`).join('')
-  return svg
+  const el = svg(paths)
+  if (name) el.dataset.icon = name
+  return el
 }
 const closeIcon = () => icon('fjern', ['M18 6l-12 12', 'M6 6l12 12'])
 const backIcon = () => icon('tilbake', ['M5 12l14 0', 'M5 12l6 6', 'M5 12l6 -6'])
@@ -126,7 +109,6 @@ async function load() {
     const loaded = await invoke('load')
     Object.assign(state, {
       os: loaded.os, version: loaded.version, hotkey: loaded.hotkey, view: loaded.view, setupText: loaded.setup,
-      team: loaded.team, publishTo: loaded.publishTo,
     })
     state.setup = parseSetup(loaded.setup)
     problems.push(...state.setup.problems)
@@ -192,9 +174,8 @@ function applySetup() {
       continue
     }
     $('menu').append(items.get(key))
-    items.get(key).hidden = key === 'oppsett' && state.team
+    items.get(key).hidden = false
   }
-  for (const id of ['edit-file', 'import']) $(id).hidden = state.team
 
   const root = document.documentElement
   root.removeAttribute('style')
@@ -520,29 +501,28 @@ function openEditor(name, original, text = original) {
   $('text').scrollTop = 0
 }
 
-const editView = (text) => { const view = current(); if (view && !state.team) openEditor(view.file, view.text, text) }
+const editView = (text) => { const view = current(); if (view) openEditor(view.file, view.text, text) }
 
-/** The setup screen; it shows its changes in the app as they are made. */
+/** «Tilpass» opens in a window of its own; the panel shows each change it sends. */
 function editSetup() {
-  if (state.team || state.setupOpen) return
   closeMenu()
-  openSetup({
-    state, h, t, invoke, icon,
-    preview: async setup => {
-      state.setup = setup
-      const loaded = new Map(state.views.map(v => [v.file, v]))
-      state.views = setup.views.map(v => ({ text: '', query: '', order: 'file', tags: [], open: null, reading: null, ...loaded.get(v.file), ...v }))
-      if (state.tab >= state.views.length) state.tab = 0
-      const problems = applySetup()
-      await loadIcons(setup, problems)
-      renderTabs()
-      return problems
-    },
-    saved: async () => { await load() },
-    restore: load,
-    editText: () => openEditor(SETUP_FILE, state.setupText),
-  })
+  invoke('open_setup').catch(error => { state.problems = [String(error)]; render() })
 }
+
+listen('preview', async ({ payload: setup }) => {
+  state.setupOpen = true
+  state.setup = setup
+  const loaded = new Map(state.views.map(v => [v.file, v]))
+  state.views = setup.views.map(v => ({ text: '', query: '', order: 'file', tags: [], open: null, reading: null, ...loaded.get(v.file), ...v }))
+  if (state.tab >= state.views.length) state.tab = 0
+  const problems = applySetup()
+  await loadIcons(setup, problems)
+  render()
+  emitTo('tilpass', 'problems', problems)
+})
+
+// «Tilpass» closed, saved or not: the files decide again.
+listen('restore', () => { state.setupOpen = false; load() })
 
 function closeEditor() {
   state.editing = null
@@ -772,11 +752,6 @@ document.addEventListener('keydown', e => {
     else if (e.key === 'Escape') { e.preventDefault(); cancelEdit() }
     return
   }
-  if (state.setupOpen) {
-    if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); $('setup-save').click() }
-    else if (e.key === 'Escape' && !e.target.closest('input, select')) { e.preventDefault(); closeSetup() }
-    return
-  }
   if (mod && /^[1-9]$/.test(e.key)) { e.preventDefault(); selectTab(Number(e.key) - 1) }
   else if (e.ctrlKey && e.key === 'Tab') { e.preventDefault(); step(e.shiftKey ? -1 : 1) }
   else if (mod && e.key.toLowerCase() === 'e') { e.preventDefault(); editView() }
@@ -796,9 +771,10 @@ document.addEventListener('keydown', e => {
   }
 })
 
-// The files are the user's: read them again each time the app comes forward.
-window.addEventListener('focus', () => { if (!state.editing && !state.setupOpen) load() })
-window.__TAURI__.webview.getCurrentWebview().onDragDropEvent(event => dropped(event.payload))
+// The files are the user's: read them again each time the app comes forward, and when one changes on disk.
+const reload = () => { if (!state.editing && !state.setupOpen && !state.importing) load() }
+window.addEventListener('focus', reload)
+listen('files-changed', reload)
 listen('opened', () => { if (!state.editing && !$('search').hidden) $('query').select() })
 
 load().then(focusView)

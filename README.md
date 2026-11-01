@@ -1,37 +1,18 @@
 # Trix Ultra
 
-App for Windows and macOS, built from blocks an admin chooses for a team:
-views, menu, colours, fonts, icons, window and every UI text, all in one
-Markdown file. The content is Markdown files. No installer, no network.
+App for Windows and macOS, built from blocks anyone can choose: views, menu,
+colours, fonts, icons, window and every UI text, all in one Markdown file. The
+content is Markdown files. No installer, no network.
 
 | | |
 |---|---|
 | Files | `Oppsett.md`, one `.md` per view, icons, in `~/Library/Application Support/Trix Ultra` (macOS) or `%APPDATA%\Trix Ultra` (Windows). Created on first launch from [seed/](seed/) |
-| Portable | A folder `Trix Ultra-data` next to the app holds the files instead |
-| Per device | `innstillinger.json` in the folder above, never in the shared one: hotkey, system list, window type, last team folder |
-| Setup | Menu «Endre oppsettet» or Ctrl+, / ⌘,: a screen that writes `Oppsett.md`; or the file itself, format in its top comment |
+| Portable | A folder `Trix Ultra-data` next to the app holds the files instead; in a shared folder, everyone sees the same content |
+| Per device | `innstillinger.json` in the folder above, never in the shared one: hotkey, system list, window type |
+| Setup | Menu «Tilpass» or Ctrl+, / ⌘,: a window beside the panel, each change shows at once, «Lagre» writes `Oppsett.md`. Or the file in any editor («Åpne Oppsett.md» in «Tilpass»): shows when saved, format in its top comment |
 | Content | Each view's file, format in its top comment; menu «Kildedata», or Ctrl+E / ⌘E |
 | Open | Panel: tray or menu bar icon. Window: like other apps, from the folder, Dock or taskbar. Both: Ctrl+Alt+U / ⌘⌥U (menu: «Endre hurtigåpner») |
 | Keys | Ctrl/⌘+1–9 or Ctrl+Tab: views. Esc: back, close, clear, hide |
-
-## Start as admin
-
-1. Download `Trix-Ultra-macOS.zip` or `Trix-Ultra-Windows.zip` (CI artifacts), unzip, open the app (see Run).
-2. Menu «Endre oppsettet» (Ctrl+, / ⌘,): tabs, menu, colours, fonts, window, icons, texts.
-3. Each tab: menu «Kildedata» → «Se og endre i fila» for the content.
-4. Setup screen → «Del med teamet»: «Publiser» or «Lag zip».
-
-## Admin and team
-
-| | Admin | Team |
-|---|---|---|
-| Copy | Own data folder; setup screen and editing | `Trix Ultra-data` with `publisert.json` beside the app: content only, no editing or setup |
-| Share | Setup screen → «Del med teamet»: «Publiser» copies the app and the data to a folder (drag it in), such as a Teams or SharePoint folder synced with OneDrive; «Lag zip» puts the same in Downloads | Opens the app in that folder; a synced folder brings each new publish |
-| By hand | Copy the app and the data folder yourself, with `publisert.json` in it (`{}` is enough) | Same |
-
-«Publiser» writes only to an empty folder or one published to before. The app
-copied is the admin's platform: a mixed team gets the other build beside it
-(`Trix Ultra.app` and `Trix Ultra.exe` share `Trix Ultra-data`).
 
 ## Setup blocks
 
