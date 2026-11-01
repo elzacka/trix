@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.2.2 - 2026-11-01
 
 - Kort: the turn icon sits in the same place on the front and the back, at the foot of the card
+- Demo content: Tiltakskort for power loss with light, heat and fire safety
 
 ## 1.2.1 - 2026-11-01
 
