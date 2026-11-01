@@ -456,7 +456,7 @@ kbd {
 
 .face a, .face button { pointer-events: auto; }
 
-.front { justify-content: center; align-items: center; text-align: center; background: var(--front); color: var(--on-front); }
+.front { align-items: center; text-align: center; background: var(--front); color: var(--on-front); }
 
 .flip:hover .front { background: color-mix(in srgb, var(--on-front) 5%, var(--front)); }
 
@@ -466,8 +466,11 @@ kbd {
 
 .back { background: var(--back); color: var(--on-back); transform: rotateY(180deg); font-size: 0.86em; user-select: text; -webkit-user-select: text; }
 
-/* A hint that the card turns, fainter than the text, on the line under the last one */
-.face > .turn { align-self: flex-end; width: 14px; height: 14px; opacity: 0.7; }
+/* A hint that the card turns, fainter than the text: under the last line, at the foot of a taller card, the same place on both sides */
+.face > .turn { align-self: flex-end; margin-top: auto; width: 14px; height: 14px; opacity: 0.7; }
+
+/* The front's text sits centred above the icon: the free space splits above the title and above the icon */
+.front > .title { margin-top: auto; }
 
 .back p, .back ul, .back ol { margin: 0; }
 

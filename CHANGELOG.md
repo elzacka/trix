@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Kort: the turn icon sits in the same place on the front and the back, at the foot of the card
+
 ## 1.2.1 - 2026-11-01
 
 - Kort: every card in a row is as tall as the tallest card in it
