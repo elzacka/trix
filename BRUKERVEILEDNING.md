@@ -90,9 +90,30 @@ Menyen → «Innhold ‹fane›»:
 | Valg | Gjør |
 |---|---|
 | «Se og endre i fila» | Fila i appen. «Lagre»: Ctrl+S / ⌘S. «Avbryt»: Esc |
-| «Importer …» | Henter en `.md`- eller `.txt`-fil: «Slå sammen» eller «Erstatt». Resultatet åpnes i appen og lagres med «Lagre» |
+| «Importer …» | Henter en Word-fil (`.docx`), en RTF-fil (`.rtf`) eller en `.md`- eller `.txt`-fil: «Slå sammen» eller «Erstatt». Resultatet åpnes i appen og lagres med «Lagre» |
 | «Eksporter» | Kopi i Nedlastinger. Overskriver aldri en fil |
 | «Åpne datamappen» | Mappa med fila |
+
+Du kan også dra en fil fra Finder eller Utforsker inn på en fane. Fila havner
+i den fanen, og du får de samme valgene. Dette virker med vindustypen «Vanlig
+vindu». Panelet lukker seg når du klikker i Finder eller Utforsker, så bruk
+«Importer …» med «Panel ved ikonet».
+
+Word og RTF blir Markdown slik:
+
+| I fila | I appen |
+|---|---|
+| Overskrift 1 | Gruppe (`##`) |
+| Overskrift 2 | Oppslag, kort eller veiledning (`###`) |
+| Overskrift 3 og lavere | Overskrift i teksten (`####`) |
+| Avsnitt, punktliste, nummerert liste, tabell, fet, kursiv, lenke | Det samme i Markdown |
+| Tittel, bilder, kommentarer | Blir ikke med |
+
+- Hver overskrift blir et oppslag, et kort eller en veiledning hvis dokumentet
+  bare har ett overskriftsnivå.
+- Hurtigtaster: Tabeller med navn, Windows-taster og Mac-taster blir én
+  hurtigtast per rad.
+- «Erstatt» beholder tittelen og kommentaren øverst i fila.
 
 Formatet står i kommentaren øverst i fila. Appen lagrer ikke hvis fila er
 endret utenfor appen etter at du åpnet den: Kopier endringene dine, velg

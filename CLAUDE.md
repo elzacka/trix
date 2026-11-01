@@ -4,7 +4,7 @@ Tauri 2 app (Windows, macOS), an app shell built on Trix (`~/dev/trix`): modules
 
 - Verify: `npm test`, then `npm run build:mac` (also runs `cargo test`) and open the app with `TRIX_ULTRA_DATA_DIR` set to a scratch folder. Windows: CI only (`build.yml`).
 - Version: `src-tauri/Cargo.toml`; Tauri reads it. A new version with its CHANGELOG heading on `main`: `build.yml` publishes release `v<version>` with the Windows zip, the macOS `.dmg` and an SPDX SBOM once CodeQL (default setup, a repo setting) passed on the commit, app and dmg signed and notarized from the `APPLE_*` secrets (README, Develop); `BRUKERVEILEDNING.md` links to `releases/latest/download/`.
-- Frontend: plain ES modules in `ui/`, no bundler, no npm runtime dependencies. Parsers and setup (`parseSetup`, `TEXTS`) in `ui/parse.js`, pure, tested with `node --test`.
+- Frontend: plain ES modules in `ui/`, no bundler, no npm runtime dependencies. Parsers and setup (`parseSetup`, `TEXTS`) in `ui/parse.js`; import converters in `ui/import.js`, `docx.js`, `rtf.js`; all pure, tested with `node --test`. The main window has Tauri's drop handler off: a dropped file reaches the webview as a `File`, never as a path in Rust.
 - One fact, one place, held by tests: `seed/Oppsett.md` equals `parseSetup('')` and lists every key in `TEXTS`; its colours, fonts and window match `ui/style.css` and `tauri.conf.json`.
 - One term per concept in code, UI and docs:
 

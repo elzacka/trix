@@ -3,6 +3,7 @@ import {
   searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, fill, contrastProblems, SETUP_FILE, TOKENS,
 } from './parse.js'
 import { h, svg } from './dom.js'
+import { importText, replaceContent, IMPORT_TYPES } from './import.js'
 
 const { invoke } = window.__TAURI__.core
 const { listen, emitTo } = window.__TAURI__.event
@@ -652,7 +653,8 @@ async function chooseImport() {
 async function readImport(file) {
   const tab = current()
   const views = MODULE_VIEWS[tab.module]
-  const text = await file.text()
+  state.error = ''
+  const text = await importText(file.name, new Uint8Array(await file.arrayBuffer()), tab.module).catch(() => '')
   if (!views.has(text)) {
     state.error = t('passer ikke', { fil: file.name, fane: tab.name })
     return render()
@@ -668,9 +670,37 @@ function finishImport() {
   const choice = $('import-dialog').returnValue
   const tab = current()
   if (choice === 'merge') editContent(MODULE_VIEWS[tab.module].merge(tab.text, state.importing))
-  else if (choice === 'replace') editContent(state.importing)
+  else if (choice === 'replace') editContent(replaceContent(tab.text, state.importing))
   state.importing = ''
 }
+
+// A file dropped on a tab goes into that tab; anywhere else, into the tab shown.
+const dropTab = e => e.target.closest?.('[role="tab"]')
+const dropping = e => e.dataTransfer?.types.includes('Files')
+const canDrop = () => current() && !state.editing && !$('import-dialog').open
+
+function markDrop(el) {
+  document.querySelectorAll('.drop-target').forEach(x => { if (x !== el) x.classList.remove('drop-target') })
+  el?.classList.add('drop-target')
+}
+
+document.addEventListener('dragover', e => {
+  if (!dropping(e)) return
+  e.preventDefault()
+  e.dataTransfer.dropEffect = canDrop() ? 'copy' : 'none'
+  markDrop(canDrop() ? dropTab(e) ?? $('tabpanel') : null)
+})
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) markDrop(null) })
+document.addEventListener('drop', e => {
+  if (!dropping(e)) return
+  e.preventDefault()
+  markDrop(null)
+  const file = e.dataTransfer.files[0]
+  if (!file || !canDrop()) return
+  const tab = dropTab(e)
+  if (tab) selectTab(Number(tab.id.slice('tab-'.length)))
+  readImport(file)
+})
 
 const MODIFIERS = ['Meta', 'Control', 'Alt', 'Shift']
 
@@ -756,7 +786,8 @@ document.querySelectorAll('[data-order]').forEach(b => b.addEventListener('click
 $('edit-file').addEventListener('click', () => editContent())
 $('edit-setup').addEventListener('click', editSetup)
 $('import').addEventListener('click', chooseImport)
-$('import-file').addEventListener('change', e => { if (e.target.files[0]) readImport(e.target.files[0]) })
+$('import-file').accept = IMPORT_TYPES.join(',')
+$('import-file').addEventListener('change',e => { if (e.target.files[0]) readImport(e.target.files[0]) })
 $('import-dialog').addEventListener('close', finishImport)
 $('export').addEventListener('click', exportList)
 $('reveal-file').addEventListener('click', () => { closeMenu(); invoke('reveal_file', { name: current().file }) })
