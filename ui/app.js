@@ -399,8 +399,28 @@ function entry(view, e) {
 // Cards: the front is the name and the first paragraph, the back is the rest.
 
 function renderCards(view) {
-  renderEntries(view, entrySections(view), entries => h('div', { class: 'cards' }, entries.map(e => flipCard(view, e))))
+  renderEntries(view, entrySections(view), entries => {
+    const cards = h('div', { class: 'cards' }, entries.map(e => flipCard(view, e)))
+    if (view.columns) cards.style.gridTemplateColumns = `repeat(${view.columns}, minmax(0, 1fr))`
+    if (view.rows) cards.style.alignItems = 'stretch'
+    return cards
+  })
+  fitCards(view)
 }
+
+/** «N i høyden»: N rows fill the panel below the search; a card with more text grows past its share. */
+function fitCards(view) {
+  const main = $('view')
+  const all = [...main.querySelectorAll('.cards')]
+  if (!view.rows || !all.length) return
+  const top = all[0].getBoundingClientRect().top - main.getBoundingClientRect().top - main.clientTop + main.scrollTop
+  const style = getComputedStyle(main)
+  const gap = parseFloat(getComputedStyle(all[0]).rowGap)
+  const free = main.clientHeight - top - parseFloat(style.paddingBottom) - gap * (view.rows - 1)
+  for (const cards of all) cards.style.setProperty('--card-height', `${Math.max(free / view.rows, 0)}px`)
+}
+
+new ResizeObserver(() => { if (current()?.kind === 'kort') fitCards(current()) }).observe($('view'))
 
 function flipCard(view, e) {
   const flipped = view.open === e.id

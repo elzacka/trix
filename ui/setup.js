@@ -2,7 +2,7 @@
 
 import {
   parseSetup, formatSetup, setupHeader, fill, KINDS, MENU, COLORS, ICONS, PNG_ONLY, TEXTS, WINDOW, FONT_SIZE, FONT_PATTERN, OPTIONS,
-  DEFAULT_OPTIONS, TOKENS, listName, iconName,
+  DEFAULT_OPTIONS, TOKENS, CARD_COUNT, listName, iconName,
 } from './parse.js'
 import { h, svg } from './dom.js'
 
@@ -221,6 +221,11 @@ function view(v, i) {
       v.options = OPTIONS[v.kind].filter(x => (x === o ? on : v.options.includes(x)))
       change(o === 'søk')
     }))),
+    ...(v.kind !== 'kort' ? [] : [['columns', 'Kort i bredden'], ['rows', 'Kort i høyden']]).map(([prop, label]) => field(label, h('select', {
+      // null, not undefined: the preview event is JSON, and «Automatisk» must reach the panel
+      onchange: e => { v[prop] = Number(e.target.value) || null; change() },
+    }, h('option', { value: '' }, 'Automatisk'), Array.from({ length: CARD_COUNT[1] - CARD_COUNT[0] + 1 }, (_, n) => n + CARD_COUNT[0])
+      .map(n => h('option', { value: n, selected: v[prop] === n }, String(n)))))),
     v.options.includes('søk') && field('Tekst i søkefeltet', h('input', {
       value: v.placeholder, placeholder: t('søk'), oninput: e => { v.placeholder = e.target.value.trim(); change() },
     })),

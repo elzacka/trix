@@ -395,6 +395,11 @@ export const DEFAULT_OPTIONS = {
   steg: ['søk', 'emneknagger'],
 }
 
+/** Kort: how many cards across (`bredden`) and down (`høyden`), as the option «3 i bredden». */
+export const CARD_COUNT = [1, 6]
+const CARD_OPTION = /^(\S+) i (bredden|høyden)$/
+const CARD_AXIS = { bredden: 'columns', 'høyden': 'rows' }
+
 export const SETUP_FILE = 'Oppsett.md'
 
 const DEFAULT_VIEWS = [
@@ -519,9 +524,18 @@ export function parseSetup(text) {
       if (!KINDS.includes(key(kind))) return problem(i, `«${kind}» er ikke en type. Bruk hurtigtaster, oppslag, kort eller steg.`)
       if (!listName(file)) return problem(i, `«${file}» må være et filnavn som slutter på .md`)
       const chosen = options === undefined || (!options && placeholder) ? DEFAULT_OPTIONS[key(kind)] : options.split(',').map(key).filter(Boolean)
-      const wrong = chosen.find(o => !OPTIONS[key(kind)].includes(o))
+      const count = {}
+      const flags = chosen.filter(o => {
+        const [, n, axis] = (key(kind) === 'kort' && o.match(CARD_OPTION)) || []
+        if (!axis) return true
+        const [min, max] = CARD_COUNT
+        if (!/^\d+$/.test(n) || n < min || n > max) problem(i, `Antall kort i ${axis} må være et heltall fra ${min} til ${max}`)
+        else count[CARD_AXIS[axis]] = Number(n)
+        return false
+      })
+      const wrong = flags.find(o => !OPTIONS[key(kind)].includes(o))
       if (wrong) problem(i, `«${wrong}» passer ikke til typen ${key(kind)}`)
-      setup.views.push({ name: title, kind: key(kind), file, options: chosen.filter(o => OPTIONS[key(kind)].includes(o)), placeholder })
+      setup.views.push({ name: title, kind: key(kind), file, options: flags.filter(o => OPTIONS[key(kind)].includes(o)), placeholder, ...count })
     } else if (section === 'meny') {
       if (MENU.includes(name)) setup.menu.push(name)
       else problem(i, `«${parts[0]}» er ikke et menyvalg`)
@@ -567,7 +581,8 @@ const cell = text => String(text).replace(/\|/g, '\\|')
 export function formatSetup(setup, header) {
   const lines = (title, items) => [`## ${title}`, '', ...items.map(item => `- ${item}`), ...(items.length ? [''] : [])]
   const view = v => {
-    const parts = [v.name, v.kind, v.file, v.options.join(', ')]
+    const counts = Object.entries(CARD_AXIS).filter(([, prop]) => v.kind === 'kort' && v[prop]).map(([axis, prop]) => `${v[prop]} i ${axis}`)
+    const parts = [v.name, v.kind, v.file, [...v.options, ...counts].join(', ')]
     if (v.placeholder) parts.push(v.placeholder)
     return parts.map(cell).join(' | ')
   }

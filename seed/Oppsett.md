@@ -21,6 +21,7 @@ En seksjon du sletter, får standardverdiene tilbake.
   - system: Viser også maskinens egne hurtigtaster (hurtigtaster)
   - emneknagger: Trykk på en #emneknagg for å se alt med samme emne (oppslag, kort, steg)
   - a–å: Sorterer alfabetisk når appen starter
+  - 3 i bredden, 2 i høyden: Antall kort ved siden av og under hverandre, 1–6. Kortene deler plassen i fanen, og et kort med mye tekst blir høyere. Uten tall viser appen så mange kort i bredden som det er plass til (kort)
 - Tekst i søkefeltet: Står i feltet før du skriver. Uten tekst: «søk» under Tekster.
 - Eksempel: - Telefonliste | oppslag | Telefonliste.md | søk | Søk etter navn eller nummer
 

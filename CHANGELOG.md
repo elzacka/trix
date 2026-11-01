@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Kort: options «N i bredden» and «N i høyden» (1–6) and the same choices in «Tilpass»; cards share the width and fill the height, and follow the window size
 - View type `steg`, default tab «Steg»: guides in steps
 - Demo content on emergency preparedness (Beredskap): groups and entries in A–Å order, Tiltakskort in scenario order
 - Kort: the card name on the back stands out from its headings; each card is as tall as its own content; the turn icon sits under the last line on both sides; the front shows bold, italic and code; screen readers read the front's text; long words wrap

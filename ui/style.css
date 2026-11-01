@@ -443,7 +443,7 @@ kbd {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 120px;
+  min-height: var(--card-height, 120px);
   padding: 14px 12px 12px;
   border: 1px solid var(--line);
   border-radius: 12px;

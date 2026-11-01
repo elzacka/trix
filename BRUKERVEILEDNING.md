@@ -56,7 +56,7 @@ Typer faner:
 | -------------- | -------------------------------------------------------------------------------------------------- |
 | `hurtigtaster` | Hurtigtaster for et program, med Windows- og Mac-taster. Valget «system» viser også maskinens egne |
 | `oppslag`      | Ordliste, oppslagsverk, spørsmål og svar, telefonliste                                             |
-| `kort`         | «Snu-kort» med forside og bakside: Tiltakskort, opplæring                                          |
+| `kort`         | «Snu-kort» med forside og bakside: Tiltakskort, opplæring. Valgene «3 i bredden» og «2 i høyden» bestemmer hvor mange kort fanen viser |
 | `steg`         | Veiledninger med steg                                                                              |
 
 ### I appen: «Tilpass»
@@ -65,7 +65,7 @@ Et eget vindu ved siden av panelet. Panelet viser hver endring med en gang.
 
 | Del | Endrer |
 |---|---|
-| «Faner» | Legg til, fjern, flytt. Navn, type, fil, valg, tekst i søkefeltet |
+| «Faner» | Legg til, fjern, flytt. Navn, type, fil, valg, tekst i søkefeltet, antall kort i bredden og høyden |
 | «Meny» | Rekkefølge, valg av og på, skillelinjer |
 | «Farger» | Lys og mørk modus. Varsel når kontrasten er lavere enn 4,5:1. «Bruk standardfargene» |
 | «Skrift og vindu» | Skrift, skrift på taster, størrelse. «Panel ved ikonet» eller «Vanlig vindu», bredde, høyde |

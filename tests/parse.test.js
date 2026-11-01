@@ -176,6 +176,17 @@ test('setup: views in order, options, the same type twice', () => {
   assert.deepEqual(setup.menu, ['avslutt', '---', 'versjon'])
 })
 
+test('setup: cards across and down', () => {
+  const setup = parseSetup('## Visninger\n- Kort | kort | Kort.md | søk, 3 i bredden, 2 I HØYDEN\n- Auto | kort | Auto.md | søk')
+  assert.deepEqual(setup.problems, [])
+  assert.deepEqual(setup.views.map(v => [v.options, v.columns, v.rows]), [[['søk'], 3, 2], [['søk'], undefined, undefined]])
+  assert.match(formatSetup(setup, '# Oppsett'), /- Kort \| kort \| Kort\.md \| søk, 3 i bredden, 2 i høyden\n- Auto \| kort \| Auto\.md \| søk\n/)
+  assert.deepEqual(parseSetup('## Visninger\n- K | kort | K.md | 7 i bredden\n- O | oppslag | O.md | 2 i høyden').problems, [
+    'Oppsett.md, linje 2: Antall kort i bredden må være et heltall fra 1 til 6',
+    'Oppsett.md, linje 3: «2 i høyden» passer ikke til typen oppslag',
+  ])
+})
+
 test('setup: colours, fonts, window, icons and texts', () => {
   const setup = parseSetup([
     '## Farger', '- Aksent | #c00 | #f88', '- tekst | navy', '## Skrift', '- tekst | Georgia', '- størrelse | 16',
