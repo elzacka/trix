@@ -43,8 +43,10 @@ Name and identifier: `productName`, `identifier` in
    open high or critical alert. The download links in the user guide follow
    the latest release.
 
-The release's macOS app is signed and notarized in CI from repository secrets;
-without them the build is ad hoc and no release goes out:
+The release's macOS app is signed and notarized in CI from the secrets of the
+environment `signing`, which only `main` can use (a ruleset blocks force pushes
+to and deletion of `main`); without them the build is ad hoc and no release
+goes out:
 
 | Secret | Holds |
 |---|---|

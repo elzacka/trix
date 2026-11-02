@@ -60,6 +60,8 @@ jobs:
     needs: macos
     if: github.ref == 'refs/heads/main'
     runs-on: macos-latest
+    # Its secrets reach only this job, and only on main (the environment's branch policy)
+    environment: signing
     permissions:
       contents: read
       actions: read
