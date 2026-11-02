@@ -7,7 +7,7 @@ const ALIASES = {
   cmd: 'cmd', command: 'cmd', '⌘': 'cmd',
   commandorcontrol: 'mod', cmdorctrl: 'mod', super: 'win',
   win: 'win', windows: 'win', '⊞': 'win',
-  fn: 'fn',
+  fn: 'fn', '🌐': 'fn', '🌐\uFE0E': 'fn',
   mellomrom: 'space', space: 'space',
   retur: 'enter', enter: 'enter', return: 'enter', '↩': 'enter',
   tab: 'tab', '⇥': 'tab',
@@ -18,12 +18,16 @@ const ALIASES = {
   høyre: 'right', right: 'right', arrowright: 'right',
   opp: 'up', up: 'up', arrowup: 'up',
   ned: 'down', down: 'down', arrowdown: 'down',
+  '←': 'left', '→': 'right', '↑': 'up', '↓': 'down',
   comma: ',', period: '.', slash: '/', minus: '-', equal: '=',
 }
 
+// The fn key's globe, in text style as in macOS menus
+const GLOBE = '🌐\uFE0E'
+
 const NAMES = {
   mac: {
-    ctrl: '⌃', shift: '⇧', alt: '⌥', cmd: '⌘', win: 'Win', fn: 'fn', space: 'Mellomrom', enter: '↩',
+    ctrl: '⌃', shift: '⇧', alt: '⌥', cmd: '⌘', win: 'Win', fn: GLOBE, space: 'Mellomrom', enter: '↩',
     tab: '⇥', esc: 'Esc', backspace: '⌫', delete: '⌦', left: '←', right: '→', up: '↑', down: '↓',
   },
   windows: {
@@ -33,16 +37,17 @@ const NAMES = {
   },
 }
 
-const MAC_SYMBOLS = '⌘⇧⌥⌃'
+const MAC_MODIFIER = /^(?:[⌘⇧⌥⌃]|🌐\uFE0E?)(?!\uFE0E)(?=.)/u
 
 function tokens(combo) {
   const out = []
   for (const chunk of combo.trim().split(/\s+/).filter(Boolean)) {
     const parts = chunk === '+' ? ['+'] : chunk.split(/\+(?=.)/).map(p => (p === '' ? '+' : p))
     for (let part of parts) {
-      while (part.length > 1 && MAC_SYMBOLS.includes(part[0])) {
-        out.push(part[0])
-        part = part.slice(1)
+      let symbol
+      while ((symbol = part.match(MAC_MODIFIER)?.[0])) {
+        out.push(symbol)
+        part = part.slice(symbol.length)
       }
       if (part) out.push(part)
     }
@@ -85,7 +90,7 @@ export function formatKeys(text, os) {
       if (os !== 'mac') return names.join('+')
       // Symbols stand together as in macOS menus; a word gets a space on each side.
       return names.reduce((all, name, i) => {
-        const word = n => n.length > 1
+        const word = n => n.length > 1 && n !== GLOBE
         return i && (word(name) || word(names[i - 1])) ? `${all} ${name}` : all + name
       }, '')
     })

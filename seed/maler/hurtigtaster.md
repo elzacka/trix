@@ -12,6 +12,7 @@ Dette er innholdet i fanen. Endre det som du vil.
 - Rekkefølgen i fila er rekkefølgen i fanen.
 - Taster: Symboler (⌘⇧S) eller ord (ctrl shift S, ctrl+shift+S)
 - Ord: ctrl, shift, alt, cmd, opt, win, fn, mellomrom, retur, tab, esc, slett, venstre, høyre, opp, ned, F1–F12
+- Symboler du kan kopiere: ⌘ ⌥ ⌃ ⇧ 🌐︎ ⇥ ↩ ⌫ ← → ↑ ↓
 -->
 
 ## Teams-møte
