@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseEntries, lead, alphabetical, searchEntries, inline,
   mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, contentName, iconName, TEXTS, TOKENS, MODULES,
-  formatSetup, setupHeader, CELL_LIMIT,
+  formatSetup, setupHeader, parseDocument, CELL_LIMIT, REPO,
 } from '../ui/parse.js'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
@@ -195,7 +195,7 @@ test('setup: modules in order, options, the same module twice', () => {
     ['Lenker', 'oppslag', 'Lenker.md', ['søk', 'emneknagger'], 'Finn en lenke'],
     ['Liste', 'oppslag', 'Liste.md', [], ''],
   ])
-  assert.deepEqual(setup.menu, ['avslutt', '---', 'versjon'])
+  assert.deepEqual(setup.menu, ['brukerveiledning', 'kildekode', 'avslutt', '---', 'versjon'])
 })
 
 test('setup: cards across and down', () => {
@@ -249,16 +249,32 @@ test('setup problems name the line, and a bad line is left out', () => {
 
 test('setup: the older names Visninger, kildedata and {visning} still read', () => {
   const setup = parseSetup('## Visninger\n- K | kort | K.md\n## Meny\n- kildedata\n## Tekster\n- visninger | Lister\n- kildedata | Fila {visning}')
-  assert.deepEqual([setup.modules.map(v => v.name), setup.menu, setup.texts.moduler, setup.texts.innhold, setup.problems], [['K'], ['innhold', 'rediger', 'åpne mappe'], 'Lister', 'Fila {fane}', []])
+  assert.deepEqual([setup.modules.map(v => v.name), setup.menu, setup.texts.moduler, setup.texts.innhold, setup.problems], [['K'], ['innhold'], 'Lister', 'Fila {fane}', []])
   assert.match(formatSetup(setup, '# Oppsett'), /\n## Moduler\n\n- K \| kort \| K\.md/)
 })
 
-test('setup: a menu with innhold gets rediger and åpne mappe before oppsett, unless it names one of them', () => {
+test('setup: a menu that names none of the added items gets them before oppsett and avslutt, where it has them', () => {
   const menu = items => parseSetup(`## Meny\n${items.map(i => `- ${i}`).join('\n')}`).menu
-  assert.deepEqual(menu(['innhold', '---', 'oppsett', 'avslutt']), ['innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'avslutt'])
-  assert.deepEqual(menu(['innhold', 'avslutt']), ['innhold', 'rediger', 'åpne mappe', 'avslutt'])
-  assert.deepEqual(menu(['innhold', 'oppsett', 'rediger']), ['innhold', 'oppsett', 'rediger'])
-  assert.deepEqual(menu(['oppsett']), ['oppsett'])
+  assert.deepEqual(menu(['innhold', '---', 'oppsett', 'hurtigåpner', '---', 'avslutt', 'versjon']),
+    ['innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'brukerveiledning', 'kildekode', 'avslutt', 'versjon'])
+  assert.deepEqual(menu(['innhold', 'avslutt']), ['innhold', 'brukerveiledning', 'kildekode', 'avslutt'])
+  assert.deepEqual(menu(['oppsett', 'kildekode']), ['oppsett', 'kildekode'])
+})
+
+test('document: headings with GitHub anchors, blocks, links to files in the repo', () => {
+  const doc = parseDocument('# Tittel\n\nSe [README](README.md) og [Filene](#filene).\n\n### I appen: «Tilpass appen»\n\n| A | B |\n|---|---|\n| 1 | 2 |\n- en\n- to\n')
+  assert.deepEqual(doc.map(b => b.type), ['h', 'p', 'h', 'table', 'ul'])
+  assert.deepEqual([doc[0].level, doc[2].level, doc[2].id], [1, 3, 'i-appen-tilpass-appen'])
+  assert.deepEqual(inline(doc[1].text).filter(s => s.type === 'link').map(s => s.href), [`${REPO}/blob/main/README.md`, '#filene'])
+})
+
+test('every #anchor in BRUKERVEILEDNING.md names a heading in it', () => {
+  const doc = parseDocument(read('../BRUKERVEILEDNING.md'))
+  const ids = new Set(doc.filter(b => b.type === 'h').map(b => b.id))
+  const texts = doc.flatMap(b => b.text ? [b.text] : b.items ?? [...b.head, ...b.rows.flat()])
+  const anchors = texts.flatMap(text => inline(text)).filter(s => s.type === 'link' && s.href.startsWith('#')).map(s => s.href.slice(1))
+  assert.ok(anchors.length)
+  assert.deepEqual(anchors.filter(a => !ids.has(a)), [])
 })
 
 test('file names stay in the data folder', () => {

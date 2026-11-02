@@ -1,6 +1,6 @@
 import {
   parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseEntries, lead, alphabetical, sortShortcuts,
-  searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, fill, contrastProblems, SETUP_FILE, TOKENS,
+  searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, parseDocument, fill, contrastProblems, SETUP_FILE, TOKENS, REPO,
 } from './parse.js'
 import { h, svg } from './dom.js'
 import { importText, importable, replaceContent, IMPORT_TYPES } from './import.js'
@@ -359,21 +359,28 @@ function renderLookup(tab) {
   renderEntries(tab, entrySections(tab), entries => h('div', { class: 'card' }, entries.map(e => entry(tab, e))))
 }
 
-/** Inline Markdown as elements; with `links` false, a link is its text. */
+/** Inline Markdown as elements; with `links` false, a link is its text. An #anchor scrolls within its article. */
 function rich(text, links = true) {
   return inline(text).map(seg => {
     if (seg.type === 'link') {
-      return !links ? seg.text : h('a', { href: seg.href, onclick: e => { e.preventDefault(); e.stopPropagation(); invoke('open_url', { url: seg.href }) } }, seg.text)
+      return !links ? seg.text : h('a', { href: seg.href, onclick: e => { e.preventDefault(); e.stopPropagation(); follow(e.currentTarget, seg.href) } }, seg.text)
     }
     return seg.type === 'text' ? seg.text : h(seg.type, {}, seg.text)
   })
 }
 
-/** Paragraphs, headings at `level`, lists and tables. */
+function follow(link, href) {
+  if (!href.startsWith('#')) return invoke('open_url', { url: href })
+  const target = link.closest('article')?.querySelector(`#${CSS.escape(href.slice(1))}`)
+  target?.scrollIntoView()
+  target?.focus({ preventScroll: true })
+}
+
+/** Paragraphs, headings at their own level or `level`, lists and tables. */
 function blocks(list, level) {
   return list.map(b => {
     if (b.type === 'p') return h('p', {}, rich(b.text))
-    if (b.type === 'h') return h(`h${level}`, { class: 'subheading' }, rich(b.text))
+    if (b.type === 'h') return h(`h${b.level ?? level}`, { class: 'subheading', id: b.id, tabindex: b.id && -1 }, rich(b.text))
     if (b.type === 'table') {
       return h('table', {},
         h('thead', {}, h('tr', {}, b.head.map((c, i) => tableCell('th', c, b.align[i])))),
@@ -564,6 +571,29 @@ own.listen('preview', async ({ payload: setup }) => {
 
 // «Tilpass» closed, saved or not: the files decide again.
 own.listen('restore', () => { state.setupOpen = false; load() })
+
+// Brukerveiledning: BRUKERVEILEDNING.md as built into the app, in place of the tabs.
+
+async function openUserGuide() {
+  closeMenu()
+  const doc = parseDocument(await invoke('read_guide'))
+  $('user-guide').replaceChildren(h('article', { class: 'guide' },
+    h('button', { class: 'back-link', onclick: closeUserGuide }, backIcon(), t('tilbake')),
+    blocks(doc.map(b => (b.level === 1 ? { ...b, id: 'user-guide-title' } : b)))))
+  $('tabpanel').hidden = true
+  document.querySelector('.bar').hidden = true
+  $('user-guide').hidden = false
+  $('user-guide').scrollTop = 0
+  $('user-guide-title')?.focus()
+}
+
+function closeUserGuide() {
+  $('user-guide').hidden = true
+  $('user-guide').replaceChildren()
+  $('tabpanel').hidden = false
+  document.querySelector('.bar').hidden = false
+  $('more').focus()
+}
 
 function closeEditor() {
   state.editing = null
@@ -795,6 +825,8 @@ $('import-dialog').addEventListener('close', finishImport)
 $('export').addEventListener('click', exportList)
 $('reveal-file').addEventListener('click', () => { closeMenu(); invoke('reveal_file', { name: current().file }) })
 $('hotkey').addEventListener('click', () => { state.recording = true; render() })
+$('user-guide-item').addEventListener('click', openUserGuide)
+$('source').addEventListener('click', () => { closeMenu(); invoke('open_url', { url: REPO }) })
 $('quit').addEventListener('click', () => invoke('quit'))
 $('cancel').addEventListener('click', cancelEdit)
 $('save').addEventListener('click', saveEdit)
@@ -823,6 +855,10 @@ document.addEventListener('keydown', e => {
   if (state.editing) {
     if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); saveEdit() }
     else if (e.key === 'Escape') { e.preventDefault(); cancelEdit() }
+    return
+  }
+  if (!$('user-guide').hidden) {
+    if (e.key === 'Escape') { e.preventDefault(); closeUserGuide() }
     return
   }
   if (mod && /^[1-9]$/.test(e.key)) { e.preventDefault(); selectTab(Number(e.key) - 1) }

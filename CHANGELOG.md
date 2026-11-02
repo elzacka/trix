@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Menu: «Endre innhold i ‹fane›» and «Åpne datamappen» are menu items of their own (`rediger`, `åpne mappe` under `## Meny`) above «Tilpass appen»; the submenu is «Importer/Eksporter». A `## Meny` with `innhold` and neither of the two gets both before `oppsett`
+- Menu: «Endre innhold i ‹fane›» and «Åpne datamappen» are menu items of their own (`rediger`, `åpne mappe` under `## Meny`) above «Tilpass appen»; the submenu is «Importer/Eksporter»
+- Menu: «Brukerveiledning» shows this user guide in the app; «Kildekode og dokumentasjon» opens the repo in the browser (`brukerveiledning`, `kildekode`)
+- A `## Meny` that names none of `rediger`, `åpne mappe`, `brukerveiledning`, `kildekode` gets the first two before `oppsett` and the last two before `avslutt`, where it has those
 - The Hurtigtaster template lists the Mac key symbols to copy: ⌘ ⌥ ⌃ ⇧ 🌐︎ ⇥ ↩ ⌫ ← → ↑ ↓
 - fn shows as the globe 🌐︎ on a Mac, as in macOS menus; a pasted 🌐 reads as fn, and ← → ↑ ↓ as the arrow keys
 

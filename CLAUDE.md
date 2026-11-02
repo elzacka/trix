@@ -25,5 +25,6 @@ Tauri 2 app (Windows, macOS), an app shell built on Trix Mini (`~/dev/trix_mini`
 - Window type `panel` or `vindu` (`set_mode`): the last one is kept in settings so the app starts in it.
 - Colours: setup sets `--<token>-light/-dark` on `:root` through CSSOM (CSP has no `'unsafe-inline'`); the rest derive with `color-mix`. Contrast under 4.5:1 is a warning, not a block.
 - Window, data folder, system list, corners, links: as Trix Mini's `CLAUDE.md`.
+- «Brukerveiledning»: `BRUKERVEILEDNING.md` built in (`include_str!`), shown by `parseDocument`; its `#anchors` are GitHub's heading slugs, held by a test.
 - No network. UI strings Norwegian Bokmål, defaults in `TEXTS`. No guidance text in the UI; format help lives in each file's top comment.
 - No `PERSONVERN.md` until elzacka asks for it.

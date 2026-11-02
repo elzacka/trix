@@ -30,6 +30,8 @@ use tauri::RunEvent;
 
 /// Written when missing; after that the files are the user's.
 const SETUP: (&str, &str) = ("Oppsett.md", include_str!("../../seed/Oppsett.md"));
+/// The user guide as built, for «Brukerveiledning»; links to other files go to the repo.
+const GUIDE: &str = include_str!("../../BRUKERVEILEDNING.md");
 /// One template per module; `{navn}` becomes the tab's name.
 const TEMPLATES: [(&str, &str); 4] = [
     ("hurtigtaster", include_str!("../../seed/maler/hurtigtaster.md")),
@@ -377,6 +379,11 @@ fn reveal_file(app: AppHandle, name: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn read_guide() -> &'static str {
+    GUIDE
+}
+
+#[tauri::command]
 fn open_url(app: AppHandle, url: String) -> Result<(), String> {
     if !url.starts_with("https://") && !url.starts_with("http://") {
         return Err("Bare nettadresser".into());
@@ -704,7 +711,7 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            load, read_content, system_list, save, reveal_file, open_url, set_hotkey, set_view, set_tray,
+            load, read_content, system_list, save, reveal_file, read_guide, open_url, set_hotkey, set_view, set_tray,
             set_size, set_tray_icon, read_icon, export_content, hold, hide, quit, set_mode, set_app_icon,
             open_setup, read_setup, save_setup, open_setup_file, add_icon, read_dropped
         ])

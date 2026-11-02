@@ -46,6 +46,8 @@ Menyen («Flere valg» øverst til høyre). Oppsettet bestemmer hvilke valg den 
 | «Importer/Eksporter», «Endre innhold i ‹fane›», «Åpne datamappen» | Innholdet i fanen, se [Innhold i appen](#innhold-i-appen) |
 | «Tilpass appen» | Oppsettet, se [I appen](#i-appen-tilpass-appen) |
 | «Endre hurtigåpner» | Trykk den nye kombinasjonen. Backspace fjerner den |
+| «Brukerveiledning» | Denne veiledningen, i appen. Esc: Tilbake |
+| «Kildekode og dokumentasjon» | Prosjektet på GitHub, i nettleseren |
 
 ## 3. Tilpass
 

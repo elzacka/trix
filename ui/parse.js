@@ -196,73 +196,115 @@ export const CELL_LIMIT = 100000
 
 const alignment = c => c.endsWith(':') ? (c.startsWith(':') ? 'center' : 'right') : ''
 
-/** `## Group`, `### Entry`, then its blocks, `Også: a, b` and `#tag` lines, in file order. */
-export function parseEntries(text) {
-  const sections = []
-  let entry = null
+/** Paragraphs, lists and tables, one line at a time, into the list `to` names; `end` closes the last paragraph. */
+function blockReader() {
+  let blocks = null
   let paragraph = []
+  let table = null
+  let cells = 0
   const endParagraph = () => {
-    if (entry && paragraph.length) entry.blocks.push({ type: 'p', text: paragraph.join(' ') })
+    if (blocks && paragraph.length) blocks.push({ type: 'p', text: paragraph.join(' ') })
     paragraph = []
   }
   const listItem = (type, item) => {
     endParagraph()
-    const last = entry.blocks.at(-1)
+    const last = blocks.at(-1)
     if (last?.type === type && !last.closed) last.items.push(item)
-    else entry.blocks.push({ type, items: [item] })
+    else blocks.push({ type, items: [item] })
   }
-  const closeList = () => { const last = entry?.blocks.at(-1); if (last?.items) last.closed = true }
-  let table = null
-  let cells = 0
+  return {
+    to(list) { endParagraph(); table = null; blocks = list },
+    /** A line that is not part of a table ends it. */
+    line(line) {
+      if (!line.startsWith('|')) table = null
+      if (line.startsWith('|')) {
+        endParagraph()
+        const row = tableCells(line)
+        if (!table) blocks.push(table = { type: 'table', head: row, align: [], rows: [] })
+        else if (!table.rows.length && !table.align.length && row.length && row.every(c => /^:?-+:?$/.test(c))) table.align = row.map(alignment)
+        else if ((cells += table.head.length) <= CELL_LIMIT) table.rows.push(row)
+      } else if (/^[-*]\s/.test(line)) {
+        listItem('ul', line.slice(2).trim())
+      } else if (/^\d+[.)]\s/.test(line)) {
+        listItem('ol', line.replace(/^\d+[.)]\s+/, ''))
+      } else if (line) {
+        const last = blocks.at(-1)
+        if (last?.items) last.closed = true
+        paragraph.push(line)
+      } else {
+        endParagraph()
+      }
+    },
+    end: endParagraph,
+  }
+}
+
+const unclose = list => { for (const b of list) delete b.closed }
+
+/** `## Group`, `### Entry`, then its blocks, `Også: a, b` and `#tag` lines, in file order. */
+export function parseEntries(text) {
+  const sections = []
+  const reader = blockReader()
+  let entry = null
   for (const line of comments(text.split(/\r?\n/))) {
     if (line === null) continue
-    if (!line.startsWith('|')) table = null
     if (/^###\s/.test(line)) {
-      endParagraph()
       if (!sections.length) sections.push({ title: '', entries: [] })
       entry = { id: 0, title: line.slice(4).trim(), blocks: [], aliases: [], tags: [] }
+      reader.to(entry.blocks)
       sections.at(-1).entries.push(entry)
     } else if (/^#{1,2}\s/.test(line)) {
-      endParagraph()
+      reader.to(null)
       entry = null
       if (line.startsWith('##')) sections.push({ title: line.slice(3).trim(), entries: [] })
     } else if (!entry) {
       continue
     } else if (/^####+\s/.test(line)) {
-      endParagraph()
+      reader.to(entry.blocks)
       entry.blocks.push({ type: 'h', text: line.replace(/^#+/, '').trim() })
     } else if (/^også:/i.test(line)) {
-      endParagraph()
+      reader.to(entry.blocks)
       entry.aliases.push(...line.slice(5).split(',').map(a => a.trim()).filter(Boolean))
     } else if (/^#[^\s#]/.test(line) && line.split(/\s+/).every(t => /^#[^\s#]/.test(t))) {
-      endParagraph()
+      reader.to(entry.blocks)
       entry.tags.push(...line.split(/\s+/).map(t => t.slice(1).toLocaleLowerCase('nb')))
-    } else if (line.startsWith('|')) {
-      endParagraph()
-      const row = tableCells(line)
-      if (!table) entry.blocks.push(table = { type: 'table', head: row, align: [], rows: [] })
-      else if (!table.rows.length && !table.align.length && row.length && row.every(c => /^:?-+:?$/.test(c))) table.align = row.map(alignment)
-      else if ((cells += table.head.length) <= CELL_LIMIT) table.rows.push(row)
-    } else if (/^[-*]\s/.test(line)) {
-      listItem('ul', line.slice(2).trim())
-    } else if (/^\d+[.)]\s/.test(line)) {
-      listItem('ol', line.replace(/^\d+[.)]\s+/, ''))
-    } else if (line) {
-      closeList()
-      paragraph.push(line)
     } else {
-      endParagraph()
+      reader.line(line)
     }
   }
-  endParagraph()
+  reader.end()
   let id = 0
   for (const s of sections) {
     for (const e of s.entries) {
       e.id = id++
-      for (const b of e.blocks) delete b.closed
+      unclose(e.blocks)
     }
   }
   return sections.filter(s => s.entries.length)
+}
+
+/** A heading's anchor as GitHub makes it, so the guide's own links find it. */
+export const slug = text => plain(text).toLocaleLowerCase('nb').replace(/[^\p{L}\p{N}\s_-]/gu, '').trim().replace(/\s/g, '-')
+
+/** A whole document: headings at their level with an anchor, then blocks. A link to a file goes to it in the repo. */
+export function parseDocument(text) {
+  const blocks = []
+  const reader = blockReader()
+  reader.to(blocks)
+  const linked = text.replace(/\]\((?!https?:|#)([^\s()]+)\)/g, `](${REPO}/blob/main/$1)`)
+  for (const line of comments(linked.split(/\r?\n/))) {
+    if (line === null) continue
+    const heading = /^(#{1,6})\s+(.*)$/.exec(line)
+    if (heading) {
+      reader.to(blocks)
+      blocks.push({ type: 'h', level: heading[1].length, text: heading[2].trim(), id: slug(heading[2]) })
+    } else {
+      reader.line(line)
+    }
+  }
+  reader.end()
+  unclose(blocks)
+  return blocks
 }
 
 /** The entry's first paragraph, when nothing comes before it: a card's front, a guide's lead. */
@@ -318,11 +360,11 @@ export function searchEntries(sections, query, tags = []) {
     .map(([, e]) => e)
 }
 
-/** **bold**, *italic*, `code` and [text](url) as segments; everything else is plain text. */
+/** **bold**, *italic*, `code` and [text](url) or [text](#anchor) as segments; everything else is plain text. */
 export function inline(text) {
   const out = []
   // A span never runs past its own delimiter, and a URL's parentheses pair up: each try stops early, so a long line stays linear.
-  const pattern = /\*\*((?:[^*]|\*(?!\*))+)\*\*|\*([^*]+)\*|`([^`]+)`|\[([^[\]]+)\]\((https?:\/\/(?:[^\s()]|\([^\s()]*\))+)\)/g
+  const pattern = /\*\*((?:[^*]|\*(?!\*))+)\*\*|\*([^*]+)\*|`([^`]+)`|\[([^[\]]+)\]\((https?:\/\/(?:[^\s()]|\([^\s()]*\))+|#[^\s()]+)\)/g
   let last = 0
   for (const m of text.matchAll(pattern)) {
     if (m.index > last) out.push({ type: 'text', text: text.slice(last, m.index) })
@@ -436,9 +478,14 @@ const DEFAULT_MODULES = [
   { name: 'Steg', module: 'steg', file: 'Steg.md', options: DEFAULT_OPTIONS.steg, placeholder: '' },
 ]
 
-export const MENU = ['visning', 'innhold', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', 'avslutt', 'versjon', '---']
+export const MENU = ['visning', 'innhold', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', 'brukerveiledning', 'kildekode', 'avslutt', 'versjon', '---']
 
-const DEFAULT_MENU = ['visning', 'innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'avslutt', 'versjon']
+const DEFAULT_MENU = ['visning', 'innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'brukerveiledning', 'kildekode', 'avslutt', 'versjon']
+
+/** A menu that names none of these items gets each list before its item, when it has that item. */
+const ADDED_MENU = { oppsett: ['rediger', 'åpne mappe'], avslutt: ['brukerveiledning', 'kildekode'] }
+
+export const REPO = 'https://github.com/elzacka/trix'
 
 /** Icon names in the setup; `menylinje` (tray) and `app` (window and taskbar) are PNG only. */
 export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'valgt', 'undermeny', 'fjern', 'snu']
@@ -494,6 +541,8 @@ export const TEXTS = {
   'importer': 'Importer …',
   'åpne mappe': 'Åpne datamappen',
   'oppsett': 'Tilpass appen',
+  'brukerveiledning': 'Brukerveiledning',
+  'kildekode': 'Kildekode og dokumentasjon',
   'velg hurtigåpner': 'Velg hurtigåpner',
   'endre hurtigåpner': 'Endre hurtigåpner',
   'ny hurtigtast': 'Trykk ny hurtigtast …',
@@ -603,10 +652,11 @@ export function parseSetup(text) {
   })
   if (!seen.has('moduler')) setup.modules = DEFAULT_MODULES.map(v => ({ ...v }))
   if (!seen.has('meny')) setup.menu = [...DEFAULT_MENU]
-  // A menu written when «innhold» also held these two keeps them
-  else if (setup.menu.includes('innhold') && !setup.menu.includes('rediger') && !setup.menu.includes('åpne mappe')) {
-    const at = setup.menu.includes('oppsett') ? setup.menu.indexOf('oppsett') : setup.menu.indexOf('innhold') + 1
-    setup.menu.splice(at, 0, 'rediger', 'åpne mappe')
+  else if (!Object.values(ADDED_MENU).flat().some(item => setup.menu.includes(item))) {
+    for (const [before, items] of Object.entries(ADDED_MENU)) {
+      const at = setup.menu.indexOf(before)
+      if (at >= 0) setup.menu.splice(at, 0, ...items)
+    }
   }
   if (!setup.modules.length) setup.problems.push(`${SETUP_FILE} har ingen moduler`)
   return setup
