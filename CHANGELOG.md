@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Menu: «Endre i datakilden» and «Åpne datamappen» are menu items of their own (`rediger`, `åpne mappe` under `## Meny`) above «Tilpass appen»; the submenu is «Importer/Eksporter». A `## Meny` with `innhold` and neither of the two gets both before `oppsett`
+- Menu: «Endre innhold i ‹fane›» and «Åpne datamappen» are menu items of their own (`rediger`, `åpne mappe` under `## Meny`) above «Tilpass appen»; the submenu is «Importer/Eksporter». A `## Meny` with `innhold` and neither of the two gets both before `oppsett`
 - The Hurtigtaster template lists the Mac key symbols to copy: ⌘ ⌥ ⌃ ⇧ 🌐︎ ⇥ ↩ ⌫ ← → ↑ ↓
 - fn shows as the globe 🌐︎ on a Mac, as in macOS menus; a pasted 🌐 reads as fn, and ← → ↑ ↓ as the arrow keys
 

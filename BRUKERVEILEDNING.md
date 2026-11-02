@@ -43,7 +43,7 @@ Menyen («Flere valg» øverst til høyre). Oppsettet bestemmer hvilke valg den 
 | Valg | Gjør |
 |---|---|
 | «Visning» | Mine hurtigtaster, maskinens eller begge. Sortering: A–Å eller rekkefølgen i fila |
-| «Importer/Eksporter», «Endre i datakilden», «Åpne datamappen» | Innholdet i fanen, se [Innhold i appen](#innhold-i-appen) |
+| «Importer/Eksporter», «Endre innhold i ‹fane›», «Åpne datamappen» | Innholdet i fanen, se [Innhold i appen](#innhold-i-appen) |
 | «Tilpass appen» | Oppsettet, se [I appen](#i-appen-tilpass-appen) |
 | «Endre hurtigåpner» | Trykk den nye kombinasjonen. Backspace fjerner den |
 
@@ -54,7 +54,7 @@ To deler, to måter:
 | | I appen | Direkte i filene |
 |---|---|---|
 | Oppsett: Moduler, meny, farger, skrift, vindu, ikoner, tekster | «Tilpass appen», Ctrl+, / ⌘, | `Oppsett.md` |
-| Innhold: Det som står i fanene | «Endre i datakilden», Ctrl+E / ⌘E | Én `.md`-fil per fane |
+| Innhold: Det som står i fanene | «Endre innhold i ‹fane›», Ctrl+E / ⌘E | Én `.md`-fil per fane |
 | Vises | Oppsett: Med en gang. Innhold: Når du lagrer | Innen ett sekund etter at du lagrer fila |
 
 Moduler. Hver fane viser én modul:
@@ -89,7 +89,7 @@ Menyen:
 
 | Valg | Gjør |
 |---|---|
-| «Endre i datakilden» | Fila i appen. «Lagre»: Ctrl+S / ⌘S. «Avbryt»: Esc |
+| «Endre innhold i ‹fane›» | Fila i appen. «Lagre»: Ctrl+S / ⌘S. «Avbryt»: Esc |
 | «Importer/Eksporter» → «Importer …» | Henter en Word-, RTF-, Excel- eller CSV-fil (`.docx`, `.rtf`, `.xlsx`, `.csv`) eller en `.md`- eller `.txt`-fil: «Slå sammen» eller «Erstatt». Resultatet åpnes i appen og lagres med «Lagre» |
 | «Importer/Eksporter» → «Eksporter» | Kopi i Nedlastinger. Overskriver aldri en fil |
 | «Åpne datamappen» | Mappa med fila |

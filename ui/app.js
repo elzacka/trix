@@ -255,6 +255,7 @@ function render() {
   document.querySelectorAll('[data-order]').forEach(b => b.setAttribute('aria-checked', b.dataset.order === tab?.order))
   $('view-label').textContent = t('visning')
   $('content-label').textContent = t('innhold', { fane: tab?.name ?? '' })
+  $('edit-file').textContent = t('rediger', { fane: tab?.name ?? '' })
   $('quit').textContent = t('avslutt')
   $('version').textContent = `v${state.version} | elzacka`
   $('hotkey').replaceChildren(...(state.recording ? [t('ny hurtigtast')]

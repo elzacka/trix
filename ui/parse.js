@@ -489,7 +489,7 @@ export const TEXTS = {
   'filrekkefølge': 'Rekkefølgen i fila',
   'visning': 'Visning',
   'innhold': 'Importer/Eksporter',
-  'rediger': 'Endre i datakilden',
+  'rediger': 'Endre innhold i {fane}',
   'eksporter': 'Eksporter',
   'importer': 'Importer …',
   'åpne mappe': 'Åpne datamappen',
