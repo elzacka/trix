@@ -393,12 +393,12 @@ kbd {
 .body a, .guide a { color: var(--accent); }
 
 /* Lines between rows and columns only: `hidden` on the table drops the outer frame. From the text colour, so they show in both modes and on a card back */
-:is(.body, .guide, .back) table { margin: 0 0 8px; border-collapse: collapse; border-style: hidden; }
+:is(.body, .guide, .back) table { margin: 0 0 8px; border-collapse: collapse; border-style: hidden; font-size: 0.94em; }
 
 :is(.body, .guide, .back) :is(th, td) { padding: 4px 8px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
 
-/* Column names under the subheadings: smaller, lighter and softer than `.subheading` */
-:is(.body, .guide, .back) th { font-size: 0.9em; font-weight: 500; color: color-mix(in srgb, currentColor 85%, transparent); }
+/* Column names as bold as `.subheading` but at the table's smaller size, so headings stay above them */
+:is(.body, .guide, .back) th { font-weight: 600; }
 
 :is(.body, .guide, .back) :is(th, td):first-child { padding-left: 0; }
 
