@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.0 - 2026-11-02
 
 - Tables in Markdown (`| a | b |`, `| --- | --- |`) on a card back, in a guide in Steg and in an Oppslag entry; text in tables is searchable; the Kort and Steg templates show one each
 - One term per concept in the app, «Tilpass», `Oppsett.md` and the docs: modules (shown as tabs) under «Moduler» with the column `modul`; «Innhold ‹fane›» in the menu, key `innhold` and placeholder `{fane}`; «Åpne datamappen»; «Rekkefølgen i fila». Older setups with `## Visninger`, `kildedata` and `{visning}` still read
