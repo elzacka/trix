@@ -34,7 +34,7 @@ Name and identifier: `productName`, `identifier` in
 
 ## Develop
 
-1. Change, then `npm test` and `TRIX_DATA_DIR=/tmp/tu npm run dev`.
+1. Change, then `npm test` and `TRIX_DATA_DIR=/tmp/trix npm run dev`.
 2. Bump `version` in [Cargo.toml](src-tauri/Cargo.toml), rename `Unreleased`
    in [CHANGELOG.md](CHANGELOG.md) to that version, commit.
 3. Push to `main`. [build.yml](.github/workflows/build.yml) tests and builds
