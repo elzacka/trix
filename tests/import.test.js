@@ -311,7 +311,7 @@ test('links: plain, one per run of the same address, within the output budget', 
 
 test('cells round-trip backslashes before, after and without a pipe', () => {
   const texts = ['a\\', '\\', 'x\\|y', '|\\', 'C:\\temp | D:\\']
-  const table = { type: 'table', rows: [['Navn', 'Verdi'], ...texts.map(t => [[{ text: t }], [{ text: t }]])] }
+  const table = { type: 'table', rows: [['Navn', 'Verdi'], ...texts.map(t => [t, t])].map(row => row.map(text => [{ text }])) }
   const text = toMarkdown([{ type: 'heading', level: 1, runs: [{ text: 'A' }] }, table], 'oppslag')
   assert.deepEqual(parseEntries(text)[0].entries[0].blocks[0].rows, texts.map(t => [t, t]))
   const keys = toMarkdown([{ type: 'table', rows: [['a\\', 'ctrl \\', '⌘\\'].map(t => [{ text: t }])] }], 'hurtigtaster')
