@@ -43,8 +43,8 @@ Menyen («Flere valg» øverst til høyre). Oppsettet bestemmer hvilke valg den 
 | Valg | Gjør |
 |---|---|
 | «Visning» | Mine hurtigtaster, maskinens eller begge. Sortering: A–Å eller rekkefølgen i fila |
-| «Innhold ‹fane›» | Innholdet i fanen, se [Innhold i appen](#innhold-i-appen) |
-| «Tilpass» | Oppsettet, se [I appen](#i-appen-tilpass) |
+| «Importer/Eksporter», «Endre i datakilden», «Åpne datamappen» | Innholdet i fanen, se [Innhold i appen](#innhold-i-appen) |
+| «Tilpass appen» | Oppsettet, se [I appen](#i-appen-tilpass-appen) |
 | «Endre hurtigåpner» | Trykk den nye kombinasjonen. Backspace fjerner den |
 
 ## 3. Tilpass
@@ -53,8 +53,8 @@ To deler, to måter:
 
 | | I appen | Direkte i filene |
 |---|---|---|
-| Oppsett: Moduler, meny, farger, skrift, vindu, ikoner, tekster | «Tilpass», Ctrl+, / ⌘, | `Oppsett.md` |
-| Innhold: Det som står i fanene | «Innhold ‹fane›», «Se og endre i fila», Ctrl+E / ⌘E | Én `.md`-fil per fane |
+| Oppsett: Moduler, meny, farger, skrift, vindu, ikoner, tekster | «Tilpass appen», Ctrl+, / ⌘, | `Oppsett.md` |
+| Innhold: Det som står i fanene | «Endre i datakilden», Ctrl+E / ⌘E | Én `.md`-fil per fane |
 | Vises | Oppsett: Med en gang. Innhold: Når du lagrer | Innen ett sekund etter at du lagrer fila |
 
 Moduler. Hver fane viser én modul:
@@ -66,7 +66,7 @@ Moduler. Hver fane viser én modul:
 | `kort`         | «Snu-kort» med forside og bakside: Tiltakskort, opplæring. Valgene «3 i bredden» og «2 i høyden» bestemmer hvor mange kort fanen viser |
 | `steg`         | Veiledninger med steg                                                                              |
 
-### I appen: «Tilpass»
+### I appen: «Tilpass appen»
 
 Et eget vindu ved siden av appen. Appen viser hver endring med en gang.
 
@@ -85,13 +85,13 @@ Et eget vindu ved siden av appen. Appen viser hver endring med en gang.
 
 ### Innhold i appen
 
-Menyen → «Innhold ‹fane›»:
+Menyen:
 
 | Valg | Gjør |
 |---|---|
-| «Se og endre i fila» | Fila i appen. «Lagre»: Ctrl+S / ⌘S. «Avbryt»: Esc |
-| «Importer …» | Henter en Word-, RTF-, Excel- eller CSV-fil (`.docx`, `.rtf`, `.xlsx`, `.csv`) eller en `.md`- eller `.txt`-fil: «Slå sammen» eller «Erstatt». Resultatet åpnes i appen og lagres med «Lagre» |
-| «Eksporter» | Kopi i Nedlastinger. Overskriver aldri en fil |
+| «Endre i datakilden» | Fila i appen. «Lagre»: Ctrl+S / ⌘S. «Avbryt»: Esc |
+| «Importer/Eksporter» → «Importer …» | Henter en Word-, RTF-, Excel- eller CSV-fil (`.docx`, `.rtf`, `.xlsx`, `.csv`) eller en `.md`- eller `.txt`-fil: «Slå sammen» eller «Erstatt». Resultatet åpnes i appen og lagres med «Lagre» |
+| «Importer/Eksporter» → «Eksporter» | Kopi i Nedlastinger. Overskriver aldri en fil |
 | «Åpne datamappen» | Mappa med fila |
 
 Du kan også dra en fil fra Finder eller Utforsker inn på en fane. Fila havner
@@ -148,7 +148,7 @@ Mappa er skjult som standard.
 
 | Måte | Slik |
 |---|---|
-| Fra appen | «Innhold ‹fane›» → «Åpne datamappen». Eller «Tilpass» → «Åpne Oppsett.md» |
+| Fra appen | «Åpne datamappen». Eller «Tilpass appen» → «Åpne Oppsett.md» |
 | Mac, Finder | ⇧⌘G, lim inn stien over, Retur. Skjulte filer av og på: ⇧⌘. |
 | Windows | Windows-tasten+R, skriv `%APPDATA%\Trix`, Enter. Eller lim stien inn i adressefeltet i Filutforsker |
 

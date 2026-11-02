@@ -436,9 +436,9 @@ const DEFAULT_MODULES = [
   { name: 'Steg', module: 'steg', file: 'Steg.md', options: DEFAULT_OPTIONS.steg, placeholder: '' },
 ]
 
-export const MENU = ['visning', 'innhold', 'oppsett', 'hurtigåpner', 'avslutt', 'versjon', '---']
+export const MENU = ['visning', 'innhold', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', 'avslutt', 'versjon', '---']
 
-const DEFAULT_MENU = ['visning', 'innhold', '---', 'oppsett', 'hurtigåpner', '---', 'avslutt', 'versjon']
+const DEFAULT_MENU = ['visning', 'innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'avslutt', 'versjon']
 
 /** Icon names in the setup; `menylinje` (tray) and `app` (window and taskbar) are PNG only. */
 export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'valgt', 'undermeny', 'fjern', 'snu']
@@ -488,12 +488,12 @@ export const TEXTS = {
   'a–å': 'Sorter A–Å',
   'filrekkefølge': 'Rekkefølgen i fila',
   'visning': 'Visning',
-  'innhold': 'Innhold {fane}',
-  'rediger': 'Se og endre i fila',
+  'innhold': 'Importer/Eksporter',
+  'rediger': 'Endre i datakilden',
   'eksporter': 'Eksporter',
   'importer': 'Importer …',
   'åpne mappe': 'Åpne datamappen',
-  'oppsett': 'Tilpass',
+  'oppsett': 'Tilpass appen',
   'velg hurtigåpner': 'Velg hurtigåpner',
   'endre hurtigåpner': 'Endre hurtigåpner',
   'ny hurtigtast': 'Trykk ny hurtigtast …',
@@ -512,7 +512,7 @@ export const TEXTS = {
   'kan ikke bruke': '{navn} kan ikke bruke {taster}',
 }
 
-/** «Innhold {fane}» with the values it names; a name it does not know stays as written. */
+/** «Åpner {navn}» with the values it names; a name it does not know stays as written. */
 export function fill(text, values = {}) {
   return text.replace(/\{([^{}]+)\}/g, (all, key) => (key in values ? String(values[key]) : all))
 }
@@ -603,6 +603,11 @@ export function parseSetup(text) {
   })
   if (!seen.has('moduler')) setup.modules = DEFAULT_MODULES.map(v => ({ ...v }))
   if (!seen.has('meny')) setup.menu = [...DEFAULT_MENU]
+  // A menu written when «innhold» also held these two keeps them
+  else if (setup.menu.includes('innhold') && !setup.menu.includes('rediger') && !setup.menu.includes('åpne mappe')) {
+    const at = setup.menu.includes('oppsett') ? setup.menu.indexOf('oppsett') : setup.menu.indexOf('innhold') + 1
+    setup.menu.splice(at, 0, 'rediger', 'åpne mappe')
+  }
   if (!setup.modules.length) setup.problems.push(`${SETUP_FILE} har ingen moduler`)
   return setup
 }

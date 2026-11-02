@@ -241,7 +241,7 @@ function moduleRow(v, i) {
 
 function menuLabel(key) {
   const labels = {
-    visning: t('visning'), innhold: t('innhold', { fane: '' }).trim(), oppsett: t('oppsett'),
+    visning: t('visning'), innhold: t('innhold', { fane: '' }).trim(), rediger: t('rediger'), 'åpne mappe': t('åpne mappe'), oppsett: t('oppsett'),
     hurtigåpner: t('endre hurtigåpner'), avslutt: t('avslutt'), versjon: 'Versjon', '---': 'Skillelinje',
   }
   return labels[key]

@@ -249,8 +249,16 @@ test('setup problems name the line, and a bad line is left out', () => {
 
 test('setup: the older names Visninger, kildedata and {visning} still read', () => {
   const setup = parseSetup('## Visninger\n- K | kort | K.md\n## Meny\n- kildedata\n## Tekster\n- visninger | Lister\n- kildedata | Fila {visning}')
-  assert.deepEqual([setup.modules.map(v => v.name), setup.menu, setup.texts.moduler, setup.texts.innhold, setup.problems], [['K'], ['innhold'], 'Lister', 'Fila {fane}', []])
+  assert.deepEqual([setup.modules.map(v => v.name), setup.menu, setup.texts.moduler, setup.texts.innhold, setup.problems], [['K'], ['innhold', 'rediger', 'åpne mappe'], 'Lister', 'Fila {fane}', []])
   assert.match(formatSetup(setup, '# Oppsett'), /\n## Moduler\n\n- K \| kort \| K\.md/)
+})
+
+test('setup: a menu with innhold gets rediger and åpne mappe before oppsett, unless it names one of them', () => {
+  const menu = items => parseSetup(`## Meny\n${items.map(i => `- ${i}`).join('\n')}`).menu
+  assert.deepEqual(menu(['innhold', '---', 'oppsett', 'avslutt']), ['innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'avslutt'])
+  assert.deepEqual(menu(['innhold', 'avslutt']), ['innhold', 'rediger', 'åpne mappe', 'avslutt'])
+  assert.deepEqual(menu(['innhold', 'oppsett', 'rediger']), ['innhold', 'oppsett', 'rediger'])
+  assert.deepEqual(menu(['oppsett']), ['oppsett'])
 })
 
 test('file names stay in the data folder', () => {

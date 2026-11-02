@@ -250,7 +250,7 @@ function render() {
   $('error').replaceChildren(...problems.map(p => h('p', {}, p)))
   $('system-name').textContent = systemName()
   $('sources').hidden = !has(tab, 'system')
-  for (const id of ['view-label', 'content-label']) $(id).closest('[data-item]').classList.toggle('unused', !tab)
+  for (const id of ['view-label', 'content-label', 'edit-file', 'reveal-file']) $(id).closest('[data-item]').classList.toggle('unused', !tab)
   document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-checked', b.dataset.view === state.view))
   document.querySelectorAll('[data-order]').forEach(b => b.setAttribute('aria-checked', b.dataset.order === tab?.order))
   $('view-label').textContent = t('visning')
@@ -617,7 +617,7 @@ function toggleMenu() {
   render()
   $('menu').hidden = false
   $('more').setAttribute('aria-expanded', 'true')
-  $('menu').querySelector('[data-item]:not([hidden]):not(.unused) button, button[data-item]:not([hidden])')?.focus()
+  $('menu').querySelector('[data-item]:not([hidden]):not(.unused) button, button[data-item]:not([hidden]):not(.unused)')?.focus()
 }
 
 async function setView(view) {
