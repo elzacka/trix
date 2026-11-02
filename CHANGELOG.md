@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.0.0 - 2026-11-02
 
 - The app is called Trix: app ID `no.tazk.trix`, data folder `Trix`, shared folder `Trix-data`, release files `Trix-macOS.dmg` and `Trix-Windows.zip`, repo `elzacka/trix`. A data folder named `Trix Ultra` is not read
 
