@@ -8,6 +8,7 @@
 - Import Word (`.docx`) and RTF (`.rtf`) files: headings become groups and entries; lists, tables, bold, italic and links carry over
 - Import Excel (`.xlsx`) and CSV (`.csv`) files as tables: each sheet becomes an entry holding its table, with bold, italic, links and dates
 - Drag a file onto a tab to import it into that tab (window type «Vanlig vindu»)
+- Tables show faint lines between rows and columns, in light and dark mode and on a card back
 - A file that would unpack too much, hold too many table cells or nest too deep is refused, and a long line with unclosed `*`, `` ` `` or `[` renders without delay
 
 ## 1.3.1 - 2026-11-01

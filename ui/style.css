@@ -392,9 +392,14 @@ kbd {
 
 .body a, .guide a { color: var(--accent); }
 
-:is(.body, .guide, .back) table { margin: 0 0 8px; border-collapse: collapse; }
+/* Lines between rows and columns only: `hidden` on the table drops the outer frame. From the text colour, so they show in both modes and on a card back */
+:is(.body, .guide, .back) table { margin: 0 0 8px; border-collapse: collapse; border-style: hidden; }
 
-:is(.body, .guide, .back) :is(th, td) { padding: 4px 12px 4px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+:is(.body, .guide, .back) :is(th, td) { padding: 4px 8px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+
+:is(.body, .guide, .back) :is(th, td):first-child { padding-left: 0; }
+
+:is(.body, .guide, .back) :is(th, td):last-child { padding-right: 0; }
 
 :is(.body, .guide, .flip) code { padding: 0 4px; background: var(--key); border-radius: 4px; font: 0.86em ui-monospace, monospace; }
 
@@ -479,8 +484,6 @@ kbd {
 .back p, .back ul, .back ol, .back table { margin: 0; }
 
 .back table { width: 100%; }
-
-.back :is(th, td) { border-color: color-mix(in srgb, currentColor 30%, transparent); }
 
 .back ul, .back ol { padding-left: 18px; }
 
