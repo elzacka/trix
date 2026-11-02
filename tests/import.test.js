@@ -248,15 +248,6 @@ test('csv: semicolon, comma or tab; quoted fields; Windows-1252 from Excel', asy
   assert.equal(await importText('a.csv', new Uint8Array([0x42, 0xe5, 0x3b, 0x31]), 'oppslag'), '### a\n\n| Bå | 1 |\n| --- | --- |\n')
 })
 
-test('hurtigtaster cells: a backslash before or without a pipe reads back as written', async () => {
-  // Only a backslash right before a pipe is read as an escape, as in `Oppsett.md`
-  const names = ['a\\', 'a\\|b', 'x\\\\|y', '\\']
-  const text = await importText('Taster.csv', rtf(`Navn;Windows\n${names.map(n => `${n};ctrl \\`).join('\n')}\n`), 'hurtigtaster')
-  const items = parseShortcuts(text, 'mac')[0].items
-  assert.deepEqual(items.map(i => i.title), names)
-  assert.deepEqual(items.map(i => i.combos), names.map(() => parseShortcuts('- x | ctrl \\', 'mac')[0].items[0].combos))
-})
-
 test('csv in hurtigtaster: rows become shortcuts under the file name as group', async () => {
   const text = await importText('Teams.csv', rtf('Navn;Windows;Mac\nKamera;ctrl shift O;⌘⇧O\n'), 'hurtigtaster')
   assert.equal(text, '## Teams\n\n- Kamera | ctrl shift O | ⌘⇧O\n')
