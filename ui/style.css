@@ -397,6 +397,9 @@ kbd {
 
 :is(.body, .guide, .back) :is(th, td) { padding: 4px 8px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
 
+/* Column names under the subheadings: smaller, lighter and softer than `.subheading` */
+:is(.body, .guide, .back) th { font-size: 0.9em; font-weight: 500; color: color-mix(in srgb, currentColor 85%, transparent); }
+
 :is(.body, .guide, .back) :is(th, td):first-child { padding-left: 0; }
 
 :is(.body, .guide, .back) :is(th, td):last-child { padding-right: 0; }
