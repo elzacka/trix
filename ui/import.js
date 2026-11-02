@@ -1,10 +1,10 @@
 // Imported files as a tab's Markdown. Pure functions, so `node --test` runs them without the app.
 
-import { readDocx, CELL_LIMIT } from './docx.js'
+import { readDocx } from './docx.js'
 import { readRtf } from './rtf.js'
 import { readXlsx } from './xlsx.js'
 import { readCsv } from './csv.js'
-import { inline } from './parse.js'
+import { inline, CELL_LIMIT } from './parse.js'
 
 export const IMPORT_TYPES = ['.md', '.markdown', '.txt', '.rtf', '.docx', '.xlsx', '.csv']
 

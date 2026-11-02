@@ -248,6 +248,15 @@ test('csv: semicolon, comma or tab; quoted fields; Windows-1252 from Excel', asy
   assert.equal(await importText('a.csv', new Uint8Array([0x42, 0xe5, 0x3b, 0x31]), 'oppslag'), '### a\n\n| Bå | 1 |\n| --- | --- |\n')
 })
 
+test('hurtigtaster cells: a backslash before or without a pipe reads back as written', async () => {
+  // Only a backslash right before a pipe is read as an escape, as in `Oppsett.md`
+  const names = ['a\\', 'a\\|b', 'x\\\\|y', '\\']
+  const text = await importText('Taster.csv', rtf(`Navn;Windows\n${names.map(n => `${n};ctrl \\`).join('\n')}\n`), 'hurtigtaster')
+  const items = parseShortcuts(text, 'mac')[0].items
+  assert.deepEqual(items.map(i => i.title), names)
+  assert.deepEqual(items.map(i => i.combos), names.map(() => parseShortcuts('- x | ctrl \\', 'mac')[0].items[0].combos))
+})
+
 test('csv in hurtigtaster: rows become shortcuts under the file name as group', async () => {
   const text = await importText('Teams.csv', rtf('Navn;Windows;Mac\nKamera;ctrl shift O;⌘⇧O\n'), 'hurtigtaster')
   assert.equal(text, '## Teams\n\n- Kamera | ctrl shift O | ⌘⇧O\n')
@@ -298,4 +307,13 @@ test('links: plain, one per run of the same address, within the output budget', 
   const long = `https://x.no/${'a'.repeat(2000)}`
   const many = Array.from({ length: 60000 }, () => ({ type: 'paragraph', runs: [{ text: 'x', href: long }] }))
   assert.throws(() => toMarkdown([heading, ...many], 'oppslag'), /for stor/)
+})
+
+test('cells round-trip backslashes before, after and without a pipe', () => {
+  const texts = ['a\\', '\\', 'x\\|y', '|\\', 'C:\\temp | D:\\']
+  const table = { type: 'table', rows: [['Navn', 'Verdi'], ...texts.map(t => [[{ text: t }], [{ text: t }]])] }
+  const text = toMarkdown([{ type: 'heading', level: 1, runs: [{ text: 'A' }] }, table], 'oppslag')
+  assert.deepEqual(parseEntries(text)[0].entries[0].blocks[0].rows, texts.map(t => [t, t]))
+  const keys = toMarkdown([{ type: 'table', rows: [['a\\', 'ctrl \\', '⌘\\'].map(t => [{ text: t }])] }], 'hurtigtaster')
+  assert.deepEqual(parseShortcuts(keys, 'mac')[0].items.map(i => i.title), ['a\\'])
 })

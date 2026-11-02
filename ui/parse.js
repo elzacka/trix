@@ -186,6 +186,9 @@ function tableCells(line) {
   return cells
 }
 
+/** Table cells per file or import, padding included: a few rows can claim a huge width. */
+export const CELL_LIMIT = 100000
+
 const alignment = c => c.endsWith(':') ? (c.startsWith(':') ? 'center' : 'right') : ''
 
 /** `## Group`, `### Entry`, then its blocks, `Også: a, b` and `#tag` lines, in file order. */
@@ -205,6 +208,7 @@ export function parseEntries(text) {
   }
   const closeList = () => { const last = entry?.blocks.at(-1); if (last?.items) last.closed = true }
   let table = null
+  let cells = 0
   for (const line of comments(text.split(/\r?\n/))) {
     if (line === null) continue
     if (!line.startsWith('|')) table = null
@@ -232,8 +236,8 @@ export function parseEntries(text) {
       endParagraph()
       const row = tableCells(line)
       if (!table) entry.blocks.push(table = { type: 'table', head: row, align: [], rows: [] })
-      else if (!table.rows.length && !table.align.length && row.every(c => /^:?-+:?$/.test(c))) table.align = row.map(alignment)
-      else table.rows.push(row)
+      else if (!table.rows.length && !table.align.length && row.length && row.every(c => /^:?-+:?$/.test(c))) table.align = row.map(alignment)
+      else if ((cells += table.head.length) <= CELL_LIMIT) table.rows.push(row)
     } else if (/^[-*]\s/.test(line)) {
       listItem('ul', line.slice(2).trim())
     } else if (/^\d+[.)]\s/.test(line)) {

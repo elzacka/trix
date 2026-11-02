@@ -11,6 +11,7 @@
 - Tables show faint lines between rows and columns, in light and dark mode and on a card back
 - Table text, column names included, is a little smaller than body text; column names are bold, below the headings above them
 - A file that would unpack too much, hold too many table cells or nest too deep is refused, and a long line with unclosed `*`, `` ` `` or `[` renders without delay
+- A content file shows at most 100 000 table cells, so a table with a very wide header cannot freeze the window
 
 ## 1.3.1 - 2026-11-01
 

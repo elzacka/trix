@@ -1,6 +1,6 @@
 // CSV as one table: comma, semicolon (Norwegian Excel) or tab, and quoted fields.
 
-import { CELL_LIMIT } from './docx.js'
+import { CELL_LIMIT } from './parse.js'
 
 /** UTF-8, or Windows-1252 as Excel saves «CSV (semikolondelt)» on Windows. */
 function decode(bytes) {

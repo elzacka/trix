@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseEntries, lead, alphabetical, searchEntries, inline,
   mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, contentName, iconName, TEXTS, TOKENS, MODULES,
-  formatSetup, setupHeader,
+  formatSetup, setupHeader, CELL_LIMIT,
 } from '../ui/parse.js'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
@@ -115,6 +115,9 @@ test('tables: header, alignment, rows; a pipe inside a cell; searchable', () => 
     { type: 'table', head: ['z'], align: [], rows: [] },
   ])
   assert.deepEqual(searchEntries(parseEntries(text), '110').map(e => e.title), ['Kort'])
+  // Rows are padded to the header's width when shown: a wide header times many short rows stops at the limit
+  const wide = parseEntries(`### A\n${'|'.repeat(1001)}\n${'|\n'.repeat(1000)}`)[0].entries[0].blocks[0]
+  assert.equal(wide.head.length * wide.rows.length, CELL_LIMIT)
 })
 
 test('A–Å groups by first letter with Å last', () => {

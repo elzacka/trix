@@ -1,9 +1,9 @@
 // Word (.docx): a zip of XML parts. Only the parts named here are read; macros, images and embedded objects never are.
 
+import { CELL_LIMIT } from './parse.js'
+
 export const PART_LIMIT = 20 * 1024 * 1024
 export const ENTRY_LIMIT = 1000
-/** Table cells per import, padding included: a few rows can claim a huge width. */
-export const CELL_LIMIT = 100000
 
 /** What one import may unpack in all, shared by every `unzip` call: parts can point at the same data. */
 export const budget = () => ({ bytes: 5 * PART_LIMIT, cells: CELL_LIMIT })

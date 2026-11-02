@@ -7,9 +7,10 @@ Report a vulnerability: hei@tazk.no.
 | App | [OWASP ASVS](https://github.com/OWASP/ASVS) 5.0.0 Level 1 (no personal data); [Tauri 2 security model](https://v2.tauri.app/security/) |
 | Desktop checklist | [OWASP TCASVS](https://github.com/OWASP/TCASVS) 5.0.2 Level 1 |
 | Tests | [OWASP WSTG](https://owasp.org/www-project-web-security-testing-guide/) 4.2 |
+| Risks | [OWASP Top 10:2025](https://owasp.org/Top10/2025/) |
 | Build and release | [OWASP Top 10 CI/CD Security Risks](https://owasp.org/www-project-top-10-ci-cd-security-risks/) |
 
-Last review: 2026-11-02, file import (Word, RTF, Excel, CSV, drop) and its fixes. The mitigations below are its result.
+Last review: 2026-11-02, release 1.4.0 (tables, renamed terms, table style) and its fix. The mitigations below are its result.
 
 ## Threat model
 
@@ -17,7 +18,7 @@ One process with the user's rights, no elevated parts, no network, no listening 
 
 | Entry point | Trust boundary | Threat | Mitigation |
 |---|---|---|---|
-| Content files (may come from someone else) | File → webview | Script in the content | Text nodes only, CSP `'self'`; links `https?://` only |
+| Content files (may come from someone else) | File → webview | Script in the content; hang on a wide table | Text nodes only, CSP `'self'`; links `https?://` only; 100 000 table cells per file, padding to the header's width included |
 | `Oppsett.md` | File → webview, Rust | Path out of the data folder; CSS or script injection | File and icon names: plain names with `.md`, `.svg` or `.png`, checked in `parse.js` and again in `data_file`; colours through CSSOM, only values `CSS.supports` accepts as a colour; font names letters, digits, space, `-`, `_` |
 | Icons from the setup | File → webview, tray | Script in an SVG; large file | Shown as `<img>` or CSS mask from a data URL, never inserted as markup; 1 MB limit; tray: PNG decoded by Tauri |
 | Links in the content | Webview → browser | Web page in the main window | `on_navigation`: own origin only; `on_new_window`: deny; http(s) goes to the browser |
