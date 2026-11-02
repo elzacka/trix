@@ -104,7 +104,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 
 ## Tekster
 
-- navn | Trix Ultra
+- navn | Trix
 - moduler | Moduler
 - flere valg | Flere valg
 - søk | Søk

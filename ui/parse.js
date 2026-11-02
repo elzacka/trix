@@ -461,7 +461,7 @@ export const WINDOW_TYPES = ['panel', 'vindu']
 export const FONT_SIZE = [12, 20]
 
 export const TEXTS = {
-  'navn': 'Trix Ultra',
+  'navn': 'Trix',
   'moduler': 'Moduler',
   'flere valg': 'Flere valg',
   'søk': 'Søk',

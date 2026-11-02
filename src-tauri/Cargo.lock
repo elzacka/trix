@@ -4031,7 +4031,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "trix-ultra"
+name = "trix"
 version = "1.4.0"
 dependencies = [
  "objc2-app-kit",

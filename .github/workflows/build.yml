@@ -28,13 +28,13 @@ jobs:
       - name: Portable folder
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force "dist/Trix Ultra" | Out-Null
-          Copy-Item src-tauri/target/release/trix-ultra.exe "dist/Trix Ultra/Trix Ultra.exe"
-          Compress-Archive -Path "dist/Trix Ultra" -DestinationPath dist/Trix-Ultra-Windows.zip
+          New-Item -ItemType Directory -Force "dist/Trix" | Out-Null
+          Copy-Item src-tauri/target/release/trix.exe "dist/Trix/Trix.exe"
+          Compress-Archive -Path "dist/Trix" -DestinationPath dist/Trix-Windows.zip
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: windows
-          path: dist/Trix-Ultra-Windows.zip
+          path: dist/Trix-Windows.zip
 
   macos:
     runs-on: macos-latest
@@ -53,7 +53,7 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macos-unsigned
-          path: dist/Trix-Ultra-macOS.dmg
+          path: dist/Trix-macOS.dmg
 
   # A job of its own: no build code runs while the Developer ID is in a keychain
   sign:
@@ -99,14 +99,14 @@ jobs:
           echo "signed=true" >> "$GITHUB_OUTPUT"
       - name: Sign and notarize
         run: |
-          hdiutil attach -readonly -nobrowse -mountpoint built/image built/Trix-Ultra-macOS.dmg
-          ditto "built/image/Trix Ultra.app" "built/Trix Ultra.app"
+          hdiutil attach -readonly -nobrowse -mountpoint built/image built/Trix-macOS.dmg
+          ditto "built/image/Trix.app" "built/Trix.app"
           hdiutil detach built/image
-          scripts/sign.sh "built/Trix Ultra.app"
+          scripts/sign.sh "built/Trix.app"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macos
-          path: dist/Trix-Ultra-macOS.dmg
+          path: dist/Trix-macOS.dmg
 
   # A new version with its CHANGELOG heading becomes a release; the user guide's download links follow the latest.
   release:
@@ -144,6 +144,6 @@ jobs:
           alerts=$(gh api --paginate "repos/$GH_REPO/code-scanning/alerts?state=open" --jq '.[] | select(.rule.security_severity_level == "high" or .rule.security_severity_level == "critical") | .html_url')
           if [ -n "$alerts" ]; then echo "Open CodeQL alerts: $alerts"; exit 1; fi
           gh run download "$GITHUB_RUN_ID" --dir dist
-          gh api "repos/$GH_REPO/dependency-graph/sbom" --jq .sbom > dist/Trix-Ultra-SBOM.spdx.json
-          gh release create "v$version" dist/windows/Trix-Ultra-Windows.zip dist/macos/Trix-Ultra-macOS.dmg dist/Trix-Ultra-SBOM.spdx.json \
-            --title "Trix Ultra $version" --notes-file notes.md --target "$GITHUB_SHA"
+          gh api "repos/$GH_REPO/dependency-graph/sbom" --jq .sbom > dist/Trix-SBOM.spdx.json
+          gh release create "v$version" dist/windows/Trix-Windows.zip dist/macos/Trix-macOS.dmg dist/Trix-SBOM.spdx.json \
+            --title "Trix $version" --notes-file notes.md --target "$GITHUB_SHA"

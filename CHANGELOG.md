@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The app is called Trix: app ID `no.tazk.trix`, data folder `Trix`, shared folder `Trix-data`, release files `Trix-macOS.dmg` and `Trix-Windows.zip`, repo `elzacka/trix`. A data folder named `Trix Ultra` is not read
+
 ## 1.4.0 - 2026-11-02
 
 - Tables in Markdown (`| a | b |`, `| --- | --- |`) on a card back, in a guide in Steg and in an Oppslag entry; text in tables is searchable; the Kort and Steg templates show one each

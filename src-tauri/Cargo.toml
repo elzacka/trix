@@ -1,5 +1,5 @@
 [package]
-name = "trix-ultra"
+name = "trix"
 version = "1.4.0"
 edition = "2024"
 publish = false

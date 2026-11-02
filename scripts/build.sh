@@ -1,5 +1,5 @@
 #!/bin/sh
-# macOS build: dist/Trix-Ultra-macOS.dmg. Windows: .github/workflows/build.yml
+# macOS build: dist/Trix-macOS.dmg. Windows: .github/workflows/build.yml
 set -eu
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.cargo/bin:$PATH"

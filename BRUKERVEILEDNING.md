@@ -1,8 +1,8 @@
-# Brukerveiledning for Trix Ultra
+# Brukerveiledning for Trix
 
 Sist oppdatert: 02.11.26. Om prosjektet: [README](README.md).
 
-Trix Ultra er en oppslagsapp du setter sammen selv:
+Trix er en oppslagsapp du setter sammen selv:
 
 - Fire moduler, som vises som faner: Hurtigtaster, oppslag, kort og steg
 - To vindustyper: «Panel ved ikonet» eller «Vanlig vindu»
@@ -14,9 +14,9 @@ Trix Ultra er en oppslagsapp du setter sammen selv:
 | | Mac | Windows |
 |---|---|---|
 | Krav | macOS 15 eller nyere | Windows 10 eller 11 |
-| Last ned | [Trix-Ultra-macOS.dmg](https://github.com/elzacka/trix-ultra/releases/latest/download/Trix-Ultra-macOS.dmg) | [Trix-Ultra-Windows.zip](https://github.com/elzacka/trix-ultra/releases/latest/download/Trix-Ultra-Windows.zip) |
-| Installer | Dobbeltklikk på dmg-fila. Dra «Trix Ultra» til «Apper» | Høyreklikk på zip-fila, velg «Pakk ut alle» |
-| Start | Åpne appen fra «Apper». Velg «Åpne» når macOS spør om en app fra internett: Det gjelder alle slike apper, og Apple har sjekket denne | Åpne `Trix Ultra\Trix Ultra.exe`. Første gang: «Mer informasjon», så «Kjør likevel», fordi appen ikke er signert |
+| Last ned | [Trix-macOS.dmg](https://github.com/elzacka/trix/releases/latest/download/Trix-macOS.dmg) | [Trix-Windows.zip](https://github.com/elzacka/trix/releases/latest/download/Trix-Windows.zip) |
+| Installer | Dobbeltklikk på dmg-fila. Dra «Trix» til «Apper» | Høyreklikk på zip-fila, velg «Pakk ut alle» |
+| Start | Åpne appen fra «Apper». Velg «Åpne» når macOS spør om en app fra internett: Det gjelder alle slike apper, og Apple har sjekket denne | Åpne `Trix\Trix.exe`. Første gang: «Mer informasjon», så «Kjør likevel», fordi appen ikke er signert |
 
 Første oppstart:
 
@@ -36,7 +36,7 @@ Første oppstart:
 | Se alt med samme emne | Trykk på en #emneknagg |
 | Snu et kort | Trykk på kortet |
 | Lese en veiledning | Trykk på den. Esc: Tilbake |
-| Avslutte | «Avslutt Trix Ultra» i menyen, eller høyreklikk på ikonet |
+| Avslutte | «Avslutt Trix» i menyen, eller høyreklikk på ikonet |
 
 Menyen («Flere valg» øverst til høyre). Oppsettet bestemmer hvilke valg den har.
 
@@ -129,11 +129,11 @@ endret utenfor appen etter at du åpnet den: Kopier endringene dine, velg
 
 #### Filene
 
-| Hvor       | Mappe                                                                                       |
-| ---------- | ------------------------------------------------------------------------------------------- |
-| Mac        | `~/Library/Application Support/Trix Ultra`                                                  |
-| Windows    | `%APPDATA%\Trix Ultra`                                                                      |
-| Delt mappe | `Trix Ultra-data` ved siden av appen, hvis den finnes, se [Del med andre](#4-del-med-andre) |
+| Hvor       | Mappe                                                                                 |
+| ---------- | ------------------------------------------------------------------------------------- |
+| Mac        | `~/Library/Application Support/Trix`                                                  |
+| Windows    | `%APPDATA%\Trix`                                                                      |
+| Delt mappe | `Trix-data` ved siden av appen, hvis den finnes, se [Del med andre](#4-del-med-andre) |
 
 | Fil | Holder |
 |---|---|
@@ -150,7 +150,7 @@ Mappa er skjult som standard.
 |---|---|
 | Fra appen | «Innhold ‹fane›» → «Åpne datamappen». Eller «Tilpass» → «Åpne Oppsett.md» |
 | Mac, Finder | ⇧⌘G, lim inn stien over, Retur. Skjulte filer av og på: ⇧⌘. |
-| Windows | Windows-tasten+R, skriv `%APPDATA%\Trix Ultra`, Enter. Eller lim stien inn i adressefeltet i Filutforsker |
+| Windows | Windows-tasten+R, skriv `%APPDATA%\Trix`, Enter. Eller lim stien inn i adressefeltet i Filutforsker |
 
 #### Endre
 
@@ -163,22 +163,22 @@ Mappa er skjult som standard.
 
 ## 4. Del med andre
 
-- Lag mappa `Trix Ultra-data` ved siden av appen. Appen bruker den i stedet for datamappen.
+- Lag mappa `Trix-data` ved siden av appen. Appen bruker den i stedet for datamappen.
 - Kopier filene dine dit. En tom mappe får standardinnholdet.
 - Appen og mappa i en delt mappe: Alle ser det samme innholdet.
-- Gi andre skrivetilgang bare til `Trix Ultra-data`, aldri til appen.
+- Gi andre skrivetilgang bare til `Trix-data`, aldri til appen.
 - `innstillinger.json` blir på hver maskin.
 
 ## 5. Ny versjon
 
 1. Avslutt appen.
 2. Last ned på nytt. Lenkene i [punkt 1](#1-last-ned-og-installer) går alltid til siste versjon.
-3. Mac: Dra appen til «Apper», velg «Erstatt». Windows: Erstatt mappa `Trix Ultra`.
+3. Mac: Dra appen til «Apper», velg «Erstatt». Windows: Erstatt mappa `Trix`.
 
 Filene og innstillingene dine blir. Endringer: [CHANGELOG](CHANGELOG.md).
 
 ## 6. Avinstaller
 
 1. Avslutt appen.
-2. Mac: Flytt «Trix Ultra» fra «Apper» til papirkurven. Windows: Slett mappa `Trix Ultra`.
+2. Mac: Flytt «Trix» fra «Apper» til papirkurven. Windows: Slett mappa `Trix`.
 3. Filene dine blir liggende. Slett datamappen hvis du vil fjerne dem, se [Filene](#filene). Eksporter først det du vil beholde.

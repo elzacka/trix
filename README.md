@@ -1,4 +1,4 @@
-# Trix Ultra
+# Trix
 
 An app shell for quick reference on Windows and macOS:
 
@@ -34,7 +34,7 @@ Name and identifier: `productName`, `identifier` in
 
 ## Develop
 
-1. Change, then `npm test` and `TRIX_ULTRA_DATA_DIR=/tmp/tu npm run dev`.
+1. Change, then `npm test` and `TRIX_DATA_DIR=/tmp/tu npm run dev`.
 2. Bump `version` in [Cargo.toml](src-tauri/Cargo.toml), rename `Unreleased`
    in [CHANGELOG.md](CHANGELOG.md) to that version, commit.
 3. Push to `main`. [build.yml](.github/workflows/build.yml) tests and builds
@@ -53,7 +53,7 @@ without them the build is ad hoc and no release goes out:
 | `APPLE_API_KEY` | App Store Connect API key, `.p8`, base64 |
 | `APPLE_API_KEY_ID`, `APPLE_API_ISSUER` | Its Key ID and Issuer ID |
 
-`npm run build:mac` builds `dist/Trix-Ultra-macOS.dmg` locally: signed with the
+`npm run build:mac` builds `dist/Trix-macOS.dmg` locally: signed with the
 Developer ID in the keychain and notarized with the `notarytool` profile
 `trix`, else ad hoc.
 

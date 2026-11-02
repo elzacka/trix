@@ -39,7 +39,7 @@ const TEMPLATES: [(&str, &str); 4] = [
 ];
 const SETTINGS: &str = "innstillinger.json";
 /// A folder by this name next to the app holds the files instead, so they travel with it.
-const PORTABLE: &str = "Trix Ultra-data";
+const PORTABLE: &str = "Trix-data";
 const DEFAULT_HOTKEY: &str = "CommandOrControl+Alt+U";
 const SETUP_WINDOW: &str = "tilpass";
 
@@ -79,19 +79,19 @@ fn app_dir() -> PathBuf {
 /// The user's app data folder, which needs no permission prompt and no cloud sync.
 fn user_dir() -> PathBuf {
     if cfg!(target_os = "macos") {
-        PathBuf::from(std::env::var_os("HOME").expect("HOME")).join("Library/Application Support/Trix Ultra")
+        PathBuf::from(std::env::var_os("HOME").expect("HOME")).join("Library/Application Support/Trix")
     } else {
-        PathBuf::from(std::env::var_os("APPDATA").expect("APPDATA")).join("Trix Ultra")
+        PathBuf::from(std::env::var_os("APPDATA").expect("APPDATA")).join("Trix")
     }
 }
 
 /// Settings are per device: a shared data folder holds none of them.
 fn settings_dir() -> PathBuf {
-    std::env::var_os("TRIX_ULTRA_DATA_DIR").map_or_else(user_dir, PathBuf::from)
+    std::env::var_os("TRIX_DATA_DIR").map_or_else(user_dir, PathBuf::from)
 }
 
 fn data_dir() -> PathBuf {
-    if let Some(dir) = std::env::var_os("TRIX_ULTRA_DATA_DIR") {
+    if let Some(dir) = std::env::var_os("TRIX_DATA_DIR") {
         return dir.into();
     }
     let portable = app_dir().join(PORTABLE);
@@ -726,12 +726,12 @@ fn main() {
 
             let _ = register(app.handle(), &current_hotkey());
 
-            let open = MenuItem::with_id(app, "open", "Åpne Trix Ultra", true, None::<&str>)?;
-            let quit = MenuItem::with_id(app, "quit", "Avslutt Trix Ultra", true, None::<&str>)?;
+            let open = MenuItem::with_id(app, "open", "Åpne Trix", true, None::<&str>)?;
+            let quit = MenuItem::with_id(app, "quit", "Avslutt Trix", true, None::<&str>)?;
             TrayIconBuilder::with_id("tray")
                 .icon(default_tray_icon(app.handle()))
                 .icon_as_template(cfg!(target_os = "macos"))
-                .tooltip("Trix Ultra")
+                .tooltip("Trix")
                 .menu(&Menu::with_items(app, &[&open, &quit])?)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
@@ -831,7 +831,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn a_link_to_a_file_is_the_same_file() {
-        let dir = std::env::temp_dir().join(format!("trix-ultra-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("trix-test-{}", std::process::id()));
         fs::create_dir_all(&dir).unwrap();
         fs::write(dir.join("Oppsett.md"), "").unwrap();
         let _ = std::os::unix::fs::symlink(dir.join("Oppsett.md"), dir.join("Lenke.md"));
@@ -844,7 +844,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn writes_never_follow_a_planted_link() {
-        let dir = std::env::temp_dir().join(format!("trix-ultra-links-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("trix-links-{}", std::process::id()));
         fs::create_dir_all(&dir).unwrap();
         let outside = dir.join("utenfor");
         fs::write(dir.join("Liste.md"), "før").unwrap();
