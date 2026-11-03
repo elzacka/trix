@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- «Tilbake» in the user guide and in Steg shows a visible hover
 - Menu: «Endre innhold i ‹fane›» and «Åpne datamappen» are menu items of their own (`rediger`, `åpne mappe` under `## Meny`) above «Tilpass appen»; the submenu is «Importer/Eksporter»
 - Menu: «Brukerveiledning» shows this user guide in the app (`brukerveiledning`)
 - A `## Meny` that names none of `rediger`, `åpne mappe`, `brukerveiledning` gets the first two before `oppsett` and the last before `avslutt`, where it has those
