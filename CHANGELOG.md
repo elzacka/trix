@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- «Tilpass»: drop-down lists as tall as the text fields and in the same font; checkboxes and radio buttons in the accent colour; menu and icon rows in one frame; «Vindustype» named beside its choices
 - User guide: its sections listed after the introduction, and a «Til toppen» button once you scroll past them (icon and text `til toppen`)
 - User guide: shorter text without repeats, quieter link lines, lines at most 44em wide
 - A list item that goes on over indented lines shows as one item, as on GitHub

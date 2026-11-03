@@ -53,6 +53,7 @@
   --key: color-mix(in srgb, var(--text) 6%, var(--surface));
   --accent-soft: color-mix(in srgb, var(--accent) 10%, var(--surface));
   color-scheme: light dark;
+  accent-color: var(--accent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -89,7 +90,7 @@ body {
   -webkit-user-select: none;
 }
 
-button, input, textarea { font: inherit; color: inherit; }
+button, input, textarea, select { font: inherit; color: inherit; }
 
 button { cursor: pointer; }
 
@@ -639,6 +640,8 @@ kbd {
 
 #setup-body summary { padding: 10px 2px; font-weight: 600; cursor: pointer; }
 
+#setup-body summary::marker, #setup-body summary::-webkit-details-marker { color: var(--muted); }
+
 .setup-section { display: flex; flex-direction: column; gap: 8px; padding: 0 0 14px; }
 
 #setup-body input:not([type="checkbox"], [type="radio"], [type="color"]), #setup-body select {
@@ -646,7 +649,18 @@ kbd {
   padding: 5px 8px;
   border: 1px solid var(--muted);
   border-radius: 7px;
-  background: var(--surface);
+  background-color: var(--surface);
+}
+
+/* Drawn, not native: the native control is shorter than a text field and has its own font */
+#setup-body select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 55%, calc(100% - 10px) 55%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
 }
 
 #setup-body input[aria-invalid="true"] { border-color: var(--text); outline: 2px dashed var(--text); outline-offset: -2px; }
@@ -669,6 +683,20 @@ kbd {
 
 .row.dragging { box-shadow: 0 6px 18px rgb(0 0 0 / 0.18); border-color: var(--accent); }
 
+/* One-line rows share a frame, with a line between them */
+.rows.grouped { gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+
+.grouped > .row { align-items: center; border-color: transparent; border-radius: 0; background: transparent; }
+
+.grouped > .row + .row { border-top-color: var(--line-soft); }
+
+.grouped > .row.dragging { border-color: var(--accent); border-radius: 10px; background: var(--surface); }
+
+.grouped .handle { padding: 0; }
+
+/* Every one-line row as tall as the others */
+.grouped .icon-button { padding: 2px; }
+
 .handle { display: inline-flex; padding: 4px 0; color: var(--muted); cursor: grab; touch-action: none; }
 
 .dragging .handle { cursor: grabbing; }
@@ -680,6 +708,9 @@ kbd {
 .row-line > input { flex: 1; }
 
 .row-buttons { display: flex; }
+
+/* Grip and arrows centred on the first line of fields */
+.rows:not(.grouped) > .row > :is(.handle, .row-buttons) { align-items: center; min-height: calc(1.45em + 12px); padding: 0; }
 
 .row-buttons .icon-button { padding: 2px; }
 
@@ -703,9 +734,9 @@ kbd {
 
 .colors td { padding: 2px 8px 2px 0; }
 
-.color { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.color { display: flex; flex-wrap: wrap; align-items: stretch; gap: 4px; }
 
-.colors input[type="color"] { flex: none; width: 36px; height: 28px; padding: 0; border: 1px solid var(--muted); border-radius: 6px; background: none; }
+.colors input[type="color"] { flex: none; width: 36px; height: auto; padding: 0; border: 1px solid var(--muted); border-radius: 6px; background: none; }
 
 #setup-body .colors .hex { width: 6.5em; font-family: var(--font-keys); }
 

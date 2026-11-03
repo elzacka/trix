@@ -257,6 +257,7 @@ function menu() {
     r.key === '---'
       ? [h('span', { class: 'separator' }, menuLabel(r.key)), iconButton('Fjern skillelinjen', REMOVE, () => apply(menuRows.filter((_, n) => n !== i)))]
       : checkbox(menuLabel(r.key), r.on, on => { r.on = on; apply(menuRows) }))], apply)
+  list.classList.add('grouped')
   return [list, h('div', { class: 'add' }, h('button', { class: 'button', onclick: () => apply([...menuRows, { key: '---', on: true }]) }, 'Legg til skillelinje'))]
 }
 
@@ -343,7 +344,8 @@ function fonts() {
     field('Skrift', font('tekst')),
     field('Skrift på taster', font('taster')),
     field('Størrelse', number(draft.fonts, 'størrelse', FONT_SIZE, 14)),
-    h('div', { class: 'checks', role: 'radiogroup', 'aria-label': 'Vindustype' }, radio('panel', 'Panel ved ikonet'), radio('vindu', 'Vanlig vindu')),
+    h('div', { class: 'field', role: 'radiogroup', 'aria-labelledby': 'setup-window-type' },
+      h('span', { id: 'setup-window-type' }, 'Vindustype'), h('div', { class: 'checks' }, radio('panel', 'Panel ved ikonet'), radio('vindu', 'Vanlig vindu'))),
     field('Bredde', number(draft.window, 'bredde', WINDOW.bredde, 420)),
     field('Høyde', number(draft.window, 'høyde', WINDOW.høyde, 600)),
   ]
@@ -364,7 +366,7 @@ async function addIcon(key, name, bytes) {
 }
 
 function icons() {
-    return h('ul', { class: 'rows' }, ICONS.map(key => {
+    return h('ul', { class: 'rows grouped' }, ICONS.map(key => {
     const chooser = h('input', {
       type: 'file', hidden: true, accept: PNG_ONLY.includes(key) ? '.png' : '.svg,.png',
       onchange: async e => { const f = e.target.files[0]; if (f) addIcon(key, f.name, await f.arrayBuffer()) },
