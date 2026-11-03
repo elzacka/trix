@@ -134,14 +134,24 @@ export function lookupShortcuts(sections, id) {
 
 function comments(lines) {
   let inside = false
-  return lines.map(raw => {
+  /** The list item an indented line continues, as in Markdown; -1 when none. */
+  let item = -1
+  const out = []
+  for (const raw of lines) {
     const line = raw.trim()
+    const listed = /^([-*]|\d+[.)])\s/.test(line)
     if (inside || line.startsWith('<!--')) {
       inside = !line.includes('-->')
-      return null
+      out.push(null)
+    } else if (item >= 0 && line && !listed && /^\s/.test(raw)) {
+      out[item] += ` ${line}`
+      out.push(null)
+    } else {
+      item = listed ? out.length : -1
+      out.push(line)
     }
-    return line
-  })
+  }
+  return out
 }
 
 /** `## Group` and `- Name | keys` or `- Name | Windows keys | Mac keys`, in file order. */

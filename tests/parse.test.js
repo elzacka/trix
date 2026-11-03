@@ -103,6 +103,9 @@ test('entries with subheadings and lists: a card\'s back, a guide\'s steps', () 
   ])
   assert.deepEqual(card.tags, ['emne'])
   assert.equal(lead(parseEntries('### A\n#### Steg\nTekst')[0].entries[0]), '')
+  assert.deepEqual(parseEntries('### A\n- en\n  to\n  - tre\n1. fire\n   fem\n\n  Seks')[0].entries[0].blocks, [
+    { type: 'ul', items: ['en to', 'tre'] }, { type: 'ol', items: ['fire fem'] }, { type: 'p', text: 'Seks' },
+  ])
   assert.deepEqual(searchEntries(parseEntries(text), 'så').map(e => e.title), ['Kort'])
 })
 

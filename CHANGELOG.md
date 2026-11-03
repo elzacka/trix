@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- A list item that goes on over indented lines shows as one item, as on GitHub
 - The icons on «Tilbake», a tag's «Fjern» and a card's turn hint keep their shape after the app reads its files again
 - «Tilbake» in the user guide and in Steg shows a visible hover
 - Menu: «Endre innhold i ‹fane›» and «Åpne datamappen» are menu items of their own (`rediger`, `åpne mappe` under `## Meny`) above «Tilpass appen»; the submenu is «Importer/Eksporter»
