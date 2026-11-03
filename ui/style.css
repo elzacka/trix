@@ -195,8 +195,6 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 
 #version { padding: 6px 10px; color: var(--muted); font-size: 0.85em; }
 
-#menu .menu-link { color: var(--accent); text-decoration: underline; }
-
 #menu .submenu-toggle, #menu #hotkey { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 
 .menu-keys { color: var(--muted); }

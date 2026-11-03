@@ -195,7 +195,7 @@ test('setup: modules in order, options, the same module twice', () => {
     ['Lenker', 'oppslag', 'Lenker.md', ['søk', 'emneknagger'], 'Finn en lenke'],
     ['Liste', 'oppslag', 'Liste.md', [], ''],
   ])
-  assert.deepEqual(setup.menu, ['brukerveiledning', 'kildekode', 'avslutt', '---', 'versjon'])
+  assert.deepEqual(setup.menu, ['brukerveiledning', 'avslutt', '---', 'versjon'])
 })
 
 test('setup: cards across and down', () => {
@@ -256,9 +256,9 @@ test('setup: the older names Visninger, kildedata and {visning} still read', () 
 test('setup: a menu that names none of the added items gets them before oppsett and avslutt, where it has them', () => {
   const menu = items => parseSetup(`## Meny\n${items.map(i => `- ${i}`).join('\n')}`).menu
   assert.deepEqual(menu(['innhold', '---', 'oppsett', 'hurtigåpner', '---', 'avslutt', 'versjon']),
-    ['innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'brukerveiledning', 'kildekode', 'avslutt', 'versjon'])
-  assert.deepEqual(menu(['innhold', 'avslutt']), ['innhold', 'brukerveiledning', 'kildekode', 'avslutt'])
-  assert.deepEqual(menu(['oppsett', 'kildekode']), ['oppsett', 'kildekode'])
+    ['innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'brukerveiledning', 'avslutt', 'versjon'])
+  assert.deepEqual(menu(['innhold', 'avslutt']), ['innhold', 'brukerveiledning', 'avslutt'])
+  assert.deepEqual(menu(['oppsett', 'brukerveiledning']), ['oppsett', 'brukerveiledning'])
 })
 
 test('document: headings with GitHub anchors, blocks, links to files in the repo', () => {

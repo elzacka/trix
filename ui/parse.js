@@ -478,12 +478,12 @@ const DEFAULT_MODULES = [
   { name: 'Steg', module: 'steg', file: 'Steg.md', options: DEFAULT_OPTIONS.steg, placeholder: '' },
 ]
 
-export const MENU = ['visning', 'innhold', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', 'brukerveiledning', 'kildekode', 'avslutt', 'versjon', '---']
+export const MENU = ['visning', 'innhold', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', 'brukerveiledning', 'avslutt', 'versjon', '---']
 
-const DEFAULT_MENU = ['visning', 'innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'brukerveiledning', 'kildekode', 'avslutt', 'versjon']
+const DEFAULT_MENU = ['visning', 'innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'brukerveiledning', 'avslutt', 'versjon']
 
 /** A menu that names none of these items gets each list before its item, when it has that item. */
-const ADDED_MENU = { oppsett: ['rediger', 'åpne mappe'], avslutt: ['brukerveiledning', 'kildekode'] }
+const ADDED_MENU = { oppsett: ['rediger', 'åpne mappe'], avslutt: ['brukerveiledning'] }
 
 export const REPO = 'https://github.com/elzacka/trix'
 
@@ -542,7 +542,6 @@ export const TEXTS = {
   'åpne mappe': 'Åpne datamappen',
   'oppsett': 'Tilpass appen',
   'brukerveiledning': 'Brukerveiledning',
-  'kildekode': 'Kildekode og dokumentasjon',
   'velg hurtigåpner': 'Velg hurtigåpner',
   'endre hurtigåpner': 'Endre hurtigåpner',
   'ny hurtigtast': 'Trykk ny hurtigtast …',

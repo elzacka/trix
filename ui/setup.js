@@ -242,7 +242,7 @@ function moduleRow(v, i) {
 function menuLabel(key) {
   const labels = {
     visning: t('visning'), innhold: t('innhold', { fane: '' }).trim(), rediger: t('rediger', { fane: '‹fane›' }), 'åpne mappe': t('åpne mappe'), oppsett: t('oppsett'),
-    hurtigåpner: t('endre hurtigåpner'), brukerveiledning: t('brukerveiledning'), kildekode: t('kildekode'), avslutt: t('avslutt'), versjon: 'Versjon', '---': 'Skillelinje',
+    hurtigåpner: t('endre hurtigåpner'), brukerveiledning: t('brukerveiledning'), avslutt: t('avslutt'), versjon: 'Versjon', '---': 'Skillelinje',
   }
   return labels[key]
 }

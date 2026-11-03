@@ -26,7 +26,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 - Eksempel: - Telefonliste | oppslag | Telefonliste.md | søk | Søk etter navn eller nummer
 
 ## Meny
-- Valgene i menyen, i rekkefølge: visning, innhold, rediger, åpne mappe, oppsett, hurtigåpner, brukerveiledning, kildekode, avslutt, versjon
+- Valgene i menyen, i rekkefølge: visning, innhold, rediger, åpne mappe, oppsett, hurtigåpner, brukerveiledning, avslutt, versjon
 - ---: Skillelinje
 - Slett en linje for å skjule valget.
 
@@ -75,7 +75,6 @@ En seksjon du sletter, får standardverdiene tilbake.
 - hurtigåpner
 - ---
 - brukerveiledning
-- kildekode
 - avslutt
 - versjon
 
@@ -137,7 +136,6 @@ En seksjon du sletter, får standardverdiene tilbake.
 - åpne mappe | Åpne datamappen
 - oppsett | Tilpass appen
 - brukerveiledning | Brukerveiledning
-- kildekode | Kildekode og dokumentasjon
 - velg hurtigåpner | Velg hurtigåpner
 - endre hurtigåpner | Endre hurtigåpner
 - ny hurtigtast | Trykk ny hurtigtast …

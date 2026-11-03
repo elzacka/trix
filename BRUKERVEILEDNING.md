@@ -1,6 +1,4 @@
-# Brukerveiledning for Trix
-
-Sist oppdatert: 02.11.26. Om prosjektet: [README](README.md).
+# Brukerveiledning
 
 Trix er en oppslagsapp du setter sammen selv:
 
@@ -16,11 +14,12 @@ Trix er en oppslagsapp du setter sammen selv:
 | Krav | macOS 15 eller nyere | Windows 10 eller 11 |
 | Last ned | [Trix-macOS.dmg](https://github.com/elzacka/trix/releases/latest/download/Trix-macOS.dmg) | [Trix-Windows.zip](https://github.com/elzacka/trix/releases/latest/download/Trix-Windows.zip) |
 | Installer | Dobbeltklikk på dmg-fila. Dra «Trix» til «Apper» | Høyreklikk på zip-fila, velg «Pakk ut alle» |
-| Start | Åpne appen fra «Apper». Velg «Åpne» når macOS spør om en app fra internett: Det gjelder alle slike apper, og Apple har sjekket denne | Åpne `Trix\Trix.exe`. Første gang: «Mer informasjon», så «Kjør likevel», fordi appen ikke er signert |
+| Start | Åpne appen fra «Apper». Velg «Åpne» når macOS spør om en app fra internett: Det gjelder alle slike apper, og Apple har sjekket denne | Åpne `Trix\Trix.exe`. Første gang: «Mer info», så «Kjør likevel», fordi appen ikke er signert |
 
 Første oppstart:
 
-- Ikonet står i menylinjen (Mac) eller ved klokka på oppgavelinjen (Windows).
+- Mac: Ikonet står i menylinjen øverst til høyre
+- Windows: Ikonet står ved klokka på oppgavelinjen. Hvis du ikke ser det: Klikk på pila for å se skjulte ikoner.
 - Appen lager filene sine i datamappen, se [Filene](#filene).
 - Hurtigåpner: ⌘⌥U (Mac), Ctrl+Alt+U (Windows).
 
@@ -47,7 +46,6 @@ Menyen («Flere valg» øverst til høyre). Oppsettet bestemmer hvilke valg den 
 | «Tilpass appen» | Oppsettet, se [I appen](#i-appen-tilpass-appen) |
 | «Endre hurtigåpner» | Trykk den nye kombinasjonen. Backspace fjerner den |
 | «Brukerveiledning» | Denne veiledningen, i appen. Esc: Tilbake |
-| «Kildekode og dokumentasjon» | Prosjektet på GitHub, i nettleseren |
 
 ## 3. Tilpass
 

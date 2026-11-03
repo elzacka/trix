@@ -1,6 +1,6 @@
 import {
   parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseEntries, lead, alphabetical, sortShortcuts,
-  searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, parseDocument, fill, contrastProblems, SETUP_FILE, TOKENS, REPO,
+  searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, parseDocument, fill, contrastProblems, SETUP_FILE, TOKENS,
 } from './parse.js'
 import { h, svg } from './dom.js'
 import { importText, importable, replaceContent, IMPORT_TYPES } from './import.js'
@@ -826,7 +826,6 @@ $('export').addEventListener('click', exportList)
 $('reveal-file').addEventListener('click', () => { closeMenu(); invoke('reveal_file', { name: current().file }) })
 $('hotkey').addEventListener('click', () => { state.recording = true; render() })
 $('user-guide-item').addEventListener('click', openUserGuide)
-$('source').addEventListener('click', () => { closeMenu(); invoke('open_url', { url: REPO }) })
 $('quit').addEventListener('click', () => invoke('quit'))
 $('cancel').addEventListener('click', cancelEdit)
 $('save').addEventListener('click', saveEdit)
