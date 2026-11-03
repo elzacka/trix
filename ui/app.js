@@ -68,16 +68,25 @@ function icon(name, paths) {
   if (name) el.dataset.icon = name
   return el
 }
-const closeIcon = () => icon('fjern', ['M18 6l-12 12', 'M6 6l12 12'])
-const backIcon = () => icon('tilbake', ['M5 12l14 0', 'M5 12l6 6', 'M5 12l6 -6'])
+/** The built-in icons this script draws; the page holds the rest. */
+const DRAWN = {
+  fjern: ['M18 6l-12 12', 'M6 6l12 12'],
+  tilbake: ['M5 12l14 0', 'M5 12l6 6', 'M5 12l6 -6'],
+  snu: ['M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4', 'M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4'],
+}
+const closeIcon = () => icon('fjern', DRAWN.fjern)
+const backIcon = () => icon('tilbake', DRAWN.tilbake)
 const turnIcon = () => {
-  const el = icon('snu', ['M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4', 'M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4'])
+  const el = icon('snu', DRAWN.snu)
   el.classList.add('turn')
   return el
 }
 
-// The built-in icons in the page, kept to swap back when the setup drops its own.
-const BUILT_IN = new Map([...document.querySelectorAll('svg[data-icon]')].map(svg => [svg.dataset.icon, [...svg.children].map(p => p.getAttribute('d'))]))
+// The built-in icons, kept to swap back when the setup drops its own.
+const BUILT_IN = new Map([
+  ...[...document.querySelectorAll('svg[data-icon]')].map(svg => [svg.dataset.icon, [...svg.children].map(p => p.getAttribute('d'))]),
+  ...Object.entries(DRAWN),
+])
 
 async function loadIcons(setup, problems) {
   icons.clear()
