@@ -68,7 +68,7 @@ Moduler. Hver fane viser én modul:
 
 ### I appen: «Tilpass appen»
 
-Et eget vindu ved siden av appen. Appen viser hver endring med en gang.
+Et eget vindu ved siden av appen. Du ser endringene i sanntid.
 
 | Del | Endrer |
 |---|---|
