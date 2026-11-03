@@ -72,6 +72,7 @@ function icon(name, paths) {
 const DRAWN = {
   fjern: ['M18 6l-12 12', 'M6 6l12 12'],
   tilbake: ['M5 12l14 0', 'M5 12l6 6', 'M5 12l6 -6'],
+  'til toppen': ['M12 5l0 14', 'M18 11l-6 -6', 'M6 11l6 -6'],
   snu: ['M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4', 'M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4'],
 }
 const closeIcon = () => icon('fjern', DRAWN.fjern)
@@ -583,12 +584,26 @@ own.listen('restore', () => { state.setupOpen = false; load() })
 
 // Brukerveiledning: BRUKERVEILEDNING.md as built into the app, in place of the tabs.
 
+/** Shows «Til toppen» once the contents list has scrolled out of view. */
+const tocWatch = new IntersectionObserver(([e]) => $('to-top')?.classList.toggle('shown', !e.isIntersecting && e.boundingClientRect.top < 0))
+
 async function openUserGuide() {
   closeMenu()
   const doc = parseDocument(await invoke('read_guide'))
-  $('user-guide').replaceChildren(h('article', { class: 'guide' },
-    h('button', { class: 'back-link', onclick: closeUserGuide }, backIcon(), t('tilbake')),
-    blocks(doc.map(b => (b.level === 1 ? { ...b, id: 'user-guide-title' } : b)))))
+  const sections = doc.filter(b => b.level === 2)
+  const toc = h('nav', { class: 'toc' }, h('ol', {}, sections.map(b =>
+    h('li', {}, h('a', { href: `#${b.id}`, onclick: e => { e.preventDefault(); follow(e.currentTarget, `#${b.id}`) } }, plain(b.text))))))
+  const first = doc.indexOf(sections[0])
+  const body = blocks(doc.map(b => (b.level === 1 ? { ...b, id: 'user-guide-title' } : b)))
+  $('user-guide').replaceChildren(
+    h('article', { class: 'guide' },
+      h('button', { class: 'back-link', onclick: closeUserGuide }, backIcon(), t('tilbake')),
+      body.slice(0, first), toc, body.slice(first)),
+    h('button', {
+      class: 'icon-button to-top', id: 'to-top', 'aria-label': t('til toppen'), title: t('til toppen'),
+      onclick: () => { $('user-guide').scrollTo({ top: 0 }); $('user-guide-title')?.focus({ preventScroll: true }) },
+    }, icon('til toppen', DRAWN['til toppen'])))
+  tocWatch.observe(toc)
   $('tabpanel').hidden = true
   document.querySelector('.bar').hidden = true
   $('user-guide').hidden = false
@@ -597,6 +612,7 @@ async function openUserGuide() {
 }
 
 function closeUserGuide() {
+  tocWatch.disconnect()
   $('user-guide').hidden = true
   $('user-guide').replaceChildren()
   $('tabpanel').hidden = false

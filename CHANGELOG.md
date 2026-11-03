@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- User guide: its sections listed after the introduction, and a «Til toppen» button once you scroll past them (icon and text `til toppen`)
+- User guide: shorter text without repeats, quieter link lines, lines at most 44em wide
 - A list item that goes on over indented lines shows as one item, as on GitHub
 - The icons on «Tilbake», a tag's «Fjern» and a card's turn hint keep their shape after the app reads its files again
 - «Tilbake» in the user guide and in Steg shows a visible hover

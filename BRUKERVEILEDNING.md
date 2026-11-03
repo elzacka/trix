@@ -14,14 +14,14 @@ Trix er en oppslagsapp du setter sammen selv:
 | Krav | macOS 15 eller nyere | Windows 10 eller 11 |
 | Last ned | [Trix-macOS.dmg](https://github.com/elzacka/trix/releases/latest/download/Trix-macOS.dmg) | [Trix-Windows.zip](https://github.com/elzacka/trix/releases/latest/download/Trix-Windows.zip) |
 | Installer | Dobbeltklikk på dmg-fila. Dra «Trix» til «Apper» | Høyreklikk på zip-fila, velg «Pakk ut alle» |
-| Start | Åpne appen fra «Apper». Velg «Åpne» når macOS spør om en app fra internett: Det gjelder alle slike apper, og Apple har sjekket denne | Åpne `Trix\Trix.exe`. Første gang: «Mer info», så «Kjør likevel», fordi appen ikke er signert |
+| Start | Åpne appen fra «Apper». Velg «Åpne» når macOS spør om appen fra internett. Apple har sjekket den | Åpne `Trix\Trix.exe`. Første gang: «Mer info», så «Kjør likevel», fordi appen ikke er signert |
 
 Første oppstart:
 
-- Mac: Ikonet står i menylinjen øverst til høyre
-- Windows: Ikonet står ved klokka på oppgavelinjen. Hvis du ikke ser det: Klikk på pila for å se skjulte ikoner.
+- Mac: Ikonet står i menylinjen øverst til høyre.
+- Windows: Ikonet står ved klokka på oppgavelinjen. Klikk på pila for å se skjulte ikoner hvis du ikke ser det.
+- Hurtigåpneren ⌘⌥U (Mac) eller Ctrl+Alt+U (Windows) åpner appen.
 - Appen lager filene sine i datamappen, se [Filene](#filene).
-- Hurtigåpner: ⌘⌥U (Mac), Ctrl+Alt+U (Windows).
 
 ## 2. Bruk
 
@@ -37,7 +37,7 @@ Første oppstart:
 | Lese en veiledning | Trykk på den. Esc: Tilbake |
 | Avslutte | «Avslutt Trix» i menyen, eller høyreklikk på ikonet |
 
-Menyen («Flere valg» øverst til høyre). Oppsettet bestemmer hvilke valg den har.
+Menyen er «Flere valg» øverst til høyre. Oppsettet bestemmer hvilke valg den har:
 
 | Valg | Gjør |
 |---|---|
@@ -76,7 +76,7 @@ Et eget vindu ved siden av appen. Du ser endringene i sanntid.
 | «Meny» | Rekkefølge, valg av og på, skillelinjer |
 | «Farger» | Lys og mørk modus. Varsel når kontrasten er lavere enn 4,5:1. «Bruk standardfargene» |
 | «Skrift og vindu» | Skrift, skrift på taster, størrelse. Vindustype: «Panel ved ikonet» eller «Vanlig vindu». Bredde, høyde |
-| «Ikoner» | SVG eller PNG: «Velg fil …» eller dra fila inn. «Standard» |
+| «Ikoner» | SVG eller PNG: «Velg fil …» eller dra fila inn. Krysset gir standardikonet tilbake |
 | «Tekster» | Alle tekstene i appen |
 
 - «Lagre»: Skriver `Oppsett.md`.
@@ -94,10 +94,10 @@ Menyen:
 | «Importer/Eksporter» → «Eksporter» | Kopi i Nedlastinger. Overskriver aldri en fil |
 | «Åpne datamappen» | Mappa med fila |
 
-Du kan også dra en fil fra Finder eller Utforsker inn på en fane. Fila havner
-i den fanen, og du får de samme valgene. Dette virker med vindustypen «Vanlig
-vindu». Panelet lukker seg når du klikker i Finder eller Utforsker, så bruk
-«Importer …» med «Panel ved ikonet».
+Med vindustypen «Vanlig vindu» kan du også dra en fil fra Finder eller
+Utforsker inn på en fane. Fila havner i den fanen, og du får de samme valgene.
+Panelet lukker seg når du klikker utenfor det, så med «Panel ved ikonet» bruker
+du «Importer …».
 
 Word og RTF blir Markdown slik:
 
@@ -115,19 +115,17 @@ Word og RTF blir Markdown slik:
   hurtigtast per rad.
 - «Erstatt» beholder tittelen og kommentaren øverst i fila.
 
-Excel og CSV blir alltid tabeller. Hvert ark blir et oppslag, et kort eller en
-veiledning med samme navn som arket. En CSV-fil, eller en Excel-fil med bare
-ett ark, får navnet til fila. Fet og kursiv skrift, lenker og datoer fra Excel
-blir med. Du kan skrive tekst over og under tabellen og formatere den, også inne
-i cellene. I Hurtigtaster blir hver rad en hurtigtast.
+Excel og CSV blir tabeller:
 
-Formatet står i kommentaren øverst i fila. Appen lagrer ikke hvis fila er
-endret utenfor appen etter at du åpnet den: Kopier endringene dine, velg
-«Avbryt» og åpne fila på nytt.
+- Hvert ark blir et oppslag, et kort eller en veiledning med samme navn som
+  arket. En CSV-fil, eller en Excel-fil med bare ett ark, får navnet til fila.
+- Fet og kursiv skrift, lenker og datoer fra Excel blir med.
+- Hurtigtaster: Hver rad blir én hurtigtast.
 
-### Direkte i filene
+Appen lagrer ikke hvis noen har endret fila utenfor appen etter at du åpnet den.
+Kopier da endringene dine, velg «Avbryt» og åpne fila på nytt.
 
-#### Filene
+### Filene
 
 | Hvor       | Mappe                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------- |
@@ -142,7 +140,7 @@ endret utenfor appen etter at du åpnet den: Kopier endringene dine, velg
 | `.svg`, `.png` | Ikonene under `## Ikoner` |
 | `innstillinger.json` | Hurtigåpner, visning og vindustype for denne maskinen. Endres i appen |
 
-#### Gjør mappa synlig
+#### Finn mappa
 
 Mappa er skjult som standard.
 
@@ -152,14 +150,13 @@ Mappa er skjult som standard.
 | Mac, Finder | ⇧⌘G, lim inn stien over, Retur. Skjulte filer av og på: ⇧⌘. |
 | Windows | Windows-tasten+R, skriv `%APPDATA%\Trix`, Enter. Eller lim stien inn i adressefeltet i Filutforsker |
 
-#### Endre
+#### Endre en fil
 
 - Åpne fila i et tekstprogram, for eksempel TextEdit, Notisblokk eller VS Code.
-- Formatet står i kommentaren øverst i hver fil.
-- Lagre fila. Appen viser endringen innen ett sekund.
+  Formatet står i kommentaren øverst i fila.
 - `Oppsett.md` med feil: Appen viser et varsel med linjenummeret og hopper over linja.
-- Slettet seksjon i `Oppsett.md`: Standardverdiene.
-- Fil som mangler: Appen lager den fra malen for typen.
+- En seksjon du sletter i `Oppsett.md`, får standardverdiene.
+- Appen lager en fil som mangler, fra malen for modulen.
 
 ## 4. Del med andre
 

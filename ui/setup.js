@@ -25,7 +25,7 @@ const COLOR_GROUPS = [
 ]
 const ICON_NAMES = {
   logo: 'Logo', app: 'Vinduet (Windows)', menylinje: 'Menylinjen (Mac) og oppgavelinjen (Windows)', meny: 'Flere valg', 'søk': 'Søk',
-  'tøm': 'Tøm søk', tasteoppslag: 'Slå opp hurtigtast', tilbake: 'Tilbake', valgt: 'Valgt', undermeny: 'Undermeny', fjern: 'Fjern merke',
+  'tøm': 'Tøm søk', tasteoppslag: 'Slå opp hurtigtast', tilbake: 'Tilbake', 'til toppen': 'Til toppen', valgt: 'Valgt', undermeny: 'Undermeny', fjern: 'Fjern merke',
   snu: 'Snu kortet',
 }
 const FONTS = ['Syne', 'Inter', 'Georgia', 'Helvetica', 'Arial', 'Verdana', 'Times New Roman', 'Segoe UI', 'Calibri']

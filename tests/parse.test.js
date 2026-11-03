@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseEntries, lead, alphabetical, searchEntries, inline,
-  mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, contentName, iconName, TEXTS, TOKENS, MODULES,
+  mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, contentName, iconName, ICONS, TEXTS, TOKENS, MODULES,
   formatSetup, setupHeader, parseDocument, CELL_LIMIT, REPO,
 } from '../ui/parse.js'
 
@@ -168,6 +168,7 @@ test('the seed setup is the default setup, with every text', () => {
   assert.deepEqual(seed.texts, TEXTS)
   const listed = read('../seed/Oppsett.md').split('## Tekster').at(-1).match(/^- [^|]+/gm).map(l => l.slice(2).trim())
   assert.deepEqual(listed, Object.keys(TEXTS))
+  assert.deepEqual(read('../seed/Oppsett.md').match(/^- Navn: (.*)$/m)[1].split(', '), ICONS)
 })
 
 test('the seed colours, fonts and window are the stylesheet\'s and the config\'s', () => {

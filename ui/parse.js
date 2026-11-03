@@ -498,7 +498,7 @@ const ADDED_MENU = { oppsett: ['rediger', 'åpne mappe'], avslutt: ['brukerveile
 export const REPO = 'https://github.com/elzacka/trix'
 
 /** Icon names in the setup; `menylinje` (tray) and `app` (window and taskbar) are PNG only. */
-export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'valgt', 'undermeny', 'fjern', 'snu']
+export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'til toppen', 'valgt', 'undermeny', 'fjern', 'snu']
 
 export const PNG_ONLY = ['app', 'menylinje']
 
@@ -539,6 +539,7 @@ export const TEXTS = {
   'fjern merke': 'Fjern {emne}',
   'også': 'Også',
   'tilbake': 'Tilbake',
+  'til toppen': 'Til toppen',
   'mine hurtigtaster': 'Mine hurtigtaster',
   'systemets hurtigtaster': 'Hurtigtaster i {system}',
   'begge': 'Begge',

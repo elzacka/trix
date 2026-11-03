@@ -46,7 +46,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 
 ## Ikoner
 - Navn | fil: Et .svg- eller .png-bilde i samme mappe som denne fila
-- Navn: logo, app, menylinje, meny, søk, tøm, tasteoppslag, tilbake, valgt, undermeny, fjern, snu
+- Navn: logo, app, menylinje, meny, søk, tøm, tasteoppslag, tilbake, til toppen, valgt, undermeny, fjern, snu
 - Ikonene i appen får tekstfargen. Det er bare formen i bildet som teller.
 - logo: Vises i sine egne farger.
 - app: Ikonet på vinduet og oppgavelinjen i Windows, bare .png.
@@ -123,6 +123,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 - fjern merke | Fjern {emne}
 - også | Også
 - tilbake | Tilbake
+- til toppen | Til toppen
 - mine hurtigtaster | Mine hurtigtaster
 - systemets hurtigtaster | Hurtigtaster i {system}
 - begge | Begge
