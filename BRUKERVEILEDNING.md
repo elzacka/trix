@@ -1,12 +1,5 @@
 # Brukerveiledning
 
-Trix er en oppslagsapp du setter sammen selv:
-
-- Fire moduler, som vises som faner: Hurtigtaster, oppslag, kort og steg
-- To vindustyper: «Panel ved ikonet» eller «Vanlig vindu»
-- Eget utseende: Farger for lys og mørk modus, skrift og ikoner
-- Eget innhold i vanlige Markdown-filer
-
 ## 1. Last ned og installer
 
 | | Mac | Windows |
@@ -127,11 +120,11 @@ Kopier da endringene dine, velg «Avbryt» og åpne fila på nytt.
 
 ### Filene
 
-| Hvor       | Mappe                                                                                 |
-| ---------- | ------------------------------------------------------------------------------------- |
-| Mac        | `~/Library/Application Support/Trix`                                                  |
-| Windows    | `%APPDATA%\Trix`                                                                      |
-| Delt mappe | `Trix-data` ved siden av appen, hvis den finnes, se [Del med andre](#4-del-med-andre) |
+| Hvor       | Mappe                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| Mac        | `~/Library/Application Support/Trix`                                                       |
+| Windows    | `%APPDATA%\Trix`                                                                           |
+| Delt mappe | `Trix-data` i samme mappe som appen, hvis den finnes, se [Del med andre](#4-del-med-andre) |
 
 | Fil | Holder |
 |---|---|
@@ -160,11 +153,14 @@ Mappa er skjult som standard.
 
 ## 4. Del med andre
 
-- Lag mappa `Trix-data` ved siden av appen. Appen bruker den i stedet for datamappen.
-- Kopier filene dine dit. En tom mappe får standardinnholdet.
-- Appen og mappa i en delt mappe: Alle ser det samme innholdet.
-- Gi andre skrivetilgang bare til `Trix-data`, aldri til appen.
-- `innstillinger.json` blir på hver maskin.
+Flere kan bruke det samme innholdet og oppsettet hvis de åpner appen fra en felles mappe.
+
+1. Legg appen i en mappe som alle har tilgang til, for eksempel en delt mappe på nettverket. På Windows legger du hele mappa `Trix` der.
+2. Lag en mappe med navnet `Trix-data` i samme mappe som appen. På Windows lager du den inne i mappa `Trix`, ved siden av `Trix.exe`. Appen bruker `Trix-data` i stedet for datamappen.
+3. Kopier filene fra datamappen din til `Trix-data`, se [Filene](#filene). Appen lager standardfilene hvis mappa er tom.
+
+- Gi de andre skrivetilgang bare til `Trix-data`, ikke til appen. Den som kan endre appen, kan bytte den ut med et annet program.
+- Hurtigåpner, visning og vindustype blir lagret på hver maskin, ikke i `Trix-data`.
 
 ## 5. Ny versjon
 
