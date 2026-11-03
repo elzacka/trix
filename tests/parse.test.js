@@ -263,6 +263,13 @@ test('setup: a menu that names none of the added items gets them before oppsett 
     ['innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'brukerveiledning', 'avslutt', 'versjon'])
   assert.deepEqual(menu(['innhold', 'avslutt']), ['innhold', 'brukerveiledning', 'avslutt'])
   assert.deepEqual(menu(['oppsett', 'brukerveiledning']), ['oppsett', 'brukerveiledning'])
+  // «Tilpass» with all three off: its file names every text
+  assert.deepEqual(parseSetup('## Meny\n- oppsett\n- avslutt\n## Tekster\n- brukerveiledning | Hjelp').menu, ['oppsett', 'avslutt'])
+})
+
+test('setup: an older default text reads as today\'s', () => {
+  const setup = parseSetup('## Tekster\n- innhold | Innhold {fane}\n- rediger | Se og endre i fila\n- oppsett | Tilpass\n- tom | Ingenting')
+  assert.deepEqual([setup.texts.innhold, setup.texts.rediger, setup.texts.oppsett, setup.texts.tom], [TEXTS.innhold, TEXTS.rediger, TEXTS.oppsett, 'Ingenting'])
 })
 
 test('document: headings with GitHub anchors, blocks, links to files in the repo', () => {
@@ -354,6 +361,7 @@ test('merge adds missing groups and lines, keeps the user\'s lines', () => {
   assert.equal(mergeShortcuts('', '- A | F1\n## B\n- C | F2'), '- A | F1\n\n## B\n\n- C | F2\n')
   assert.equal(mergeShortcuts('## B\n- C | F2', '- A | F1'), '- A | F1\n\n## B\n- C | F2\n')
   assert.equal(mergeShortcuts('- A | F1\n## B', '- D | F3'), '- A | F1\n- D | F3\n## B\n')
+  assert.equal(mergeShortcuts('## G\n- A | ctrl A\n  eller F1', '## G\n- C | F2'), '## G\n- A | ctrl A\n  eller F1\n- C | F2\n')
 })
 
 test('merge adds missing entries with all their lines, keeps the user\'s entries', () => {
@@ -364,6 +372,7 @@ test('merge adds missing entries with all their lines, keeps the user\'s entries
     '', '## B', '', '### Bit', 'En.', '', '## C', '', '### Cache', 'Mellomlager.', '',
   ].join('\n'))
   assert.equal(mergeEntries('## B\n### C\nc', '### A\na'), '### A\na\n\n## B\n### C\nc\n')
+  assert.equal(mergeEntries('## G\n### E\n- en\n  to', '## G\n### F\nf'), '## G\n### E\n- en\n  to\n\n### F\nf\n')
 })
 
 test('the Windows list parses whole', () => {

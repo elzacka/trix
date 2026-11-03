@@ -10,7 +10,7 @@
 - «Tilbake» in the user guide and in Steg shows a visible hover
 - Menu: «Endre innhold i ‹fane›» and «Åpne datamappen» are menu items of their own (`rediger`, `åpne mappe` under `## Meny`) above «Tilpass appen»; the submenu is «Importer/Eksporter»
 - Menu: «Brukerveiledning» shows this user guide in the app (`brukerveiledning`)
-- A `## Meny` that names none of `rediger`, `åpne mappe`, `brukerveiledning` gets the first two before `oppsett` and the last before `avslutt`, where it has those
+- A setup from 2.0.0 gets the new menu: `rediger` and `åpne mappe` before `oppsett`, `brukerveiledning` before `avslutt`, where it has those, and the default texts «Importer/Eksporter», «Endre innhold i ‹fane›» and «Tilpass appen» in place of the older ones
 - The Hurtigtaster template lists the Mac key symbols to copy: ⌘ ⌥ ⌃ ⇧ 🌐︎ ⇥ ↩ ⌫ ← → ↑ ↓
 - fn shows as the globe 🌐︎ on a Mac, as in macOS menus; a pasted 🌐 reads as fn, and ← → ↑ ↓ as the arrow keys
 

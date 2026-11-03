@@ -735,7 +735,7 @@ function finishImport() {
 // A file dropped on a tab goes into that tab; anywhere else, into the tab shown.
 const dropTab = e => e.target.closest?.('[role="tab"]')
 const dropping = e => e.dataTransfer?.types.includes('Files')
-const canDrop = () => current() && !state.editing && !$('import-dialog').open
+const canDrop = () => current() && !state.editing && !$('import-dialog').open && $('user-guide').hidden
 
 function markDrop(el) {
   document.querySelectorAll('.drop-target').forEach(x => { if (x !== el) x.classList.remove('drop-target') })

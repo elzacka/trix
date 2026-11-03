@@ -132,7 +132,8 @@ export function lookupShortcuts(sections, id) {
     .filter(s => s.items.length)
 }
 
-function comments(lines) {
+/** Lines outside comments; a line that continues a list item joins it and adds its index to `continued`. */
+function comments(lines, continued = new Set()) {
   let inside = false
   /** The list item an indented line continues, as in Markdown; -1 when none. */
   let item = -1
@@ -145,6 +146,7 @@ function comments(lines) {
       out.push(null)
     } else if (item >= 0 && line && !listed && /^\s/.test(raw)) {
       out[item] += ` ${line}`
+      continued.add(out.length)
       out.push(null)
     } else {
       item = listed ? out.length : -1
@@ -396,7 +398,9 @@ export function plain(text) {
 /** Groups and their item lines with the line numbers they end at; outside the format comment. */
 function shortcutBlocks(lines) {
   const groups = []
-  comments(lines).forEach((line, i) => {
+  const continued = new Set()
+  comments(lines, continued).forEach((line, i) => {
+    if (continued.has(i) && groups.length) groups.at(-1).end = i
     if (line === null) return
     if (/^##(?!#)/.test(line)) groups.push({ title: line.replace(/^#+/, '').trim(), heading: i, end: i, items: [] })
     const item = line.match(/^[-*]\s+(.*)$/)
@@ -413,7 +417,9 @@ function shortcutBlocks(lines) {
 function entryBlocks(lines) {
   const groups = []
   let entry = null
-  comments(lines).forEach((line, i) => {
+  const continued = new Set()
+  comments(lines, continued).forEach((line, i) => {
+    if (continued.has(i) && entry) groups.at(-1).end = i
     if (line === null) return
     if (/^#{1,3}\s/.test(line)) entry = null
     if (/^##\s/.test(line)) groups.push({ title: line.slice(3).trim(), heading: i, end: i, items: [] })
@@ -492,7 +498,7 @@ export const MENU = ['visning', 'innhold', 'rediger', 'åpne mappe', 'oppsett', 
 
 const DEFAULT_MENU = ['visning', 'innhold', '---', 'rediger', 'åpne mappe', 'oppsett', 'hurtigåpner', '---', 'brukerveiledning', 'avslutt', 'versjon']
 
-/** A menu that names none of these items gets each list before its item, when it has that item. */
+/** A menu that names none of these items gets each list before its item, when it has that item; not in a file that names the text `brukerveiledning`, as each file this version writes does. */
 const ADDED_MENU = { oppsett: ['rediger', 'åpne mappe'], avslutt: ['brukerveiledning'] }
 
 export const REPO = 'https://github.com/elzacka/trix'
@@ -584,12 +590,17 @@ const key = text => text.trim().toLocaleLowerCase('nb').replace(/^a-å$/, 'a–�
 /** Older names for a section, a menu item and a text, still read. */
 const RENAMED = { visninger: 'moduler', kildedata: 'innhold' }
 
+/** Texts as an older setup wrote their defaults; they read as today's. */
+const OLDER_TEXTS = { innhold: 'Innhold {fane}', rediger: 'Se og endre i fila', oppsett: 'Tilpass' }
+
 /** Sections it has replace the defaults; sections it lacks keep them. Problems name the line. */
 export function parseSetup(text) {
   const setup = {
     modules: [], menu: [], colors: {}, fonts: {}, window: {}, icons: {}, texts: { ...TEXTS }, problems: [],
   }
   const seen = new Set()
+  /** The texts the file names. */
+  const named = new Set()
   let section = null
   const problem = (i, message) => setup.problems.push(`${SETUP_FILE}, linje ${i + 1}: ${message}`)
   comments(text.split(/\r?\n/)).forEach((line, i) => {
@@ -657,12 +668,14 @@ export function parseSetup(text) {
     } else if (section === 'tekster') {
       const text = RENAMED[name] ?? name
       if (!(text in TEXTS)) return problem(i, `«${parts[0]}» er ikke en tekst i oppsettet`)
-      setup.texts[text] = parts.slice(1).join(' | ').replaceAll('{visning}', '{fane}')
+      const value = parts.slice(1).join(' | ').replaceAll('{visning}', '{fane}')
+      setup.texts[text] = value === OLDER_TEXTS[text] ? TEXTS[text] : value
+      named.add(text)
     }
   })
   if (!seen.has('moduler')) setup.modules = DEFAULT_MODULES.map(v => ({ ...v }))
   if (!seen.has('meny')) setup.menu = [...DEFAULT_MENU]
-  else if (!Object.values(ADDED_MENU).flat().some(item => setup.menu.includes(item))) {
+  else if (!named.has('brukerveiledning') && !Object.values(ADDED_MENU).flat().some(item => setup.menu.includes(item))) {
     for (const [before, items] of Object.entries(ADDED_MENU)) {
       const at = setup.menu.indexOf(before)
       if (at >= 0) setup.menu.splice(at, 0, ...items)
