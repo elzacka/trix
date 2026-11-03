@@ -107,7 +107,7 @@ function change(again) {
 // Building blocks of the screen
 
 function render() {
-    const scroll = $('setup-body').scrollTop
+  const scroll = $('setup-body').scrollTop
   $('setup-body').replaceChildren(
     section('moduler', 'Moduler', modules()),
     section('meny', 'Meny', menu()),
@@ -139,7 +139,7 @@ function iconButton(label, paths, onclick, disabled) {
 
 /** Rows that move by dragging the grip or with the buttons beside them. */
 function rows(items, row, apply) {
-    const list = h('ol', { class: 'rows' }, items.map((item, i) => h('li', { class: 'row', 'data-index': i },
+  const list = h('ol', { class: 'rows' }, items.map((item, i) => h('li', { class: 'row', 'data-index': i },
     h('span', { class: 'handle' }, svg(GRIP)),
     h('div', { class: 'row-main' }, row(item, i)),
     h('div', { class: 'row-buttons' },
@@ -185,7 +185,7 @@ function unique(base, taken) {
 }
 
 function modules() {
-    const list = rows(draft.modules, moduleRow, order => { draft.modules = order; change(true) })
+  const list = rows(draft.modules, moduleRow, order => { draft.modules = order; change(true) })
   const choice = h('select', { 'aria-label': 'Modul' }, MODULES.map(k => h('option', { value: k }, MODULE_NAMES[k])))
   const add = () => {
     const name = unique(MODULE_NAMES[choice.value], draft.modules.map(v => v.name.toLocaleLowerCase('nb')))
@@ -197,7 +197,7 @@ function modules() {
 }
 
 function moduleRow(v, i) {
-    const file = h('input', {
+  const file = h('input', {
     value: v.file, 'aria-label': 'Fil', spellcheck: 'false',
     onchange: e => {
       const ok = contentName(e.target.value.trim())
@@ -248,7 +248,7 @@ function menuLabel(key) {
 }
 
 function menu() {
-    const apply = order => {
+  const apply = order => {
     menuRows = order
     draft.menu = menuRows.filter(r => r.on || r.key === '---').map(r => r.key)
     change(true)
@@ -278,7 +278,7 @@ function hex(name, mode) {
 const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i
 
 function colors() {
-    // A picker and its hex code: either one sets the colour and shows in the other.
+  // A picker and its hex code: either one sets the colour and shows in the other.
   const input = (name, title, mode) => {
     const label = `${title}, ${mode === 'light' ? 'lys' : 'mørk'} modus`
     const set = value => {
@@ -315,7 +315,7 @@ function colors() {
 }
 
 function fonts() {
-    const font = key => h('input', {
+  const font = key => h('input', {
     value: draft.fonts[key] ?? '', list: 'setup-fonts', placeholder: key === 'tekst' ? 'Syne' : 'Inter', spellcheck: 'false',
     oninput: e => {
       const value = e.target.value.trim()
@@ -366,7 +366,7 @@ async function addIcon(key, name, bytes) {
 }
 
 function icons() {
-    return h('ul', { class: 'rows grouped' }, ICONS.map(key => {
+  return h('ul', { class: 'rows grouped' }, ICONS.map(key => {
     const chooser = h('input', {
       type: 'file', hidden: true, accept: PNG_ONLY.includes(key) ? '.png' : '.svg,.png',
       onchange: async e => { const f = e.target.files[0]; if (f) addIcon(key, f.name, await f.arrayBuffer()) },
@@ -384,7 +384,7 @@ function icons() {
 }
 
 function texts() {
-    return Object.keys(TEXTS).map(key => field(key, h('input', {
+  return Object.keys(TEXTS).map(key => field(key, h('input', {
     value: draft.texts[key] === TEXTS[key] ? '' : draft.texts[key], placeholder: TEXTS[key],
     oninput: e => { draft.texts[key] = e.target.value || TEXTS[key]; change() },
   })))
