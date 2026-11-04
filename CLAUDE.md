@@ -17,7 +17,7 @@ Tauri 2 app (Windows, macOS), an app shell built on Trix Mini (`~/dev/trix_mini`
   | vindustype: `panel`, `vindu` | window type |
   | datamappen | data folder |
 
-  Main window (`main`) whatever its window type; «panel» only for the window type. «Tilpass» is a window, never a module. Older names still read (`RENAMED`): `## Visninger`, `kildedata`, `{visning}`. Template per module in `seed/maler/`, `{navn}` filled with the tab's name.
+  Main window (`main`) whatever its window type; «panel» only for the window type. «Tilpass» is a window, never a module. Older names still read (`RENAMED`): `## Visninger`, `kildedata`, `{visning}`. Every setup file names every text, so a changed default in `TEXTS` needs its old value in `OLDER_TEXTS`. Template per module in `seed/maler/`, `{navn}` filled with the tab's name.
 - Files are the user's: written only when missing and on «Lagre»; `save` refuses when the file changed on disk since it was read. File and icon names from the setup: plain names in the data folder (`data_file` in `main.rs`, `contentName`/`iconName` in `parse.js`).
 - Setup icons: shown as image or CSS mask from a data URL, never as markup. Tray icon: PNG via `set_tray_icon`. The bundle icon is build time: `assets/icon.svg`.
 - `Oppsett.md` is the source. «Tilpass» (`ui/setup.html`, `setup.js`) is a window of its own: it parses the file, sends each change to the main window as event `preview`, and «Lagre» writes it back with `formatSetup` (`save_setup`), keeping the file's top comment. The panel's `save` refuses `Oppsett.md`.
