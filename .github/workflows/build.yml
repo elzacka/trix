@@ -60,6 +60,8 @@ jobs:
     needs: macos
     if: github.ref == 'refs/heads/main'
     runs-on: macos-latest
+    # Notarization takes 1-2 min; a hung one ran 6 h until GitHub's default cut it
+    timeout-minutes: 30
     # Its secrets reach only this job, and only on main (the environment's branch policy)
     environment: signing
     permissions:
