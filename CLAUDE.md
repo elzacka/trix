@@ -22,6 +22,7 @@ Tauri 2 app (Windows, macOS), an app shell built on Trix Mini (`~/dev/trix_mini`
 - Setup icons: shown as image or CSS mask from a data URL, never as markup. Tray icon: PNG via `set_tray_icon`. The bundle icon is build time: `assets/icon.svg`.
 - `Oppsett.md` is the source. «Tilpass» (`ui/setup.html`, `setup.js`) is a window of its own: it parses the file, sends each change to the main window as event `preview`, and «Lagre» writes it back with `formatSetup` (`save_setup`), keeping the file's top comment. The panel's `save` refuses `Oppsett.md`.
 - Commands per window: `build.rs` lists them, `capabilities/` grants each window its own. A change in the data folder (`watch`, polled each second) reloads both windows. Settings are per device (`settings_dir`), never in a shared data folder.
+- Links between tabs: `[tekst](Fil.md#sted)` or `#sted`, `sted` a heading slug (`findAnchor`), broken ones warned on load (`linkProblems`). `state.trail` holds what each followed link left; `#return` restores it. Internal links never reach Rust.
 - Window type `panel` or `vindu` (`set_mode`): the last one is kept in settings so the app starts in it.
 - Colours: setup sets `--<token>-light/-dark` on `:root` through CSSOM (CSP has no `'unsafe-inline'`); the rest derive with `color-mix`. Contrast under 4.5:1 is a warning, not a block.
 - Window, data folder, system list, corners, links: as Trix Mini's `CLAUDE.md`.

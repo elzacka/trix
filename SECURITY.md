@@ -18,7 +18,7 @@ One process with the user's rights, no elevated parts, no network, no listening 
 
 | Entry point | Trust boundary | Threat | Mitigation |
 |---|---|---|---|
-| Content files (may come from someone else) | File → webview | Script in the content; hang on a wide table | Text nodes only, CSP `'self'`; links `https?://` only, or `#anchor` to a heading in the same article (`CSS.escape`); 100 000 table cells per file, padding to the header's width included |
+| Content files (may come from someone else) | File → webview | Script in the content; hang on a wide table | Text nodes only, CSP `'self'`; links `https?://` only, `#anchor` to a heading in the same article (`CSS.escape`), or `File.md#anchor` with a plain file name, matched against the setup's tabs and never read as a path; 100 000 table cells per file, padding to the header's width included |
 | `Oppsett.md` | File → webview, Rust | Path out of the data folder; CSS or script injection | File and icon names: plain names with `.md`, `.svg` or `.png`, checked in `parse.js` and again in `data_file`; colours through CSSOM, only values `CSS.supports` accepts as a colour; font names letters, digits, space, `-`, `_` |
 | Icons from the setup | File → webview, tray | Script in an SVG; large file | Shown as `<img>` or CSS mask from a data URL, never inserted as markup; 1 MB limit; tray: PNG decoded by Tauri |
 | Links in the content | Webview → browser | Web page in the main window | `on_navigation`: own origin only; `on_new_window`: deny; http(s) goes to the browser |

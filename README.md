@@ -7,6 +7,7 @@ An app shell for quick reference on Windows and macOS:
 - Two window types: a panel at the menu bar or tray icon, or a normal window
 - Appearance: colours for light and dark mode, fonts, icons, menu and every
   UI text, in one file or in «Tilpass»
+- Links between tabs, with a floating way back to the exact place
 - Your own content in plain Markdown files, one per tab, written by hand or
   imported from Word, RTF, Excel or CSV, also by dropping a file on a tab
 

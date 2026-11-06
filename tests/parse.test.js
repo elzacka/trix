@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseEntries, lead, alphabetical, searchEntries, inline,
   mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, contentName, iconName, ICONS, TEXTS, TOKENS, MODULES,
-  formatSetup, setupHeader, parseDocument, CELL_LIMIT, REPO,
+  formatSetup, setupHeader, parseDocument, CELL_LIMIT, REPO, linkSegments, linkText, contentLink, linkedTab, findAnchor, linkProblems,
 } from '../ui/parse.js'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
@@ -392,7 +392,65 @@ test('shortcuts A–Å: groups and their lines, ungrouped lines first', () => {
 
 test('inline: linear on a long line of unclosed marks', () => {
   const started = performance.now()
-  for (const c of ['[', '*', '`', '**a', '[a](', '[a](https://x']) inline(c.repeat(200000))
+  for (const c of ['[', '*', '`', '**a', '[a](', '[a](https://x', '[a](b.md', 'b.md']) inline(c.repeat(200000))
   assert.ok(performance.now() - started < 1000)
   assert.deepEqual(inline('**a** *b* `c` [d](https://e.no)').map(s => s.type), ['strong', 'text', 'em', 'text', 'code', 'text', 'link'])
+})
+
+test('a link to a tab: a plain file name, with or without an anchor', () => {
+  const href = text => inline(text).find(s => s.type === 'link')?.href
+  assert.equal(href('[a](Steg.md)'), 'Steg.md')
+  assert.equal(href('[a](Mine%20notater.MD#egen-plan)'), 'Mine%20notater.MD#egen-plan')
+  for (const text of ['[a](../Steg.md)', '[a](mappe/Steg.md)', '[a](C:Steg.md)', '[a](javascript:x.md)', '[a](.skjult.md)', '[a](Steg.txt)']) {
+    assert.equal(href(text), undefined, text)
+  }
+  assert.deepEqual(contentLink('Mine%20notater.md#egen%20plan'), { file: 'Mine notater.md', anchor: 'egen plan' })
+  assert.deepEqual(contentLink('#husk'), { file: '', anchor: 'husk' })
+  assert.deepEqual(contentLink('Steg.md#100%'), { file: 'Steg.md', anchor: '100%' })
+  const tabs = [{ file: 'Kort.md' }, { file: 'Steg.md' }]
+  assert.deepEqual([linkedTab(tabs, 'steg.MD', 0), linkedTab(tabs, '', 1), linkedTab(tabs, 'Borte.md', 0)], [1, 1, -1])
+})
+
+test('an anchor finds an entry, a heading in one or a group; in Hurtigtaster a group or a shortcut', () => {
+  const text = '## Rutiner\n\n### Bortfall strøm\nTekst\n\n#### Gjør dette!\n- Sjekk\n\n### Brann\nTekst'
+  assert.equal(findAnchor(text, 'kort', 'bortfall-strøm').entry.title, 'Bortfall strøm')
+  assert.equal(findAnchor(text, 'kort', 'Bortfall strøm').entry.title, 'Bortfall strøm')
+  const heading = findAnchor(text, 'steg', 'gjør-dette')
+  assert.deepEqual([heading.entry.title, heading.anchor], ['Bortfall strøm', 'gjør-dette'])
+  assert.deepEqual(findAnchor(text, 'oppslag', 'rutiner'), { group: true, anchor: 'rutiner' })
+  assert.equal(findAnchor(text, 'kort', 'borte'), null)
+  const keys = '## Møte\n- Kamera av og på | ctrl K | ⌘K\n- Bare Mac | | ⌘B'
+  assert.deepEqual(findAnchor(keys, 'hurtigtaster', 'møte', 'mac'), { anchor: 'møte' })
+  assert.deepEqual(findAnchor(keys, 'hurtigtaster', 'kamera-av-og-på', 'mac'), { anchor: 'kamera-av-og-på' })
+  assert.equal(findAnchor(keys, 'hurtigtaster', 'bare-mac', 'windows'), null)
+})
+
+test('a link that leads nowhere names its file and line; a comment and the web are left out', () => {
+  const tabs = [
+    { file: 'Kort.md', module: 'kort', text: '<!-- [a](Borte.md) -->\n### A\nTekst\n\n[b](Steg.md#b)\n[c](Steg.md#borte)\n[d](Borte.md)\n[e](#a)\n[f](#borte)\n[g](https://e.no#borte)\n`[h](Borte.md)`' },
+    { file: 'Steg.md', module: 'steg', text: '### B\nTekst' },
+    { file: 'Hurtigtaster.md', module: 'hurtigtaster', text: '- [Bare Windows](Kort.md#a) | ctrl B |\n- Annen | ⌘A\n- [x](Hurtigtaster.md#bare-windows) | ⌘X' },
+  ]
+  assert.deepEqual(linkProblems(tabs), [
+    'Kort.md, linje 6: Finner ikke «Steg.md#borte»',
+    'Kort.md, linje 7: Finner ikke «Borte.md»',
+    'Kort.md, linje 9: Finner ikke «#borte»',
+  ])
+  const seed = MODULES.map(module => ({ file: `${module}.md`, module, text: read(`../seed/maler/${module}.md`) }))
+  assert.deepEqual(linkProblems(seed), [])
+})
+
+test('a link to a tab counts by its text: search, A–Å, a shortcut\'s name', () => {
+  assert.equal(linkText('Se [rutinen](Steg.md#a) og [DSB](https://dsb.no)'), 'Se rutinen og [DSB](https://dsb.no)')
+  assert.deepEqual(searchEntries(parseEntries('### A\nSe [rutinen](Steg.md#a)'), 'steg'), [])
+  assert.equal(searchEntries(parseEntries('### A\nSe [rutinen](Steg.md#a)'), 'rutinen').length, 1)
+  const [section] = parseShortcuts('- [Zebra](Oppslag.md#a) | ⌘Z\n- Bjørn | ⌘B', 'mac')
+  assert.deepEqual(sortShortcuts([section])[0].items.map(i => i.title.slice(0, 2)), ['Bj', '[Z'])
+  assert.deepEqual(filterShortcuts([section], 'oppslag'), [])
+  assert.deepEqual(linkSegments('2 * 3 * [a](Steg.md)').map(s => s.type), ['text', 'link'])
+})
+
+test('document: a code span keeps its text, a link to a file goes to the repo', () => {
+  const [p] = parseDocument('`[a](Steg.md#b)` og [c](README.md)')
+  assert.equal(p.text, `\`[a](Steg.md#b)\` og [c](${REPO}/blob/main/README.md)`)
 })

@@ -28,6 +28,7 @@ Første oppstart:
 | Se alt med samme emne | Trykk på en #emneknagg |
 | Snu et kort | Trykk på kortet |
 | Lese en veiledning | Trykk på den. Esc: Tilbake |
+| Følge en lenke til en annen fane | Trykk på den. «Tilbake til ‹sted›» eller Esc: Dit du kom fra, se [Lenker mellom fanene](#lenker-mellom-fanene) |
 | Avslutte | «Avslutt Trix» i menyen, eller høyreklikk på ikonet |
 
 Menyen er «Flere valg» øverst til høyre. Oppsettet bestemmer hvilke valg den har:
@@ -117,6 +118,28 @@ Excel og CSV blir tabeller:
 
 Appen lagrer ikke hvis noen har endret fila utenfor appen etter at du åpnet den.
 Kopier da endringene dine, velg «Avbryt» og åpne fila på nytt.
+
+### Lenker mellom fanene
+
+Du kan lenke til en annen fane eller til et sted i en fane. Skriv lenken i
+innholdet med filnavnet til fanen:
+
+| Skriv | Går til |
+|---|---|
+| `[Se rutinen](Steg.md)` | Fanen med fila `Steg.md` |
+| `[Se rutinen](Steg.md#forbered-deg-på-ekombortfall)` | Veiledningen, oppslaget, kortet, overskriften, gruppen eller hurtigtasten med det navnet |
+| `[Se under](#husk)` | Et sted i samme fane |
+
+- Etter `#` skriver du navnet med små bokstaver og bindestrek for mellomrom. Tegn som `?` og `,` tar du bort.
+- I et filnavn skriver du `%20` for mellomrom.
+- Et oppslag og en veiledning åpner seg, og et kort snur seg, når lenken går dit.
+- I Hurtigtaster står lenken i navnet. På et kort virker den bare på baksiden, fordi et trykk på forsiden snur kortet.
+- Appen viser et varsel med fil og linje hvis stedet ikke finnes, for eksempel etter at du har endret en overskrift.
+
+Når du følger en lenke, står «Tilbake til ‹sted›» nederst i vinduet:
+
+- Knappen eller Esc: Du kommer tilbake til samme fane og samme sted, med søket og det åpne kortet eller oppslaget slik det var. Hver lenke du følger videre, får sitt eget steg tilbake.
+- Krysset: Du blir der du er, og knappen forsvinner.
 
 ### Filene
 

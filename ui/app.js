@@ -1,6 +1,6 @@
 import {
   parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseEntries, lead, alphabetical, sortShortcuts,
-  searchEntries, formatKeys, inline, plain, mergeShortcuts, mergeEntries, parseSetup, parseDocument, fill, contrastProblems, SETUP_FILE, TOKENS,
+  searchEntries, formatKeys, inline, linkSegments, contentLink, linkedTab, findAnchor, linkProblems, plain, slug, mergeShortcuts, mergeEntries, parseSetup, parseDocument, fill, contrastProblems, SETUP_FILE, TOKENS,
 } from './parse.js'
 import { h, svg } from './dom.js'
 import { importText, importable, replaceContent, IMPORT_TYPES } from './import.js'
@@ -31,6 +31,8 @@ const state = {
   view: 'mine',
   system: '',
   importing: '',
+  /** Where links were followed from, latest last. */
+  trail: [],
   /** The file in the editor: { name, original }. */
   editing: null,
   discarding: false,
@@ -145,6 +147,7 @@ async function load() {
       }
     }))
     if (state.tab >= state.modules.length) state.tab = 0
+    problems.push(...linkProblems(state.modules))
     state.system = ''
     // Read only when shown: on a Mac this reads the system's settings.
     if (state.view !== 'mine' && state.modules.some(v => has(v, 'system'))) {
@@ -171,7 +174,7 @@ function applySetup() {
   const { texts, menu, colors, fonts, window: size } = state.setup
   document.title = texts.navn
   document.querySelectorAll('[data-text]').forEach(el => { el.textContent = t(el.dataset.text) })
-  for (const [id, key] of [['more', 'flere valg'], ['clear', 'tøm søk'], ['capture', 'slå opp']]) {
+  for (const [id, key] of [['more', 'flere valg'], ['clear', 'tøm søk'], ['capture', 'slå opp'], ['return-stay', 'bli her']]) {
     $(id).setAttribute('aria-label', t(key))
     $(id).title = t(key)
   }
@@ -272,6 +275,7 @@ function render() {
     : [state.hotkey ? t('endre hurtigåpner') : t('velg hurtigåpner'), state.hotkey && h('span', { class: 'menu-keys' }, hotkeyName())].filter(Boolean)))
   $('tools').replaceChildren()
   $('status').textContent = ''
+  renderReturn()
   if (tab) MODULE_VIEWS[tab.module].render(tab)
   else $('list').replaceChildren(h('p', { class: 'empty' }, t('tom')))
 }
@@ -317,10 +321,10 @@ function renderShortcuts(tab) {
   $('tools').replaceChildren(...(id && count ? [h('span', {}, `${combo}: ${found}`)] : []))
   $('status').textContent = id ? (count ? `${combo}: ${found}` : t('ikke i lista', { taster: combo })) : query ? found : ''
   const group = (s, heading) => h('section', {},
-    s.title && h(heading, {}, s.title),
+    s.title && h(heading, { 'data-anchor': slug(s.title) }, s.title),
     h('div', { class: 'card' }, s.items.map(item =>
-      h('div', { class: 'shortcut' },
-        h('span', { class: 'name' }, item.title),
+      h('div', { class: 'shortcut', 'data-anchor': slug(item.title) },
+        h('span', { class: 'name' }, segments(linkSegments(item.title))),
         h('span', { class: 'keys' }, item.keys.flatMap((k, i) =>
           [i > 0 && h('span', { class: 'or' }, 'eller'), ...k.map(p => (p.keys ? h('kbd', {}, p.keys) : h('span', { class: 'or' }, p.text)))]))))))
   $('list').replaceChildren(
@@ -360,7 +364,7 @@ function entrySections(tab) {
 function renderEntries(tab, sections, list) {
   const filtered = tab.query.trim() || (has(tab, 'emneknagger') && tab.tags.length)
   $('list').replaceChildren(...(sections.length
-    ? sections.map(s => h('section', {}, s.title && h('h2', {}, s.title), list(s.entries)))
+    ? sections.map(s => h('section', {}, s.title && h('h2', { 'data-anchor': slug(s.title) }, s.title), list(s.entries)))
     : [filtered ? emptyState(tab.query.trim() ? t('ingen treff', { søk: tab.query.trim() }) : t('tom'))
       : h('p', { class: 'empty' }, t('tom'))]))
 }
@@ -369,9 +373,9 @@ function renderLookup(tab) {
   renderEntries(tab, entrySections(tab), entries => h('div', { class: 'card' }, entries.map(e => entry(tab, e))))
 }
 
-/** Inline Markdown as elements; with `links` false, a link is its text. An #anchor scrolls within its article. */
-function rich(text, links = true) {
-  return inline(text).map(seg => {
+/** Segments as elements; with `links` false, a link is its text. */
+function segments(list, links = true) {
+  return list.map(seg => {
     if (seg.type === 'link') {
       return !links ? seg.text : h('a', { href: seg.href, onclick: e => { e.preventDefault(); e.stopPropagation(); follow(e.currentTarget, seg.href) } }, seg.text)
     }
@@ -379,18 +383,101 @@ function rich(text, links = true) {
   })
 }
 
+const rich = (text, links) => segments(inline(text), links)
+
+/** The web goes to the browser. In the user guide an #anchor scrolls within it; in content a link goes to a tab or a place in one. */
 function follow(link, href) {
-  if (!href.startsWith('#')) return invoke('open_url', { url: href })
+  if (/^https?:/.test(href)) return invoke('open_url', { url: href })
+  if (!link.closest('#user-guide')) return followContent(link, href)
   const target = link.closest('article')?.querySelector(`#${CSS.escape(href.slice(1))}`)
   target?.scrollIntoView()
   target?.focus({ preventScroll: true })
+}
+
+// Links between tabs: each leaves a mark on the trail, and «Tilbake til …» restores what it holds.
+
+function here(link) {
+  const tab = current()
+  const id = tab.reading ?? tab.open
+  return {
+    file: tab.file,
+    view: state.view,
+    place: (id != null && parseEntries(tab.text).flatMap(s => s.entries).find(e => e.id === id)?.title) || tab.name,
+    tabs: new Map(state.modules.map(({ file, query, order, tags, open, reading }) => [file, { query, order, tags, open, reading }])),
+    scroll: $('tabpanel').scrollTop,
+    link: [...$('list').querySelectorAll('a')].indexOf(link),
+  }
+}
+
+async function followContent(link, href) {
+  const { file, anchor } = contentLink(href)
+  const at = linkedTab(state.modules, file, state.tab)
+  if (at < 0) return
+  state.trail.push(here(link))
+  // The user's own shortcuts must show; «Tilbake til …» sets the view back.
+  if (state.view === 'system' && state.modules[at].module === 'hurtigtaster' && has(state.modules[at], 'system')) await setView('begge')
+  const tab = state.modules[at]
+  const found = (anchor && findAnchor(tab.text, tab.module, anchor, state.os)) || {}
+  Object.assign(tab, { query: '', tags: [], open: null, reading: null })
+  if (found.group) tab.order = 'file'
+  if (found.entry) {
+    const back = found.entry.blocks.length > (lead(found.entry) ? 1 : 0)
+    if (tab.module === 'steg') tab.reading = found.entry.id
+    else if (tab.module === 'oppslag' || back) tab.open = found.entry.id
+  }
+  state.tab = at
+  closeMenu()
+  render()
+  $('tabpanel').scrollTop = 0
+  land(found, tab, at)
+}
+
+/** Brings the place into view and marks it for a moment, so the eye finds it. */
+function land(found, tab, at) {
+  if (found.entry && tab.module === 'steg' && !found.anchor) return $('guide-title').focus()
+  const scope = (found.entry && $(`entry-${found.entry.id}`)) || $('list')
+  const target = found.anchor ? scope.querySelector(`[data-anchor="${CSS.escape(found.anchor)}"]`) : found.entry && scope
+  if (!target) return $(`tab-${at}`).focus()
+  target.classList.add('landed')
+  target.scrollIntoView({ block: 'start' })
+  if (found.anchor) target.tabIndex = -1
+  ;(found.anchor ? target : target.querySelector('button')).focus({ preventScroll: true })
+}
+
+async function goBack() {
+  const from = state.trail.pop()
+  if (from.view !== state.view) await setView(from.view)
+  for (const tab of state.modules) Object.assign(tab, from.tabs.get(tab.file))
+  const at = state.modules.findIndex(tab => tab.file === from.file)
+  if (at >= 0) state.tab = at
+  closeMenu()
+  render()
+  $('tabpanel').scrollTop = from.scroll
+  const link = $('list').querySelectorAll('a')[from.link]
+  if (!link) return $(`tab-${state.tab}`).focus()
+  link.classList.add('landed')
+  link.focus({ preventScroll: true })
+}
+
+function stayHere() {
+  state.trail = []
+  renderReturn()
+  $(`tab-${state.tab}`).focus()
+}
+
+function renderReturn() {
+  const from = state.trail.at(-1)
+  $('return').hidden = !from
+  if (!from) return
+  $('return-place').textContent = t('tilbake til', { sted: from.place })
+  $('return-back').title = $('return-place').textContent
 }
 
 /** Paragraphs, headings at their own level or `level`, lists and tables. */
 function blocks(list, level) {
   return list.map(b => {
     if (b.type === 'p') return h('p', {}, rich(b.text))
-    if (b.type === 'h') return h(`h${b.level ?? level}`, { class: 'subheading', id: b.id, tabindex: b.id && -1 }, rich(b.text))
+    if (b.type === 'h') return h(`h${b.level ?? level}`, { class: 'subheading', id: b.id, tabindex: b.id && -1, 'data-anchor': slug(b.text) }, rich(b.text))
     if (b.type === 'table') {
       return h('table', {},
         h('thead', {}, h('tr', {}, b.head.map((c, i) => tableCell('th', c, b.align[i])))),
@@ -851,6 +938,10 @@ $('export').addEventListener('click', exportList)
 $('reveal-file').addEventListener('click', () => { closeMenu(); invoke('reveal_file', { name: current().file }) })
 $('hotkey').addEventListener('click', () => { state.recording = true; render() })
 $('user-guide-item').addEventListener('click', openUserGuide)
+$('return-back').prepend(backIcon())
+$('return-back').addEventListener('click', goBack)
+$('return-stay').append(closeIcon())
+$('return-stay').addEventListener('click', stayHere)
 $('quit').addEventListener('click', () => invoke('quit'))
 $('cancel').addEventListener('click', cancelEdit)
 $('save').addEventListener('click', saveEdit)
@@ -893,6 +984,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Escape') {
     e.preventDefault()
     if (!$('menu').hidden) { closeMenu(); $('more').focus() }
+    else if (state.trail.length) goBack()
     else if (tab?.reading != null) closeGuide(tab)
     else if (tab?.open != null) { tab.open = null; render() }
     else if (tab?.tags.length) { tab.tags = []; render() }

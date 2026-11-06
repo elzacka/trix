@@ -189,7 +189,7 @@ export function filterShortcuts(sections, query) {
     .map(s => ({
       ...s,
       items: s.items.filter(item => {
-        const text = [s.title, item.title, ...item.keys.flat().map(p => p.keys ?? p.text)].join(' ').toLocaleLowerCase('nb')
+        const text = [s.title, linkText(item.title), ...item.keys.flat().map(p => p.keys ?? p.text)].join(' ').toLocaleLowerCase('nb')
         return words.every(w => text.includes(w))
       }),
     }))
@@ -303,7 +303,8 @@ export function parseDocument(text) {
   const blocks = []
   const reader = blockReader()
   reader.to(blocks)
-  const linked = text.replace(/\]\((?!https?:|#)([^\s()]+)\)/g, `](${REPO}/blob/main/$1)`)
+  // A code span shows its text as written.
+  const linked = text.replace(/`[^`\n]*`|\]\((?!https?:|#)([^\s()]+)\)/g, (all, file) => (file ? `](${REPO}/blob/main/${file})` : all))
   for (const line of comments(linked.split(/\r?\n/))) {
     if (line === null) continue
     const heading = /^(#{1,6})\s+(.*)$/.exec(line)
@@ -324,13 +325,13 @@ export function lead(entry) {
   return entry.blocks[0]?.type === 'p' ? entry.blocks[0].text : ''
 }
 
-const blockText = b => b.text ?? b.items?.join(' ') ?? [b.head, ...b.rows].flat().join(' ')
+const blockText = b => linkText(b.text ?? b.items?.join(' ') ?? [b.head, ...b.rows].flat().join(' '))
 
 const collator = new Intl.Collator('nb')
 
 /** Groups A–Å with their lines A–Å; lines without a group stay first. In place. */
 export function sortShortcuts(sections) {
-  for (const s of sections) s.items.sort((a, b) => collator.compare(a.title, b.title))
+  for (const s of sections) s.items.sort((a, b) => collator.compare(linkText(a.title), linkText(b.title)))
   return sections.sort((a, b) => (b.title === '') - (a.title === '') || collator.compare(a.title, b.title))
 }
 
@@ -372,22 +373,97 @@ export function searchEntries(sections, query, tags = []) {
     .map(([, e]) => e)
 }
 
-/** **bold**, *italic*, `code` and [text](url) or [text](#anchor) as segments; everything else is plain text. */
-export function inline(text) {
+// [text](url), [text](#anchor) or [text](File.md#anchor): the file a plain name, as `contentName` checks it.
+const LINK = /\[(?<label>[^[\]]+)\]\((?<href>https?:\/\/(?:[^\s()]|\([^\s()]*\))+|#[^\s()]+|[^\s()#\\/:*?"<>|.][^\s()#\\/:*?"<>|]*\.[mM][dD](?:#[^\s()]+)?)\)/g
+// A span never runs past its own delimiter, and a URL's parentheses pair up: each try stops early, so a long line stays linear.
+const INLINE = new RegExp(/\*\*(?<bold>(?:[^*]|\*(?!\*))+)\*\*|\*(?<italic>[^*]+)\*|`(?<code>[^`]+)`|/.source + LINK.source, 'g')
+
+/** **bold**, *italic*, `code` and links as segments; everything else is plain text. */
+export function inline(text, pattern = INLINE) {
   const out = []
-  // A span never runs past its own delimiter, and a URL's parentheses pair up: each try stops early, so a long line stays linear.
-  const pattern = /\*\*((?:[^*]|\*(?!\*))+)\*\*|\*([^*]+)\*|`([^`]+)`|\[([^[\]]+)\]\((https?:\/\/(?:[^\s()]|\([^\s()]*\))+|#[^\s()]+)\)/g
   let last = 0
   for (const m of text.matchAll(pattern)) {
     if (m.index > last) out.push({ type: 'text', text: text.slice(last, m.index) })
-    if (m[1]) out.push({ type: 'strong', text: m[1] })
-    else if (m[2]) out.push({ type: 'em', text: m[2] })
-    else if (m[3]) out.push({ type: 'code', text: m[3] })
-    else out.push({ type: 'link', text: m[4], href: m[5] })
+    if (m.groups.bold) out.push({ type: 'strong', text: m.groups.bold })
+    else if (m.groups.italic) out.push({ type: 'em', text: m.groups.italic })
+    else if (m.groups.code) out.push({ type: 'code', text: m.groups.code })
+    else out.push({ type: 'link', text: m.groups.label, href: m.groups.href })
     last = m.index + m[0].length
   }
   if (last < text.length) out.push({ type: 'text', text: text.slice(last) })
   return out
+}
+
+/** Links as segments, the rest as written: in a shortcut's name, * and ` are characters. */
+export const linkSegments = text => inline(text, LINK)
+
+const external = href => /^https?:/.test(href)
+
+/** The text with a link to a tab as its label: a search for «steg» finds no file name, and A–Å sorts by what shows. */
+export const linkText = text => text.replace(LINK, (all, label, href) => (external(href) ? all : label))
+
+const decoded = text => {
+  try {
+    return decodeURIComponent(text)
+  } catch {
+    return text
+  }
+}
+
+/** `File.md#anchor` as its file and anchor; `#anchor` has no file. */
+export function contentLink(href) {
+  const at = href.indexOf('#')
+  return at < 0 ? { file: decoded(href), anchor: '' } : { file: decoded(href.slice(0, at)), anchor: decoded(href.slice(at + 1)) }
+}
+
+/** The index of the tab with this file; no file means the tab `from`. */
+export function linkedTab(tabs, file, from) {
+  const name = file.toLocaleLowerCase('nb')
+  return file ? tabs.findIndex(tab => tab.file.toLocaleLowerCase('nb') === name) : from
+}
+
+const isHeading = b => b.type === 'h'
+
+/** What an anchor names in a tab: an entry, a heading in one, a group or a shortcut; null when nothing. */
+export function findAnchor(text, module, anchor, os) {
+  const wanted = slug(anchor)
+  const named = title => slug(title) === wanted
+  if (module === 'hurtigtaster') {
+    return parseShortcuts(text, os).some(s => named(s.title) || s.items.some(i => named(i.title))) ? { anchor: wanted } : null
+  }
+  const sections = parseEntries(text)
+  const entries = sections.flatMap(s => s.entries)
+  const entry = entries.find(e => named(e.title))
+  if (entry) return { entry }
+  const parent = entries.find(e => e.blocks.some(b => isHeading(b) && named(b.text)))
+  if (parent) return { entry: parent, anchor: wanted }
+  return sections.some(s => named(s.title)) ? { group: true, anchor: wanted } : null
+}
+
+/** Every anchor in a tab; a shortcut may show on the other system only. */
+function anchors({ text, module }) {
+  const titles = module === 'hurtigtaster'
+    ? ['mac', 'windows'].flatMap(os => parseShortcuts(text, os).flatMap(s => [s.title, ...s.items.map(i => i.title)]))
+    : parseEntries(text).flatMap(s => [s.title, ...s.entries.flatMap(e => [e.title, ...e.blocks.filter(isHeading).map(b => b.text)])])
+  return new Set(titles.map(slug))
+}
+
+/** A link to a tab or a place that does not exist, naming its file and line. */
+export function linkProblems(tabs) {
+  const known = new Map()
+  const has = (tab, anchor) => {
+    if (!known.has(tab)) known.set(tab, anchors(tab))
+    return known.get(tab).has(slug(anchor))
+  }
+  return tabs.flatMap((tab, from) => comments(tab.text.split(/\r?\n/)).flatMap((line, i) => (line === null ? [] : inline(line)
+    .filter(s => s.type === 'link' && !external(s.href) && !leads(tabs, from, s.href, has))
+    .map(s => `${tab.file}, linje ${i + 1}: Finner ikke «${s.href}»`))))
+}
+
+function leads(tabs, from, href, has) {
+  const { file, anchor } = contentLink(href)
+  const target = tabs[linkedTab(tabs, file, from)]
+  return target && (!anchor || has(target, anchor))
 }
 
 /** The text without Markdown marks, for the one-line preview. */
@@ -545,6 +621,8 @@ export const TEXTS = {
   'fjern merke': 'Fjern {emne}',
   'også': 'Også',
   'tilbake': 'Tilbake',
+  'tilbake til': 'Tilbake til {sted}',
+  'bli her': 'Bli her',
   'til toppen': 'Til toppen',
   'mine hurtigtaster': 'Mine hurtigtaster',
   'systemets hurtigtaster': 'Hurtigtaster i {system}',

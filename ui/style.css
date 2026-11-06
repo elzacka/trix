@@ -391,7 +391,7 @@ kbd {
 
 .body ul, .body ol, .guide ul, .guide ol { padding-left: 20px; }
 
-.body a, .guide a { color: var(--accent); }
+.body a, .guide a, .shortcut a { color: var(--accent); }
 
 /* Lines between rows and columns only: `hidden` on the table drops the outer frame. From the text colour, so they show in both modes and on a card back */
 :is(.body, .guide, .back) table { margin: 0 0 8px; border-collapse: collapse; border-style: hidden; font-size: 0.94em; }
@@ -585,6 +585,69 @@ kbd {
 #user-guide :is(th, td) { overflow-wrap: break-word; }
 
 #user-guide .subheading:focus { outline: none; }
+
+/* Links between tabs: where a link landed, and the way back */
+
+.landed { border-radius: 6px; scroll-margin-top: 12px; animation: landed 1.8s ease-out; }
+
+@keyframes landed { from { background-color: color-mix(in srgb, var(--accent) 24%, transparent); } }
+
+/* The mark shows the place; a heading or row takes focus only so the keyboard goes on from there */
+[data-anchor].landed:focus { outline: none; }
+
+/* A card's faces cover its ground: a ring instead, with a gap, as a back can be the accent colour */
+.flip.landed { border-radius: 12px; animation-name: landed-card; }
+
+@keyframes landed-card {
+  from { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+  to { box-shadow: 0 0 0 2px transparent, 0 0 0 4px transparent; }
+}
+
+/* Room below the last line, so the pill never covers it */
+main:has(#return:not([hidden])) { padding-bottom: 60px; }
+
+#return {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  max-width: calc(100% - 24px);
+  translate: -50% 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.16);
+  animation: return-in 0.18s ease-out;
+}
+
+@keyframes return-in { from { opacity: 0; translate: -50% 6px; } }
+
+@media (prefers-reduced-motion: reduce) { #return { animation: none; } }
+
+#return-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 6px 8px 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+#return-back:hover { background: var(--accent-soft); }
+
+#return-back :is(svg, .icon) { flex: none; width: 16px; height: 16px; }
+
+#return-place { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+#return-stay { flex: none; margin-right: 4px; padding: 5px; border-radius: 999px; }
+
+#return-stay :is(svg, .icon) { width: 14px; height: 14px; }
 
 /* Editor */
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Links between tabs: `[tekst](Steg.md#tittel)` goes to a tab, or to an entry, a heading, a group or a shortcut in it; `#tittel` stays in the tab. An entry or a guide opens and a card turns on arrival
+- «Tilbake til ‹sted›» floats at the foot of the window after a link, and Esc does the same: back to the same tab and scroll position, with its search, tags and open entry. × stays where you are (texts `tilbake til`, `bli her`)
+- A warning names the file and line of a link to a tab or place that does not exist
+- User guide: code spans show relative links as written
+
 ## 2.1.0 - 2026-11-04
 
 - «Tilpass»: drop-down lists as tall as the text fields and in the same font; checkboxes and radio buttons in the accent colour; menu and icon rows in one frame; «Vindustype» named beside its choices

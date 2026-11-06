@@ -10,6 +10,7 @@ Dette er innholdet i fanen. Endre det som du vil.
 - Også: Andre navn, skilt med komma
 - #emneknagg #flere
 - **fet**, *kursiv*, [lenke](https://…)
+- [tekst](Oppslag.md#nødvarsel): Lenke til en annen fane eller et sted i den. Etter # står navnet på stedet, med små bokstaver og bindestrek for mellomrom.
 - Rekkefølgen i fila er rekkefølgen i fanen. A–Å sorterer alfabetisk.
 -->
 

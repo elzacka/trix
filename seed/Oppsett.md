@@ -123,6 +123,8 @@ En seksjon du sletter, får standardverdiene tilbake.
 - fjern merke | Fjern {emne}
 - også | Også
 - tilbake | Tilbake
+- tilbake til | Tilbake til {sted}
+- bli her | Bli her
 - til toppen | Til toppen
 - mine hurtigtaster | Mine hurtigtaster
 - systemets hurtigtaster | Hurtigtaster i {system}
