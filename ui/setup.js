@@ -20,8 +20,9 @@ const OPTION_NAMES = {
 // The colours by where they show, under the names «Tilpass» gives them
 const COLOR_GROUPS = [
   ['Generelt', { bakgrunn: 'Bakgrunn', flate: 'Lister og felt', linje: 'Linjer', tekst: 'Tekst', dempet: 'Dempet tekst' }],
-  ['Knapper og lenker', { aksent: 'Farge', 'på aksent': 'Tekst på knapper' }],
-  ['Kort', { forside: 'Forside', 'på forside': 'Tekst på forsiden', bakside: 'Bakside', 'på bakside': 'Tekst på baksiden' }],
+  ['Knapper', { aksent: 'Farge', 'på aksent': 'Tekst på knapper' }],
+  ['Lenker', { lenke: 'Farge' }],
+  ['Kort', { forside: 'Forside', 'på forside': 'Tekst på forsiden', bakside: 'Bakside', 'på bakside': 'Tekst på baksiden', 'lenke på bakside': 'Lenker på baksiden' }],
 ]
 const ICON_NAMES = {
   logo: 'Logo', app: 'Vinduet (Windows)', menylinje: 'Menylinjen (Mac) og oppgavelinjen (Windows)', meny: 'Flere valg', 'søk': 'Søk',

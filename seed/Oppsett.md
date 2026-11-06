@@ -32,7 +32,7 @@ En seksjon du sletter, får standardverdiene tilbake.
 
 ## Farger
 - Navn | lys modus | mørk modus. Én farge: Den samme i begge.
-- flate: Lister og felt. aksent: Knapper og lenker. forside og bakside: Kortene. «på …»: Teksten på den fargen.
+- flate: Lister og felt. aksent: Knapper. lenke: Lenker. forside og bakside: Kortene. «på …»: Teksten på den fargen.
 - Farger som #1e293b, rgb(30 41 59) eller navy
 - Appen sier fra hvis kontrasten mellom tekst og bakgrunn er lavere enn 4,5:1 (WCAG AA).
 
@@ -87,10 +87,12 @@ En seksjon du sletter, får standardverdiene tilbake.
 - dempet | #5a687c | #9aa3ae
 - aksent | #00466a | #7598ad
 - på aksent | #ffffff | #0b1218
+- lenke | #1261a8 | #58a6ff
 - forside | #1e293b | #1a1e23
 - på forside | #ffffff | #e5e7eb
 - bakside | #00466a | #7598ad
 - på bakside | #ffffff | #0b1218
+- lenke på bakside | #8fd0ff | #001f66
 
 ## Skrift
 

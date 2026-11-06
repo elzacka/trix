@@ -328,8 +328,8 @@ test('placeholders', () => {
 test('contrast: WCAG ratio, problems below 4.5:1', () => {
   assert.equal(contrast([0, 0, 0], [255, 255, 255]), 21)
   assert.equal(contrast([255, 255, 255], [255, 255, 255]), 1)
-  const good = { tekst: [0, 0, 0], bakgrunn: [255, 255, 255], flate: [255, 255, 255], dempet: [80, 80, 80], aksent: [0, 70, 106], 'på aksent': [255, 255, 255],
-    forside: [255, 255, 255], 'på forside': [0, 0, 0], bakside: [0, 70, 106], 'på bakside': [255, 255, 255] }
+  const good = { tekst: [0, 0, 0], bakgrunn: [255, 255, 255], flate: [255, 255, 255], dempet: [80, 80, 80], aksent: [0, 70, 106], 'på aksent': [255, 255, 255], lenke: [18, 97, 168],
+    forside: [255, 255, 255], 'på forside': [0, 0, 0], bakside: [0, 70, 106], 'på bakside': [255, 255, 255], 'lenke på bakside': [143, 208, 255] }
   assert.deepEqual(contrastProblems({ lys: good }), [])
   assert.deepEqual(contrastProblems({ mørk: { ...good, dempet: [170, 170, 170] } }), [
     'Oppsett.md: Dempet tekst på bakgrunnen har kontrast 2,3:1 i mørk modus. Den bør være minst 4,5:1.',
@@ -342,6 +342,9 @@ test('contrast: WCAG ratio, problems below 4.5:1', () => {
   assert.deepEqual(contrastProblems({ lys: { ...good, tekst: [30, 41, 59], dempet: [100, 116, 139] } }), [
     'Oppsett.md: Dempet tekst på lister og felt har kontrast 4,0:1 i lys modus. Den bør være minst 4,5:1.',
   ])
+  // 4.6:1 on white, 4.0:1 on its own hover tint
+  assert.deepEqual(contrastProblems({ lys: { ...good, lenke: [0, 115, 230] } }).map(p => p.split(' har ')[0]), ['Oppsett.md: Lenker på bakgrunnen', 'Oppsett.md: Lenker på lister og felt'])
+  assert.deepEqual(contrastProblems({ mørk: { ...good, 'lenke på bakside': [255, 255, 255], bakside: [117, 152, 173], 'på bakside': [11, 18, 24] } }).map(p => p.split(' har ')[0]), ['Oppsett.md: Lenker på baksiden av kort'])
 })
 
 test('the default colours pass AA in both modes', () => {

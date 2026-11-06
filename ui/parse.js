@@ -587,12 +587,12 @@ export const PNG_ONLY = ['app', 'menylinje']
 /** An image file in the data folder, as `data_file` in `main.rs` checks it. */
 export const iconName = (name, icon) => /^[^\\/:*?"<>|.][^\\/:*?"<>|]*\.(svg|png)$/i.test(name) && (!PNG_ONLY.includes(icon) || /\.png$/i.test(name))
 
-export const COLORS = ['bakgrunn', 'flate', 'linje', 'tekst', 'dempet', 'aksent', 'på aksent', 'forside', 'på forside', 'bakside', 'på bakside']
+export const COLORS = ['bakgrunn', 'flate', 'linje', 'tekst', 'dempet', 'aksent', 'på aksent', 'lenke', 'forside', 'på forside', 'bakside', 'på bakside', 'lenke på bakside']
 
 /** The setup's colour names as the stylesheet's tokens. */
 export const TOKENS = {
-  bakgrunn: 'bg', flate: 'surface', linje: 'line', tekst: 'text', dempet: 'muted', aksent: 'accent', 'på aksent': 'on-accent',
-  forside: 'front', 'på forside': 'on-front', bakside: 'back', 'på bakside': 'on-back',
+  bakgrunn: 'bg', flate: 'surface', linje: 'line', tekst: 'text', dempet: 'muted', aksent: 'accent', 'på aksent': 'on-accent', lenke: 'link',
+  forside: 'front', 'på forside': 'on-front', bakside: 'back', 'på bakside': 'on-back', 'lenke på bakside': 'link-back',
 }
 
 export const WINDOW = { bredde: [320, 1200], høyde: [400, 1000] }
@@ -811,7 +811,8 @@ export function contrast(a, b) {
 const PAIRS = [
   ['tekst', 'bakgrunn', 'Tekst på bakgrunnen'], ['tekst', 'flate', 'Tekst på lister og felt'],
   ['dempet', 'bakgrunn', 'Dempet tekst på bakgrunnen'], ['dempet', 'flate', 'Dempet tekst på lister og felt'],
-  ['aksent', 'bakgrunn', 'Knapper og lenker på bakgrunnen'], ['aksent', 'flate', 'Knapper og lenker på lister og felt'],
+  ['aksent', 'bakgrunn', 'Knapper på bakgrunnen'], ['aksent', 'flate', 'Knapper på lister og felt'],
+  ['lenke', 'bakgrunn', 'Lenker på bakgrunnen'], ['lenke', 'flate', 'Lenker på lister og felt'], ['lenke på bakside', 'bakside', 'Lenker på baksiden av kort'],
   ['på aksent', 'aksent', 'Tekst på knapper'], ['på forside', 'forside', 'Tekst på forsiden av kort'], ['på bakside', 'bakside', 'Tekst på baksiden av kort'],
 ]
 
@@ -829,7 +830,9 @@ export function contrastProblems(modes) {
   const problems = []
   for (const [mode, colors] of Object.entries(modes)) {
     for (const [text, ground, name] of PAIRS) {
-      const ratio = Math.min(...shades(colors, ground).map(shade => contrast(colors[text], shade)))
+      // A link's own tint on hover, as `style.css` mixes it; on a card back it inverts, which keeps the ratio.
+      const grounds = shades(colors, ground).flatMap(shade => (text === 'lenke' ? [shade, mix(colors.lenke, shade, 0.1)] : [shade]))
+      const ratio = Math.min(...grounds.map(shade => contrast(colors[text], shade)))
       if (ratio < 4.5) {
         const shown = ratio.toFixed(1).replace('.', ',')
         problems.push(`${SETUP_FILE}: ${name} har kontrast ${shown}:1 i ${mode} modus. Den bør være minst 4,5:1.`)

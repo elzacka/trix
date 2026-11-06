@@ -6,6 +6,7 @@
 - «Tilbake til ‹sted›» floats at the foot of the window after a link, and Esc does the same: back to the same tab and scroll position, with its search, tags and open entry. × stays where you are (texts `tilbake til`, `bli her`)
 - A warning names the file and line of a link to a tab or place that does not exist
 - User guide: code spans show relative links as written
+- Links have no underline: their own tone and weight, and a tint on hover (a card back turns its colours around). New colours `lenke` and `lenke på bakside`, at least 4.5:1 in both modes, hover included
 
 ## 2.1.0 - 2026-11-04
 
