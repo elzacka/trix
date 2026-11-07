@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.2.0 - 2026-11-07
 
 - «Brukerveiledning» in the menu opens `BRUKERVEILEDNING.md` in the default text app. The file comes with the app, the dmg and the zip, and a new version replaces it. A setup that names the text or icon `til toppen` reads without a warning
 - User guide: a table of contents at the top links to every heading, without numbers
