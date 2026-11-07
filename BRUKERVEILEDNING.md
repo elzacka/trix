@@ -1,26 +1,10 @@
 # Brukerveiledning
 
-## 1. Last ned og installer
-
-| | Mac | Windows |
-|---|---|---|
-| Krav | macOS 15 eller nyere | Windows 10 eller 11 |
-| Last ned | [Trix-macOS.dmg](https://github.com/elzacka/trix/releases/latest/download/Trix-macOS.dmg) | [Trix-Windows.zip](https://github.com/elzacka/trix/releases/latest/download/Trix-Windows.zip) |
-| Installer | Dobbeltklikk på dmg-fila. Dra «Trix» til «Apper» | Høyreklikk på zip-fila, velg «Pakk ut alle» |
-| Start | Åpne appen fra «Apper». Velg «Åpne» når macOS spør om appen fra internett. Apple har sjekket den | Åpne `Trix\Trix.exe`. Første gang: «Mer info», så «Kjør likevel», fordi appen ikke er signert |
-
-Første oppstart:
-
-- Mac: Ikonet står i menylinjen øverst til høyre.
-- Windows: Ikonet står ved klokka på oppgavelinjen. Klikk på pila for å se skjulte ikoner hvis du ikke ser det.
-- Hurtigåpneren ⌘⌥U (Mac) eller Ctrl+Alt+U (Windows) åpner appen.
-- Appen lager filene sine i datamappen, se [Filene](#filene).
-
-## 2. Bruk
+## Bruk
 
 | Gjør | Slik |
 |---|---|
-| Åpne | Klikk på ikonet, eller bruk hurtigåpneren |
+| Åpne | Klikk på ikonet, eller bruk hurtigåpneren: ⌘⌥U (Mac), Ctrl+Alt+U (Windows) |
 | Lukke | Esc, eller klikk utenfor panelet |
 | Bytte fane | Klikk, Ctrl/⌘+1–9 eller Ctrl+Tab |
 | Søke | Skriv i søkefeltet, Ctrl/⌘+F |
@@ -41,7 +25,7 @@ Menyen er «Flere valg» øverst til høyre. Oppsettet bestemmer hvilke valg den
 | «Endre hurtigåpner» | Trykk den nye kombinasjonen. Backspace fjerner den |
 | «Brukerveiledning» | Denne veiledningen, i appen. Esc: Tilbake |
 
-## 3. Tilpass
+## Tilpass
 
 To deler, to måter:
 
@@ -176,11 +160,11 @@ Når du følger en krysslenke, står «Tilbake til ‹sted›» nederst i vindue
 
 ### Filene
 
-| Hvor       | Mappe                                                                                      |
-| ---------- | ------------------------------------------------------------------------------------------ |
-| Mac        | `~/Library/Application Support/Trix`                                                       |
-| Windows    | `%APPDATA%\Trix`                                                                           |
-| Delt mappe | `Trix-data` i samme mappe som appen, hvis den finnes, se [Del med andre](#4-del-med-andre) |
+| Hvor       | Mappe                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| Mac        | `~/Library/Application Support/Trix`                                                     |
+| Windows    | `%APPDATA%\Trix`                                                                         |
+| Delt mappe | `Trix-data` i samme mappe som appen, hvis den finnes, se [Del med andre](#del-med-andre) |
 
 | Fil | Holder |
 |---|---|
@@ -207,7 +191,7 @@ Mappa er skjult som standard.
 - En seksjon du sletter i `Oppsett.md`, får standardverdiene.
 - Appen lager en fil som mangler, fra malen for modulen.
 
-## 4. Del med andre
+## Del med andre
 
 Flere kan bruke det samme innholdet og oppsettet hvis de åpner appen fra en felles mappe.
 
@@ -218,15 +202,15 @@ Flere kan bruke det samme innholdet og oppsettet hvis de åpner appen fra en fel
 - Gi de andre skrivetilgang bare til `Trix-data`, ikke til appen. Den som kan endre appen, kan bytte den ut med et annet program.
 - Hurtigåpner, visning og vindustype blir lagret på hver maskin, ikke i `Trix-data`.
 
-## 5. Ny versjon
+## Ny versjon
 
 1. Avslutt appen.
-2. Last ned på nytt. Lenkene i [punkt 1](#1-last-ned-og-installer) går alltid til siste versjon.
+2. Last ned siste versjon, se [Last ned og installer](INSTALLERING.md).
 3. Mac: Dra appen til «Apper», velg «Erstatt». Windows: Erstatt mappa `Trix`.
 
 Filene og innstillingene dine blir. Endringer: [CHANGELOG](CHANGELOG.md).
 
-## 6. Avinstaller
+## Avinstaller
 
 1. Avslutt appen.
 2. Mac: Flytt «Trix» fra «Apper» til papirkurven. Windows: Slett mappa `Trix`.

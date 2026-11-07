@@ -1,9 +1,9 @@
 # Trix
 
-Tauri 2 app (Windows, macOS), an app shell built on Trix Mini (`~/dev/trix_mini`): modules, menu, colours, fonts, icons, window and texts from `Oppsett.md`, content from one Markdown file per tab. Anyone customizes it, in «Tilpass» or in `Oppsett.md`. Overview: `README.md`; user guide (nb): `BRUKERVEILEDNING.md`.
+Tauri 2 app (Windows, macOS), an app shell built on Trix Mini (`~/dev/trix_mini`): modules, menu, colours, fonts, icons, window and texts from `Oppsett.md`, content from one Markdown file per tab. Anyone customizes it, in «Tilpass» or in `Oppsett.md`. Overview: `README.md`; install (nb): `INSTALLERING.md`, outside the app; user guide (nb): `BRUKERVEILEDNING.md`.
 
 - Verify: `npm test`, then `npm run build:mac` (also runs `cargo test`) and open the app with `TRIX_DATA_DIR` set to a scratch folder. Windows: CI only (`build.yml`).
-- Version: `src-tauri/Cargo.toml`; Tauri reads it. A new version with its CHANGELOG heading on `main`: `build.yml` publishes release `v<version>` with the Windows zip, the macOS `.dmg` and an SPDX SBOM once CodeQL (default setup, a repo setting) passed on the commit, app and dmg signed and notarized from the `APPLE_*` secrets (README, Develop); `BRUKERVEILEDNING.md` links to `releases/latest/download/`.
+- Version: `src-tauri/Cargo.toml`; Tauri reads it. A new version with its CHANGELOG heading on `main`: `build.yml` publishes release `v<version>` with the Windows zip, the macOS `.dmg` and an SPDX SBOM once CodeQL (default setup, a repo setting) passed on the commit, app and dmg signed and notarized from the `APPLE_*` secrets (README, Develop); `INSTALLERING.md` links to `releases/latest/download/`.
 - Frontend: plain ES modules in `ui/`, no bundler, no npm runtime dependencies. Parsers and setup (`parseSetup`, `TEXTS`) in `ui/parse.js`; import converters in `ui/import.js` (one per format: `docx.js`, `rtf.js`, `xlsx.js`, `csv.js`); all pure, tested with `node --test`. The main window has Tauri's drop handler off: a dropped file reaches the webview as a `File`, never as a path in Rust.
 - One fact, one place, held by tests: `seed/Oppsett.md` equals `parseSetup('')` and lists every key in `TEXTS`; its colours, fonts and window match `ui/style.css` and `tauri.conf.json`.
 - One term per concept in code, UI and docs:

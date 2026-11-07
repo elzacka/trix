@@ -15,9 +15,10 @@ No installer, no network.
 
 ## Use
 
-Download, install, use and customize: [BRUKERVEILEDNING.md](BRUKERVEILEDNING.md)
-(Norwegian). Formats: the top comment of [seed/Oppsett.md](seed/Oppsett.md)
-and of each template in [seed/maler/](seed/maler/).
+Download and install: [INSTALLERING.md](INSTALLERING.md). Use and customize:
+[BRUKERVEILEDNING.md](BRUKERVEILEDNING.md). Both in Norwegian. Formats: the top
+comment of [seed/Oppsett.md](seed/Oppsett.md) and of each template in
+[seed/maler/](seed/maler/).
 
 The option `system` reads, on macOS, System Settings → Keyboard Shortcuts and
 App Shortcuts each time the app opens; on Windows [system/Windows.md](system/Windows.md).
@@ -41,7 +42,7 @@ Name and identifier: `productName`, `identifier` in
 3. Push to `main`. [build.yml](.github/workflows/build.yml) tests and builds
    both platforms, and publishes release `v<version>` with an SBOM when
    CHANGELOG.md has a heading for it and CodeQL passed on the commit with no
-   open high or critical alert. The download links in the user guide follow
+   open high or critical alert. The download links in INSTALLERING.md follow
    the latest release.
 
 The release's macOS app is signed and notarized in CI from the secrets of the

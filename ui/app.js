@@ -679,7 +679,7 @@ async function openUserGuide() {
   const doc = parseDocument(await invoke('read_guide'))
   const sections = doc.filter(b => b.level === 2)
   const toc = h('nav', { class: 'toc' }, h('ol', { class: 'card' }, sections.map(b =>
-    h('li', {}, h('a', { href: `#${b.id}`, onclick: e => { e.preventDefault(); follow(e.currentTarget, `#${b.id}`) } }, plain(b.text).replace(/^\d+\. /, ''))))))
+    h('li', {}, h('a', { href: `#${b.id}`, onclick: e => { e.preventDefault(); follow(e.currentTarget, `#${b.id}`) } }, plain(b.text))))))
   const first = doc.indexOf(sections[0])
   const body = blocks(doc.map(b => (b.level === 1 ? { ...b, id: 'user-guide-title' } : b)))
   $('user-guide').replaceChildren(

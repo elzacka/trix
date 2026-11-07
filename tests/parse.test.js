@@ -288,6 +288,13 @@ test('every #anchor in BRUKERVEILEDNING.md names a heading in it', () => {
   assert.deepEqual(anchors.filter(a => !ids.has(a)), [])
 })
 
+test('every link from INSTALLERING.md to a place in the user guide names a heading in it', () => {
+  const ids = new Set(parseDocument(read('../BRUKERVEILEDNING.md')).filter(b => b.type === 'h').map(b => b.id))
+  const anchors = [...read('../INSTALLERING.md').matchAll(/BRUKERVEILEDNING\.md#([^)]+)/g)].map(m => m[1])
+  assert.ok(anchors.length)
+  assert.deepEqual(anchors.filter(a => !ids.has(a)), [])
+})
+
 test('file names stay in the data folder', () => {
   for (const name of ['Ordliste.md', 'Slik gjør du.md']) assert.ok(contentName(name), name)
   for (const name of ['../a.md', 'a/b.md', 'a\\b.md', 'C:a.md', '.a.md', 'a.txt', 'Oppsett.md']) assert.ok(!contentName(name), name)

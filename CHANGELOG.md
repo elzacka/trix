@@ -8,7 +8,8 @@
 - User guide: code spans show relative links as written
 - User guide: «Lenker» describes links to web pages and cross-links within and between modules, step by step
 - Links have no underline: their own tone and weight, and a tint on hover (a card back turns its colours around). New colours `lenke` and `lenke på bakside`, at least 4.5:1 in both modes, hover included
-- User guide: clearer hierarchy. Sections listed in one framed list with the numbers in a column of their own, larger steps between title and heading levels, tables with row lines only, full width and one shared first column, quieter column names
+- User guide: clearer hierarchy. Sections listed in one framed list, smaller headings on every level, tables with row lines only, full width and one shared first column, quieter column names
+- User guide: no section numbers. Download and install live in `INSTALLERING.md`, outside the app; «Bruk» names the quick-open keys
 
 ## 2.1.0 - 2026-11-04
 
