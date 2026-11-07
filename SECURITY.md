@@ -10,7 +10,7 @@ Report a vulnerability: hei@tazk.no.
 | Risks | [OWASP Top 10:2025](https://owasp.org/Top10/2025/) |
 | Build and release | [OWASP Top 10 CI/CD Security Risks](https://owasp.org/www-project-top-10-ci-cd-security-risks/) |
 
-Last review: 2026-11-03, the whole app, release 2.1.0, with its fixes. The mitigations below are its result.
+Last review: 2026-11-07, the changes since release 2.1.0, with its fixes; the whole app 2026-11-03. The mitigations below are their result.
 
 ## Threat model
 
@@ -21,7 +21,7 @@ One process with the user's rights, no elevated parts, no network, no listening 
 | Content files (may come from someone else) | File → webview | Script in the content; hang on a wide table | Text nodes only, CSP `'self'`; links `https?://` only, `#anchor` to a heading in the same article (`CSS.escape`), or `File.md#anchor` with a plain file name, matched against the setup's tabs and never read as a path; 100 000 table cells per file, padding to the header's width included |
 | `Oppsett.md` | File → webview, Rust | Path out of the data folder; CSS or script injection | File and icon names: plain names with `.md`, `.svg` or `.png`, checked in `parse.js` and again in `data_file`; colours through CSSOM, only values `CSS.supports` accepts as a colour; font names letters, digits, space, `-`, `_` |
 | Icons from the setup | File → webview, tray | Script in an SVG; large file | Shown as `<img>` or CSS mask from a data URL, never inserted as markup; 1 MB limit; tray: PNG decoded by Tauri |
-| Links in the content | Webview → browser | Web page in the main window | `on_navigation`: own origin only; `on_new_window`: deny; http(s) goes to the browser |
+| Links in the content | Webview → browser | Web page in the main window | `on_navigation`: own origin only; `on_new_window`: deny; http(s) goes to the browser, never the app's own origin |
 | IPC from the main window | Webview → Rust | File access beyond the data folder | Only the main window's commands (`capabilities/default.json`) and Tauri's events; names checked as above; `save` refuses `Oppsett.md`, also through a link or short name; `open_url` http(s) only; remote pages get no IPC (Tauri, no `remote` capability) |
 | IPC from «Tilpass» | Webview → Rust | Access to the content files or links | Only its commands (`capabilities/tilpass.json`): read and write `Oppsett.md`, add an icon, read a dropped file, open `Oppsett.md`; `build.rs` makes every other app command a deny; of Tauri's own, events and closing, destroying and titling app windows |
 | «Tilpass»: icon chosen or dropped | Any file → data folder | Overwritten file; large file | `add_icon`: `.svg`/`.png` by name, 1 MB, a free name beside an existing file; `read_dropped` reads only a path from the last drop on «Tilpass» (`DragDrop` in Rust), 1 MB |
