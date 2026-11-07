@@ -10,6 +10,7 @@
 - Links have no underline: their own tone and weight, and a tint on hover (a card back turns its colours around). New colours `lenke` and `lenke på bakside`, at least 4.5:1 in both modes, hover included
 - User guide: clearer hierarchy. Sections listed in one framed list, smaller headings on every level, tables with row lines only, full width and one shared first column, quieter column names
 - User guide: no section numbers. Download and install live in `INSTALLERING.md`, outside the app; «Bruk» names the quick-open keys
+- User guide: says where the icon and the three-dot menu are and what the data folder is, and uses the labels in «Tilpass». «Ny versjon» on Windows replaces `Trix.exe`, so `Trix-data` stays; «Avinstaller» warns that deleting the folder `Trix` deletes a `Trix-data` inside it
 
 ## 2.1.0 - 2026-11-04
 

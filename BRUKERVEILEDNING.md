@@ -4,10 +4,10 @@
 
 | Gjør | Slik |
 |---|---|
-| Åpne | Klikk på ikonet, eller bruk hurtigåpneren: ⌘⌥U (Mac), Ctrl+Alt+U (Windows) |
-| Lukke | Esc, eller klikk utenfor panelet |
-| Bytte fane | Klikk, Ctrl/⌘+1–9 eller Ctrl+Tab |
-| Søke | Skriv i søkefeltet, Ctrl/⌘+F |
+| Åpne | Klikk på ikonet i menylinjen (Mac) eller ved klokka på oppgavelinjen (Windows), eller bruk hurtigåpneren: ⌘⌥U (Mac), Ctrl+Alt+U (Windows) |
+| Lukke | Esc. Panelet lukker seg også når du klikker utenfor det |
+| Bytte fane | Klikk, Ctrl+1–9 / ⌘1–9 eller Ctrl+Tab |
+| Søke | Skriv i søkefeltet. Ctrl+F / ⌘F flytter markøren dit |
 | Slå opp en hurtigtast | Tastaturknappen i søkefeltet, trykk kombinasjonen |
 | Se alt med samme emne | Trykk på en #emneknagg |
 | Snu et kort | Trykk på kortet |
@@ -15,7 +15,7 @@
 | Følge en lenke | Trykk på den. En nettside åpnes i nettleseren. En krysslenke går til stedet i appen, og «Tilbake til ‹sted›» eller Esc tar deg tilbake. Se [Lenker](#lenker) |
 | Avslutte | «Avslutt Trix» i menyen, eller høyreklikk på ikonet |
 
-Menyen er «Flere valg» øverst til høyre. Oppsettet bestemmer hvilke valg den har:
+Menyen er knappen med tre prikker øverst til høyre («Flere valg»). Oppsettet bestemmer hvilke valg den har:
 
 | Valg | Gjør |
 |---|---|
@@ -39,9 +39,9 @@ Moduler. Hver fane viser én modul:
 
 | Modul          | Passer til                                                                                         |
 | -------------- | -------------------------------------------------------------------------------------------------- |
-| `hurtigtaster` | Hurtigtaster for et program, med Windows- og Mac-taster. Valget «system» viser også maskinens egne |
+| `hurtigtaster` | Hurtigtaster for et program, med Windows- og Mac-taster. Valget «Maskinens egne hurtigtaster» tar dem med |
 | `oppslag`      | Ordliste, oppslagsverk, spørsmål og svar, telefonliste                                             |
-| `kort`         | «Snu-kort» med forside og bakside: Tiltakskort, opplæring. Valgene «3 i bredden» og «2 i høyden» bestemmer hvor mange kort fanen viser |
+| `kort`         | «Snu-kort» med forside og bakside: Tiltakskort, opplæring. «Kort i bredden» og «Kort i høyden» bestemmer hvor mange kort fanen viser |
 | `steg`         | Veiledninger med steg                                                                              |
 
 ### I appen: «Tilpass appen»
@@ -160,6 +160,8 @@ Når du følger en krysslenke, står «Tilbake til ‹sted›» nederst i vindue
 
 ### Filene
 
+Appen lager filene sine i datamappen:
+
 | Hvor       | Mappe                                                                                    |
 | ---------- | ---------------------------------------------------------------------------------------- |
 | Mac        | `~/Library/Application Support/Trix`                                                     |
@@ -173,13 +175,13 @@ Når du følger en krysslenke, står «Tilbake til ‹sted›» nederst i vindue
 | `.svg`, `.png` | Ikonene under `## Ikoner` |
 | `innstillinger.json` | Hurtigåpner, visning og vindustype for denne maskinen. Endres i appen |
 
-#### Finn mappa
+#### Finn datamappen
 
-Mappa er skjult som standard.
+Datamappen er skjult som standard.
 
 | Måte | Slik |
 |---|---|
-| Fra appen | «Åpne datamappen». Eller «Tilpass appen» → «Åpne Oppsett.md» |
+| Fra appen | «Åpne datamappen» |
 | Mac, Finder | ⇧⌘G, lim inn stien over, Retur. Skjulte filer av og på: ⇧⌘. |
 | Windows | Windows-tasten+R, skriv `%APPDATA%\Trix`, Enter. Eller lim stien inn i adressefeltet i Filutforsker |
 
@@ -195,7 +197,7 @@ Mappa er skjult som standard.
 
 Flere kan bruke det samme innholdet og oppsettet hvis de åpner appen fra en felles mappe.
 
-1. Legg appen i en mappe som alle har tilgang til, for eksempel en delt mappe på nettverket. På Windows legger du hele mappa `Trix` der.
+1. Legg appen i en mappe som alle har tilgang til, for eksempel en delt mappe på nettverket. På Windows er appen mappa `Trix`, så du legger hele mappa der.
 2. Lag en mappe med navnet `Trix-data` i samme mappe som appen. På Windows lager du den inne i mappa `Trix`, ved siden av `Trix.exe`. Appen bruker `Trix-data` i stedet for datamappen.
 3. Kopier filene fra datamappen din til `Trix-data`, se [Filene](#filene). Appen lager standardfilene hvis mappa er tom.
 
@@ -206,12 +208,12 @@ Flere kan bruke det samme innholdet og oppsettet hvis de åpner appen fra en fel
 
 1. Avslutt appen.
 2. Last ned siste versjon, se [Last ned og installer](INSTALLERING.md).
-3. Mac: Dra appen til «Apper», velg «Erstatt». Windows: Erstatt mappa `Trix`.
+3. Mac: Dobbeltklikk på dmg-fila, dra «Trix» til «Apper» og velg «Erstatt». Windows: Pakk ut zip-fila og erstatt `Trix.exe` i mappa `Trix`.
 
-Filene og innstillingene dine blir. Endringer: [CHANGELOG](CHANGELOG.md).
+Filene og innstillingene dine blir liggende. Endringer: [CHANGELOG](CHANGELOG.md).
 
 ## Avinstaller
 
 1. Avslutt appen.
-2. Mac: Flytt «Trix» fra «Apper» til papirkurven. Windows: Slett mappa `Trix`.
+2. Mac: Flytt «Trix» fra «Apper» til papirkurven. Windows: Slett mappa `Trix`. `Trix-data` blir slettet sammen med den hvis den ligger der.
 3. Filene dine blir liggende. Slett datamappen hvis du vil fjerne dem, se [Filene](#filene). Eksporter først det du vil beholde.
