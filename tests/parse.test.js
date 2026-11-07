@@ -283,6 +283,12 @@ test('every #anchor in BRUKERVEILEDNING.md names a heading in it', () => {
   assert.deepEqual(anchors.filter(a => !guideIds.has(a)), [])
 })
 
+test('the list at the top of BRUKERVEILEDNING.md links to every heading, in order, indented by level', () => {
+  const list = guide.split(/^## /m)[0].split('\n').filter(line => /^\s*- /.test(line))
+  const headings = [...guide.matchAll(/^(#{2,6})\s+(.*)$/gm)].map(([, marks, title]) => `${'  '.repeat(marks.length - 2)}- [${title}](#${slug(title)})`)
+  assert.deepEqual(list, headings)
+})
+
 test('BRUKERVEILEDNING.md stands alone: a link out of it is a web address', () => {
   assert.deepEqual(targets(guide).filter(t => !/^(#|https:\/\/)/.test(t)), [])
 })

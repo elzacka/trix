@@ -1,5 +1,19 @@
 # Brukerveiledning
 
+- [Bruk](#bruk)
+- [Tilpass](#tilpass)
+  - [I appen: «Tilpass appen»](#i-appen-tilpass-appen)
+  - [Innhold i appen](#innhold-i-appen)
+  - [Lenker](#lenker)
+    - [Lenker til nettsider](#lenker-til-nettsider)
+    - [Krysslenker mellom innhold](#krysslenker-mellom-innhold)
+  - [Filene](#filene)
+    - [Finn datamappen](#finn-datamappen)
+    - [Endre en fil](#endre-en-fil)
+- [Del med andre](#del-med-andre)
+- [Ny versjon](#ny-versjon)
+- [Avinstaller](#avinstaller)
+
 ## Bruk
 
 | Gjør | Slik |

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - «Brukerveiledning» in the menu opens `BRUKERVEILEDNING.md` in the default text app. The file comes with the app, the dmg and the zip, and a new version replaces it. A setup that names the text or icon `til toppen` reads without a warning
+- User guide: a table of contents at the top links to every heading, without numbers
 - Links between tabs: `[tekst](Steg.md#tittel)` goes to a tab, or to an entry, a heading, a group or a shortcut in it; `#tittel` stays in the tab. An entry or a guide opens and a card turns on arrival
 - «Tilbake til ‹sted›» floats at the foot of the window after a link, and Esc does the same: back to the same tab and scroll position, with its search, tags and open entry. × stays where you are (texts `tilbake til`, `bli her`)
 - A warning names the file and line of a link to a tab or place that does not exist
