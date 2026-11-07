@@ -9,7 +9,8 @@ Dette er innholdet i fanen. Endre det som du vil.
 - «eller» mellom to hurtigtaster for samme handling
 - "tekst" eller «tekst»: Vises som tekst, ikke som taster. Eksempel: "hold inne" ⌘W
 - \|: Tegnet | i et navn
-- [tekst](Oppslag.md#nødvarsel): Lenke til en annen fane eller et sted i den. Etter # står navnet på stedet, med små bokstaver og bindestrek for mellomrom.
+- [tekst](https://…) i et navn: Lenke til en nettside
+- [tekst](Oppslag.md#nødvarsel) i et navn: Lenke til en annen fane eller et sted i den. Etter # står navnet på stedet, med små bokstaver og bindestrek for mellomrom.
 - Rekkefølgen i fila er rekkefølgen i fanen.
 - Taster: Symboler (⌘⇧S) eller ord (ctrl shift S, ctrl+shift+S)
 - Ord: ctrl, shift, alt, cmd, opt, win, fn, mellomrom, retur, tab, esc, slett, venstre, høyre, opp, ned, F1–F12

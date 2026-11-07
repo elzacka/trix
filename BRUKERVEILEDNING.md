@@ -28,7 +28,7 @@ Første oppstart:
 | Se alt med samme emne | Trykk på en #emneknagg |
 | Snu et kort | Trykk på kortet |
 | Lese en veiledning | Trykk på den. Esc: Tilbake |
-| Følge en lenke til en annen fane | Trykk på den. «Tilbake til ‹sted›» eller Esc: Dit du kom fra, se [Lenker mellom fanene](#lenker-mellom-fanene) |
+| Følge en lenke | Trykk på den. En nettside åpnes i nettleseren. En krysslenke går til stedet i appen, og «Tilbake til ‹sted›» eller Esc tar deg tilbake. Se [Lenker](#lenker) |
 | Avslutte | «Avslutt Trix» i menyen, eller høyreklikk på ikonet |
 
 Menyen er «Flere valg» øverst til høyre. Oppsettet bestemmer hvilke valg den har:
@@ -119,26 +119,59 @@ Excel og CSV blir tabeller:
 Appen lagrer ikke hvis noen har endret fila utenfor appen etter at du åpnet den.
 Kopier da endringene dine, velg «Avbryt» og åpne fila på nytt.
 
-### Lenker mellom fanene
+### Lenker
 
-Du kan lenke til en annen fane eller til et sted i en fane. Skriv lenken i
-innholdet med filnavnet til fanen:
+Du skriver lenker i innholdet, med «Endre innhold i ‹fane›» eller direkte i fila.
+En lenke har to deler: `[teksten som vises](hvor lenken går)`.
 
-| Skriv | Går til |
+- Lenker virker i tekst, lister og tabeller, men ikke i titler og grupper (`###` og `##`).
+- I Hurtigtaster skriver du lenken i navnet: `- [Kamera](Oppslag.md#kamera) | ctrl K | ⌘K`.
+- På et kort virker lenken bare på baksiden, fordi et trykk på forsiden snur kortet.
+
+#### Lenker til nettsider
+
+Skriv hele adressen: `[DSB](https://www.dsb.no/)`.
+
+- Lenken åpnes i nettleseren din, og appen blir stående der den er.
+- Adressen må begynne med `https://` eller `http://`. Ellers viser appen teksten slik du skrev den.
+- Appen sjekker ikke om nettsiden finnes.
+
+#### Krysslenker mellom innhold
+
+En krysslenke går til et sted i innholdet i appen. Den virker på samme måte i
+alle moduler, og mellom alle moduler:
+
+| Lenken går til | Skriv |
 |---|---|
-| `[Se rutinen](Steg.md)` | Fanen med fila `Steg.md` |
-| `[Se rutinen](Steg.md#forbered-deg-på-ekombortfall)` | Veiledningen, oppslaget, kortet, overskriften, gruppen eller hurtigtasten med det navnet |
-| `[Se under](#husk)` | Et sted i samme fane |
+| Et sted i samme fane | `[Se listen](#husk)` |
+| Et sted i en annen fane, med samme eller en annen modul | `[Se rutinen](Steg.md#forbered-deg-på-ekombortfall)` |
+| Toppen av en annen fane | `[Alle rutinene](Steg.md)` |
 
-- Etter `#` skriver du navnet med små bokstaver og bindestrek for mellomrom. Tegn som `?` og `,` tar du bort.
-- I et filnavn skriver du `%20` for mellomrom.
-- Et oppslag og en veiledning åpner seg, og et kort snur seg, når lenken går dit.
-- I Hurtigtaster står lenken i navnet. På et kort virker den bare på baksiden, fordi et trykk på forsiden snur kortet.
-- Appen viser et varsel med fil og linje hvis stedet ikke finnes, for eksempel etter at du har endret en overskrift.
+Hver fane har sin egen fil. Du lenker derfor mellom to faner med modulen `kort`
+på samme måte som fra et kort til en veiledning.
 
-Når du følger en lenke, står «Tilbake til ‹sted›» nederst i vinduet:
+Slik lager du en krysslenke:
 
-- Knappen eller Esc: Du kommer tilbake til samme fane og samme sted, med søket og det åpne kortet eller oppslaget slik det var. Hver lenke du følger videre, får sitt eget steg tilbake.
+1. Finn filnavnet til fanen du vil lenke til. Det står under «Moduler» i «Tilpass appen».
+2. Finn navnet på stedet, og skriv det med små bokstaver og bindestrek for mellomrom. Ta bort tegn som `?`, `,` og `:`. «Forbered deg på ekombortfall» blir `forbered-deg-på-ekombortfall`.
+3. Skriv lenken og lagre. Appen viser et varsel med fil og linje hvis den ikke finner stedet. Det samme skjer hvis du senere endrer navnet på stedet.
+
+Dette kan en krysslenke gå til:
+
+| Modul | Stedet kan være | Når du følger lenken |
+|---|---|---|
+| `oppslag` | Et oppslag, en overskrift i et oppslag, en gruppe | Oppslaget åpner seg |
+| `kort` | Et kort, en overskrift på baksiden, en gruppe | Kortet snur seg |
+| `steg` | En veiledning, en overskrift i en veiledning, en gruppe | Veiledningen åpner seg |
+| `hurtigtaster` | En hurtigtast, en gruppe | Appen viser hurtigtasten eller gruppen |
+
+- Appen tømmer søket og fjerner merkene i fanen du kommer til, slik at du ser stedet.
+- Lenken går til det første stedet hvis to steder har samme navn. En tittel kommer foran en overskrift.
+- I et filnavn skriver du `%20` for mellomrom: `[Rutiner](Mine%20rutiner.md)`.
+
+Når du følger en krysslenke, står «Tilbake til ‹sted›» nederst i vinduet:
+
+- Knappen eller Esc: Du kommer tilbake til samme fane og samme sted, med søket og det åpne kortet eller oppslaget slik det var. Hver krysslenke du følger videre, får sitt eget steg tilbake.
 - Krysset: Du blir der du er, og knappen forsvinner.
 
 ### Filene
