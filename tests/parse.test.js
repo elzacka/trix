@@ -460,6 +460,22 @@ test('a link to a tab counts by its text: search, A–Å, a shortcut\'s name', (
   assert.deepEqual(linkSegments('2 * 3 * [a](Steg.md)').map(s => s.type), ['text', 'link'])
 })
 
+test('A–Å sorts a shortcut by what shows, a link to the web as well', () => {
+  const [section] = parseShortcuts('- [Zebra](https://z.no) | ⌘Z\n- [Apple](Steg.md) | ⌘A\n- Bjørn | ⌘B', 'mac')
+  assert.deepEqual(sortShortcuts([section])[0].items.map(i => i.title), ['[Apple](Steg.md)', 'Bjørn', '[Zebra](https://z.no)'])
+})
+
+test('a link in a shortcut\'s name is checked as it shows; * and ` are characters there', () => {
+  const tabs = [{ file: 'H.md', module: 'hurtigtaster', text: '- a*b [x](Borte.md) c*d | ⌘A\n- `[y](Borte.md)` | ⌘B\n## `[z](Borte.md)`\nEksempel: [v](Borte.md)\n- b | [w](Borte.md)' }]
+  assert.deepEqual(linkProblems(tabs), ['H.md, linje 1: Finner ikke «Borte.md»', 'H.md, linje 2: Finner ikke «Borte.md»'])
+})
+
+test('an anchor of only signs names nothing', () => {
+  assert.equal(findAnchor('- a | ⌘A', 'hurtigtaster', '!!!', 'mac'), null)
+  assert.equal(findAnchor('### A\nTekst', 'kort', '!!!'), null)
+  assert.deepEqual(linkProblems([{ file: 'H.md', module: 'hurtigtaster', text: '- a | ⌘A\n- [x](#!!!) | ⌘B' }]), ['H.md, linje 2: Finner ikke «#!!!»'])
+})
+
 test('document: a code span keeps its text, a link to a file goes to the repo', () => {
   const [p] = parseDocument('`[a](Steg.md#b)` og [c](README.md)')
   assert.equal(p.text, `\`[a](Steg.md#b)\` og [c](${REPO}/blob/main/README.md)`)

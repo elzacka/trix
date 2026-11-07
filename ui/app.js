@@ -260,7 +260,8 @@ function render() {
   $('capture').setAttribute('aria-pressed', state.capturing)
   const problems = [...state.problems, state.error].filter(Boolean)
   $('error').hidden = !problems.length
-  $('error').replaceChildren(...problems.map(p => h('p', {}, p)))
+  // A live region: a new node is read out again, so only on a change.
+  if ($('error').textContent !== problems.join('')) $('error').replaceChildren(...problems.map(p => h('p', {}, p)))
   $('system-name').textContent = systemName()
   $('sources').hidden = !has(tab, 'system')
   for (const id of ['view-label', 'content-label', 'edit-file', 'reveal-file']) $(id).closest('[data-item]').classList.toggle('unused', !tab)
@@ -429,15 +430,15 @@ async function followContent(link, href) {
   closeMenu()
   render()
   $('tabpanel').scrollTop = 0
-  land(found, tab, at)
+  land(found, tab)
 }
 
 /** Brings the place into view and marks it for a moment, so the eye finds it. */
-function land(found, tab, at) {
+function land(found, tab) {
   if (found.entry && tab.module === 'steg' && !found.anchor) return $('guide-title').focus()
   const scope = (found.entry && $(`entry-${found.entry.id}`)) || $('list')
   const target = found.anchor ? scope.querySelector(`[data-anchor="${CSS.escape(found.anchor)}"]`) : found.entry && scope
-  if (!target) return $(`tab-${at}`).focus()
+  if (!target) return focusTabButton()
   target.classList.add('landed')
   target.scrollIntoView({ block: 'start' })
   if (found.anchor) target.tabIndex = -1
@@ -446,6 +447,8 @@ function land(found, tab, at) {
 
 async function goBack() {
   const from = state.trail.pop()
+  // A second click while the first waits for the view.
+  if (!from) return
   if (from.view !== state.view) await setView(from.view)
   for (const tab of state.modules) Object.assign(tab, from.tabs.get(tab.file))
   const at = state.modules.findIndex(tab => tab.file === from.file)
@@ -454,7 +457,7 @@ async function goBack() {
   render()
   $('tabpanel').scrollTop = from.scroll
   const link = $('list').querySelectorAll('a')[from.link]
-  if (!link) return $(`tab-${state.tab}`).focus()
+  if (!link) return focusTabButton()
   link.classList.add('landed')
   link.focus({ preventScroll: true })
 }
@@ -462,7 +465,7 @@ async function goBack() {
 function stayHere() {
   state.trail = []
   renderReturn()
-  $(`tab-${state.tab}`).focus()
+  focusTabButton()
 }
 
 function renderReturn() {
@@ -610,9 +613,12 @@ function clearAll() {
   $('query').focus()
 }
 
+/** With one tab the row of tabs is hidden, and focus goes to the menu button beside it. */
+const focusTabButton = () => (state.modules.length > 1 ? $(`tab-${state.tab}`) : $('more')).focus()
+
 function focusTab() {
   if (!$('search').hidden) $('query').focus()
-  else $(`tab-${state.tab}`)?.focus()
+  else focusTabButton()
 }
 
 function selectTab(i) {
@@ -646,7 +652,8 @@ const editContent = (text) => { const tab = current(); if (tab) openEditor(tab.f
 /** «Tilpass» opens in a window of its own; the main window shows each change it sends. */
 function editSetup() {
   closeMenu()
-  invoke('open_setup').catch(error => { state.problems = [String(error)]; render() })
+  state.error = ''
+  invoke('open_setup').then(render, error => fail(String(error)))
 }
 
 /** Counts previews, so a slower one that finishes late does not show an older draft's warnings. */
@@ -763,24 +770,32 @@ function toggleMenu() {
   $('menu').querySelector('[data-item]:not([hidden]):not(.unused) button, button[data-item]:not([hidden]):not(.unused)')?.focus()
 }
 
+/** An action that failed: read out again even when the text is the same as last time. */
+function fail(message) {
+  state.error = message
+  $('error').replaceChildren()
+  render()
+}
+
 async function setView(view) {
   closeMenu()
+  state.error = ''
   try {
     await invoke('set_view', { view })
   } catch (error) {
-    state.error = String(error)
-    return render()
+    return fail(String(error))
   }
   await load()
 }
 
 async function exportList() {
   closeMenu()
+  state.error = ''
   try {
     await invoke('export_content', { name: current().file })
-  } catch (error) {
-    state.error = String(error)
     render()
+  } catch (error) {
+    fail(String(error))
   }
 }
 
@@ -800,10 +815,7 @@ async function readImport(file) {
   // Name and size first: a dropped file can be anything, of any size.
   const text = !importable(file.name, file.size) ? ''
     : await file.arrayBuffer().then(bytes => importText(file.name, new Uint8Array(bytes), tab.module)).catch(() => '')
-  if (!views.has(text)) {
-    state.error = t('passer ikke', { fil: file.name, fane: tab.name })
-    return render()
-  }
+  if (!views.has(text)) return fail(t('passer ikke', { fil: file.name, fane: tab.name }))
   // An empty list keeps its format comment.
   if (!views.has(tab.text)) return editContent(views.merge(tab.text, text))
   state.importing = text
@@ -908,7 +920,8 @@ async function setHotkey(hotkey) {
     state.hotkey = hotkey
     state.error = ''
   } catch {
-    state.error = t('kan ikke bruke', { taster: formatKeys(hotkey, state.os)[0] })
+    closeMenu()
+    return fail(t('kan ikke bruke', { taster: formatKeys(hotkey, state.os)[0] }))
   }
   closeMenu()
   render()

@@ -331,7 +331,8 @@ const collator = new Intl.Collator('nb')
 
 /** Groups A–Å with their lines A–Å; lines without a group stay first. In place. */
 export function sortShortcuts(sections) {
-  for (const s of sections) s.items.sort((a, b) => collator.compare(linkText(a.title), linkText(b.title)))
+  const shown = title => linkSegments(title).map(s => s.text).join('')
+  for (const s of sections) s.items.sort((a, b) => collator.compare(shown(a.title), shown(b.title)))
   return sections.sort((a, b) => (b.title === '') - (a.title === '') || collator.compare(a.title, b.title))
 }
 
@@ -399,7 +400,7 @@ export const linkSegments = text => inline(text, LINK)
 
 const external = href => /^https?:/.test(href)
 
-/** The text with a link to a tab as its label: a search for «steg» finds no file name, and A–Å sorts by what shows. */
+/** The text with a link to a tab as its label: a search for «steg» finds no file name. */
 export const linkText = text => text.replace(LINK, (all, label, href) => (external(href) ? all : label))
 
 const decoded = text => {
@@ -427,6 +428,7 @@ const isHeading = b => b.type === 'h'
 /** What an anchor names in a tab: an entry, a heading in one, a group or a shortcut; null when nothing. */
 export function findAnchor(text, module, anchor, os) {
   const wanted = slug(anchor)
+  if (!wanted) return null
   const named = title => slug(title) === wanted
   if (module === 'hurtigtaster') {
     return parseShortcuts(text, os).some(s => named(s.title) || s.items.some(i => named(i.title))) ? { anchor: wanted } : null
@@ -445,7 +447,7 @@ function anchors({ text, module }) {
   const titles = module === 'hurtigtaster'
     ? ['mac', 'windows'].flatMap(os => parseShortcuts(text, os).flatMap(s => [s.title, ...s.items.map(i => i.title)]))
     : parseEntries(text).flatMap(s => [s.title, ...s.entries.flatMap(e => [e.title, ...e.blocks.filter(isHeading).map(b => b.text)])])
-  return new Set(titles.map(slug))
+  return new Set(titles.map(slug).filter(Boolean))
 }
 
 /** A link to a tab or a place that does not exist, naming its file and line. */
@@ -455,7 +457,9 @@ export function linkProblems(tabs) {
     if (!known.has(tab)) known.set(tab, anchors(tab))
     return known.get(tab).has(slug(anchor))
   }
-  return tabs.flatMap((tab, from) => comments(tab.text.split(/\r?\n/)).flatMap((line, i) => (line === null ? [] : inline(line)
+  // In Hurtigtaster only a shortcut's name shows links.
+  const links = (tab, line) => (tab.module === 'hurtigtaster' ? linkSegments(/^[-*]\s+(.*)$/.exec(line)?.[1].split(/(?<!\\)\|/)[0] ?? '') : inline(line))
+  return tabs.flatMap((tab, from) => comments(tab.text.split(/\r?\n/)).flatMap((line, i) => (line === null ? [] : links(tab, line)
     .filter(s => s.type === 'link' && !external(s.href) && !leads(tabs, from, s.href, has))
     .map(s => `${tab.file}, linje ${i + 1}: Finner ikke «${s.href}»`))))
 }

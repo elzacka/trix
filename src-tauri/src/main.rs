@@ -645,17 +645,22 @@ fn close_setup_first(app: &AppHandle) -> bool {
 /// A window that shows only the app; links that would open in it go to the browser.
 fn guarded<'a>(app: &AppHandle, builder: WebviewWindowBuilder<'a, tauri::Wry, AppHandle>) -> WebviewWindowBuilder<'a, tauri::Wry, AppHandle> {
     let dev = app.config().build.dev_url.clone();
+    let is_own = move |url: &Url| own_page(url) || dev.as_ref().is_some_and(|dev| dev.origin() == url.origin());
+    let also_own = is_own.clone();
     let (navigating, opening) = (app.clone(), app.clone());
     builder
         .on_navigation(move |url| {
-            let own = own_page(url) || dev.as_ref().is_some_and(|dev| dev.origin() == url.origin());
+            let own = is_own(url);
             if !own {
                 to_browser(&navigating, url);
             }
             own
         })
+        // A middle-click on a link to a tab: on Windows the app's own origin is http, and no browser should get it.
         .on_new_window(move |url, _| {
-            to_browser(&opening, &url);
+            if !also_own(&url) {
+                to_browser(&opening, &url);
+            }
             NewWindowResponse::Deny
         })
 }
