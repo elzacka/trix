@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tauri dev",
+    "dev": "PATH=\"$HOME/.cargo/bin:$PATH\" tauri dev",
     "test": "node --test tests/*.test.js",
     "build:mac": "scripts/build.sh"
   },
