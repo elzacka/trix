@@ -23,7 +23,7 @@ Menyen er knappen med tre prikker øverst til høyre («Flere valg»). Oppsettet
 | «Importer/Eksporter», «Endre innhold i ‹fane›», «Åpne datamappen» | Innholdet i fanen, se [Innhold i appen](#innhold-i-appen) |
 | «Tilpass appen» | Oppsettet, se [I appen](#i-appen-tilpass-appen) |
 | «Endre hurtigåpner» | Trykk den nye kombinasjonen. Backspace fjerner den |
-| «Brukerveiledning» | Denne veiledningen, i appen. Esc: Tilbake |
+| «Brukerveiledning» | Denne veiledningen, i tekstprogrammet ditt |
 
 ## Tilpass
 
@@ -207,10 +207,10 @@ Flere kan bruke det samme innholdet og oppsettet hvis de åpner appen fra en fel
 ## Ny versjon
 
 1. Avslutt appen.
-2. Last ned siste versjon, se [Last ned og installer](INSTALLERING.md).
-3. Mac: Dobbeltklikk på dmg-fila, dra «Trix» til «Apper» og velg «Erstatt». Windows: Pakk ut zip-fila og erstatt `Trix.exe` i mappa `Trix`.
+2. Last ned siste versjon, se [Last ned og installer](https://github.com/elzacka/trix/blob/main/INSTALLERING.md).
+3. Mac: Dobbeltklikk på dmg-fila, dra «Trix» til «Apper» og velg «Erstatt». Windows: Pakk ut zip-fila og erstatt `Trix.exe` og `BRUKERVEILEDNING.md` i mappa `Trix`.
 
-Filene og innstillingene dine blir liggende. Endringer: [CHANGELOG](CHANGELOG.md).
+Filene og innstillingene dine blir liggende. Den nye brukerveiledningen erstatter den gamle. Endringer: [CHANGELOG](https://github.com/elzacka/trix/blob/main/CHANGELOG.md).
 
 ## Avinstaller
 

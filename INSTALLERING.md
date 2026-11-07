@@ -15,4 +15,4 @@ Første oppstart:
 - Windows: Ikonet står ved klokka på oppgavelinjen. Klikk på pila for å se skjulte ikoner hvis du ikke ser det.
 - Appen lager filene sine i datamappen, se [Filene](BRUKERVEILEDNING.md#filene).
 
-Resten står i [brukerveiledningen](BRUKERVEILEDNING.md).
+Resten står i [brukerveiledningen](BRUKERVEILEDNING.md). Den følger med appen, og du åpner den med «Brukerveiledning» i menyen. Du finner den også i dmg-fila og i mappa `Trix` på Windows.

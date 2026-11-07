@@ -295,30 +295,8 @@ export function parseEntries(text) {
   return sections.filter(s => s.entries.length)
 }
 
-/** A heading's anchor as GitHub makes it, so the guide's own links find it. */
+/** A heading's anchor as GitHub makes it. */
 export const slug = text => plain(text).toLocaleLowerCase('nb').replace(/[^\p{L}\p{N}\s_-]/gu, '').trim().replace(/\s/g, '-')
-
-/** A whole document: headings at their level with an anchor, then blocks. A link to a file goes to it in the repo. */
-export function parseDocument(text) {
-  const blocks = []
-  const reader = blockReader()
-  reader.to(blocks)
-  // A code span shows its text as written.
-  const linked = text.replace(/`[^`\n]*`|\]\((?!https?:|#)([^\s()]+)\)/g, (all, file) => (file ? `](${REPO}/blob/main/${file})` : all))
-  for (const line of comments(linked.split(/\r?\n/))) {
-    if (line === null) continue
-    const heading = /^(#{1,6})\s+(.*)$/.exec(line)
-    if (heading) {
-      reader.to(blocks)
-      blocks.push({ type: 'h', level: heading[1].length, text: heading[2].trim(), id: slug(heading[2]) })
-    } else {
-      reader.line(line)
-    }
-  }
-  reader.end()
-  unclose(blocks)
-  return blocks
-}
 
 /** The entry's first paragraph, when nothing comes before it: a card's front, a guide's lead. */
 export function lead(entry) {
@@ -581,10 +559,8 @@ const DEFAULT_MENU = ['visning', 'innhold', '---', 'rediger', 'åpne mappe', 'op
 /** A menu that names none of these items gets each list before its item, when it has that item; not in a file that names the text `brukerveiledning`, as each file this version writes does. */
 const ADDED_MENU = { oppsett: ['rediger', 'åpne mappe'], avslutt: ['brukerveiledning'] }
 
-export const REPO = 'https://github.com/elzacka/trix'
-
 /** Icon names in the setup; `menylinje` (tray) and `app` (window and taskbar) are PNG only. */
-export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'til toppen', 'valgt', 'undermeny', 'fjern', 'snu']
+export const ICONS = ['logo', 'app', 'menylinje', 'meny', 'søk', 'tøm', 'tasteoppslag', 'tilbake', 'valgt', 'undermeny', 'fjern', 'snu']
 
 export const PNG_ONLY = ['app', 'menylinje']
 
@@ -627,7 +603,6 @@ export const TEXTS = {
   'tilbake': 'Tilbake',
   'tilbake til': 'Tilbake til {sted}',
   'bli her': 'Bli her',
-  'til toppen': 'Til toppen',
   'mine hurtigtaster': 'Mine hurtigtaster',
   'systemets hurtigtaster': 'Hurtigtaster i {system}',
   'begge': 'Begge',
@@ -672,6 +647,9 @@ const key = text => text.trim().toLocaleLowerCase('nb').replace(/^a-å$/, 'a–�
 /** Older names for a section, a menu item and a text, still read. */
 const RENAMED = { visninger: 'moduler', kildedata: 'innhold' }
 
+/** An icon and a text the app has dropped; every setup from before names them, so they read without a warning. */
+const RETIRED = new Set(['til toppen'])
+
 /** Texts as an older setup wrote their defaults; they read as today's. */
 const OLDER_TEXTS = { innhold: 'Innhold {fane}', rediger: 'Se og endre i fila', oppsett: 'Tilpass' }
 
@@ -700,6 +678,7 @@ export function parseSetup(text) {
     if (!item || !section) return
     const parts = item[1].split(/\s*(?<!\\)\|\s*/).map(part => part.replace(/\\\|/g, '|').trim())
     const name = key(parts[0])
+    if ((section === 'ikoner' || section === 'tekster') && RETIRED.has(name)) return
     if (section === 'moduler') {
       const [title, module = '', file = '', options, placeholder = ''] = parts
       if (!title || !module || !file) return problem(i, 'Skriv navn, modul og fil, skilt med |')

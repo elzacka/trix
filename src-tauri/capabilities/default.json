@@ -12,7 +12,7 @@
     "allow-system-list",
     "allow-save",
     "allow-reveal-file",
-    "allow-read-guide",
+    "allow-open-guide",
     "allow-open-url",
     "allow-set-hotkey",
     "allow-set-view",

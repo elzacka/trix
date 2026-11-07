@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import {
   formatKeys, comboId, lookupId, lookupShortcuts, parseShortcuts, filterShortcuts, parseEntries, lead, alphabetical, searchEntries, inline,
   mergeShortcuts, mergeEntries, sortShortcuts, parseSetup, fill, contrast, contrastProblems, contentName, iconName, ICONS, TEXTS, TOKENS, MODULES,
-  formatSetup, setupHeader, parseDocument, CELL_LIMIT, REPO, linkSegments, linkText, contentLink, linkedTab, findAnchor, linkProblems,
+  formatSetup, setupHeader, CELL_LIMIT, slug, linkSegments, linkText, contentLink, linkedTab, findAnchor, linkProblems,
 } from '../ui/parse.js'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
@@ -272,27 +272,37 @@ test('setup: an older default text reads as today\'s', () => {
   assert.deepEqual([setup.texts.innhold, setup.texts.rediger, setup.texts.oppsett, setup.texts.tom], [TEXTS.innhold, TEXTS.rediger, TEXTS.oppsett, 'Ingenting'])
 })
 
-test('document: headings with GitHub anchors, blocks, links to files in the repo', () => {
-  const doc = parseDocument('# Tittel\n\nSe [README](README.md) og [Filene](#filene).\n\n### I appen: «Tilpass appen»\n\n| A | B |\n|---|---|\n| 1 | 2 |\n- en\n- to\n')
-  assert.deepEqual(doc.map(b => b.type), ['h', 'p', 'h', 'table', 'ul'])
-  assert.deepEqual([doc[0].level, doc[2].level, doc[2].id], [1, 3, 'i-appen-tilpass-appen'])
-  assert.deepEqual(inline(doc[1].text).filter(s => s.type === 'link').map(s => s.href), [`${REPO}/blob/main/README.md`, '#filene'])
-})
+const guide = read('../BRUKERVEILEDNING.md')
+const guideIds = new Set([...guide.matchAll(/^#{1,6}\s+(.*)$/gm)].map(m => slug(m[1])))
+/** Link targets in the text; a code span shows a sample. */
+const targets = text => [...text.replace(/`[^`\n]*`/g, '').matchAll(/\]\(([^)]+)\)/g)].map(m => m[1])
 
 test('every #anchor in BRUKERVEILEDNING.md names a heading in it', () => {
-  const doc = parseDocument(read('../BRUKERVEILEDNING.md'))
-  const ids = new Set(doc.filter(b => b.type === 'h').map(b => b.id))
-  const texts = doc.flatMap(b => b.text ? [b.text] : b.items ?? [...b.head, ...b.rows.flat()])
-  const anchors = texts.flatMap(text => inline(text)).filter(s => s.type === 'link' && s.href.startsWith('#')).map(s => s.href.slice(1))
+  const anchors = targets(guide).filter(t => t.startsWith('#')).map(t => t.slice(1))
   assert.ok(anchors.length)
-  assert.deepEqual(anchors.filter(a => !ids.has(a)), [])
+  assert.deepEqual(anchors.filter(a => !guideIds.has(a)), [])
+})
+
+test('BRUKERVEILEDNING.md stands alone: a link out of it is a web address', () => {
+  assert.deepEqual(targets(guide).filter(t => !/^(#|https:\/\/)/.test(t)), [])
 })
 
 test('every link from INSTALLERING.md to a place in the user guide names a heading in it', () => {
-  const ids = new Set(parseDocument(read('../BRUKERVEILEDNING.md')).filter(b => b.type === 'h').map(b => b.id))
   const anchors = [...read('../INSTALLERING.md').matchAll(/BRUKERVEILEDNING\.md#([^)]+)/g)].map(m => m[1])
   assert.ok(anchors.length)
-  assert.deepEqual(anchors.filter(a => !ids.has(a)), [])
+  assert.deepEqual(anchors.filter(a => !guideIds.has(a)), [])
+})
+
+test('the user guide comes with the app, the disk image and the zip', () => {
+  assert.equal(JSON.parse(read('../src-tauri/tauri.conf.json')).bundle.resources['../BRUKERVEILEDNING.md'], 'BRUKERVEILEDNING.md')
+  assert.match(read('../scripts/sign.sh'), /ditto "\$APP\/Contents\/Resources\/BRUKERVEILEDNING\.md" "\$STAGE\/BRUKERVEILEDNING\.md"/)
+  assert.match(read('../.github/workflows/build.yml'), /Copy-Item BRUKERVEILEDNING\.md "dist\/Trix\/BRUKERVEILEDNING\.md"/)
+})
+
+test('setup: the dropped icon and text read without a warning', () => {
+  const setup = parseSetup('## Ikoner\n- til toppen | a.svg\n## Tekster\n- til toppen | Opp')
+  assert.deepEqual([setup.problems, setup.icons, 'til toppen' in setup.texts], [[], {}, false])
+  assert.ok(!formatSetup(setup, '# Oppsett').includes('til toppen'))
 })
 
 test('file names stay in the data folder', () => {
@@ -474,9 +484,4 @@ test('an anchor of only signs names nothing', () => {
   assert.equal(findAnchor('- a | ⌘A', 'hurtigtaster', '!!!', 'mac'), null)
   assert.equal(findAnchor('### A\nTekst', 'kort', '!!!'), null)
   assert.deepEqual(linkProblems([{ file: 'H.md', module: 'hurtigtaster', text: '- a | ⌘A\n- [x](#!!!) | ⌘B' }]), ['H.md, linje 2: Finner ikke «#!!!»'])
-})
-
-test('document: a code span keeps its text, a link to a file goes to the repo', () => {
-  const [p] = parseDocument('`[a](Steg.md#b)` og [c](README.md)')
-  assert.equal(p.text, `\`[a](Steg.md#b)\` og [c](${REPO}/blob/main/README.md)`)
 })

@@ -30,6 +30,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force "dist/Trix" | Out-Null
           Copy-Item src-tauri/target/release/trix.exe "dist/Trix/Trix.exe"
+          Copy-Item BRUKERVEILEDNING.md "dist/Trix/BRUKERVEILEDNING.md"
           Compress-Archive -Path "dist/Trix" -DestinationPath dist/Trix-Windows.zip
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

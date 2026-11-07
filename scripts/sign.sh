@@ -11,6 +11,8 @@ IDENTITY=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer I
 notarize() {
   xcrun notarytool submit "$1" --keychain-profile trix ${NOTARY_KEYCHAIN:+--keychain "$NOTARY_KEYCHAIN"} --wait
 }
+# Opened from inside the app: a save from an editor would break the signature
+chmod a-w "$APP/Contents/Resources/BRUKERVEILEDNING.md"
 if [ -n "$IDENTITY" ]; then
   codesign --force --options runtime --timestamp --sign "$IDENTITY" "$APP"
   UPLOAD="${TMPDIR:-/tmp}/trix-notarize.zip"
@@ -20,10 +22,11 @@ if [ -n "$IDENTITY" ]; then
   xcrun stapler staple "$APP"
 fi
 
-# The disk image shows the app beside a link to Applications (Finder: the user's language), to drag it there
+# The disk image shows the app beside a link to Applications (Finder: the user's language), to drag it there, and the user guide
 STAGE=$(mktemp -d)
 ditto "$APP" "$STAGE/Trix.app"
 ln -s /Applications "$STAGE/Applications"
+ditto "$APP/Contents/Resources/BRUKERVEILEDNING.md" "$STAGE/BRUKERVEILEDNING.md"
 hdiutil create -volname "Trix" -srcfolder "$STAGE" -format UDZO -ov "$DMG"
 if [ -n "$IDENTITY" ]; then
   codesign --timestamp --sign "$IDENTITY" "$DMG"

@@ -2,17 +2,16 @@
 
 ## Unreleased
 
+- «Brukerveiledning» in the menu opens `BRUKERVEILEDNING.md` in the default text app. The file comes with the app, the dmg and the zip, and a new version replaces it. A setup that names the text or icon `til toppen` reads without a warning
 - Links between tabs: `[tekst](Steg.md#tittel)` goes to a tab, or to an entry, a heading, a group or a shortcut in it; `#tittel` stays in the tab. An entry or a guide opens and a card turns on arrival
 - «Tilbake til ‹sted›» floats at the foot of the window after a link, and Esc does the same: back to the same tab and scroll position, with its search, tags and open entry. × stays where you are (texts `tilbake til`, `bli her`)
 - A warning names the file and line of a link to a tab or place that does not exist
-- User guide: code spans show relative links as written
 - User guide: «Lenker» describes links to web pages and cross-links within and between modules, step by step
 - Links have no underline: their own tone and weight, and a tint on hover (a card back turns its colours around). New colours `lenke` and `lenke på bakside`, at least 4.5:1 in both modes, hover included. A setup with its own colours gets these until it names them, and the contrast warning names any below 4.5:1
 - A warning also names a link with only signs after `#`, and a link in a shortcut's name beside `*` or `` ` ``
 - A–Å sorts a shortcut with a link to a web page by what shows
 - With a single tab, focus goes to «Flere valg» where it would go to the hidden tab. A warning is read out by a screen reader once, not at each key press in the search, and a failure repeated is read out again. A successful export, view change or opening of «Tilpass» clears the last error
 - Windows: a middle-click on a link to a tab stays in the app, and opens no browser (not tested on Windows)
-- User guide: clearer hierarchy. Sections listed in one framed list, smaller headings on every level, tables with row lines only, full width and one shared first column, quieter column names
 - User guide: no section numbers. Download and install live in `INSTALLERING.md`, outside the app; «Bruk» names the quick-open keys
 - User guide: says where the icon and the three-dot menu are and what the data folder is, and uses the labels in «Tilpass». «Ny versjon» on Windows replaces `Trix.exe`, so `Trix-data` stays; «Avinstaller» warns that deleting the folder `Trix` deletes a `Trix-data` inside it
 

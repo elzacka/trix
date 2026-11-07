@@ -17,6 +17,7 @@ use tauri::{
     WindowEvent,
     image::Image,
     menu::{Menu, MenuItem},
+    path::BaseDirectory,
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     webview::{NewWindowResponse, Url},
     WebviewUrl,
@@ -30,8 +31,8 @@ use tauri::RunEvent;
 
 /// Written when missing; after that the files are the user's.
 const SETUP: (&str, &str) = ("Oppsett.md", include_str!("../../seed/Oppsett.md"));
-/// The user guide as built, for «Brukerveiledning»; links to other files go to the repo.
-const GUIDE: &str = include_str!("../../BRUKERVEILEDNING.md");
+/// A file in the app (`bundle.resources`), so a new version replaces it.
+const GUIDE: &str = "BRUKERVEILEDNING.md";
 /// One template per module; `{navn}` becomes the tab's name.
 const TEMPLATES: [(&str, &str); 4] = [
     ("hurtigtaster", include_str!("../../seed/maler/hurtigtaster.md")),
@@ -318,14 +319,17 @@ fn save_setup(original: String, text: String) -> Result<String, String> {
     write_checked(data_dir().join(SETUP.0), &original, text)
 }
 
-/// `Oppsett.md` in the user's own editor; where none is set for `.md`, shown in Finder or Explorer.
-#[tauri::command]
-fn open_setup_file(app: AppHandle) -> Result<(), String> {
-    let path = data_dir().join(SETUP.0);
+/// A file in the user's own editor; where none is set for `.md`, shown in Finder or Explorer.
+fn open_file(app: &AppHandle, path: &Path) -> Result<(), String> {
     app.opener()
         .open_path(path.to_string_lossy(), None::<&str>)
-        .or_else(|_| app.opener().reveal_item_in_dir(&path))
+        .or_else(|_| app.opener().reveal_item_in_dir(path))
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn open_setup_file(app: AppHandle) -> Result<(), String> {
+    open_file(&app, &data_dir().join(SETUP.0))
 }
 
 /// «Tilpass»: a normal window beside the main window, which stays open to show each change.
@@ -378,9 +382,14 @@ fn reveal_file(app: AppHandle, name: String) -> Result<(), String> {
     app.opener().reveal_item_in_dir(file_path(&name)?).map_err(|e| e.to_string())
 }
 
+/// Missing on Windows when only `Trix.exe` was moved or replaced.
 #[tauri::command]
-fn read_guide() -> &'static str {
-    GUIDE
+fn open_guide(app: AppHandle) -> Result<(), String> {
+    let path = app.path().resolve(GUIDE, BaseDirectory::Resource).map_err(|e| e.to_string())?;
+    if !path.is_file() {
+        return Err(format!("Finner ikke {GUIDE}. Last ned appen på nytt."));
+    }
+    open_file(&app, &path)
 }
 
 #[tauri::command]
@@ -716,7 +725,7 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            load, read_content, system_list, save, reveal_file, read_guide, open_url, set_hotkey, set_view, set_tray,
+            load, read_content, system_list, save, reveal_file, open_guide, open_url, set_hotkey, set_view, set_tray,
             set_size, set_tray_icon, read_icon, export_content, hold, hide, quit, set_mode, set_app_icon,
             open_setup, read_setup, save_setup, open_setup_file, add_icon, read_dropped
         ])

@@ -1,6 +1,6 @@
 import {
   parseShortcuts, filterShortcuts, lookupId, lookupShortcuts, comboId, parseEntries, lead, alphabetical, sortShortcuts,
-  searchEntries, formatKeys, inline, linkSegments, contentLink, linkedTab, findAnchor, linkProblems, plain, slug, mergeShortcuts, mergeEntries, parseSetup, parseDocument, fill, contrastProblems, SETUP_FILE, TOKENS,
+  searchEntries, formatKeys, inline, linkSegments, contentLink, linkedTab, findAnchor, linkProblems, plain, slug, mergeShortcuts, mergeEntries, parseSetup, fill, contrastProblems, SETUP_FILE, TOKENS,
 } from './parse.js'
 import { h, svg } from './dom.js'
 import { importText, importable, replaceContent, IMPORT_TYPES } from './import.js'
@@ -74,7 +74,6 @@ function icon(name, paths) {
 const DRAWN = {
   fjern: ['M18 6l-12 12', 'M6 6l12 12'],
   tilbake: ['M5 12l14 0', 'M5 12l6 6', 'M5 12l6 -6'],
-  'til toppen': ['M12 5l0 14', 'M18 11l-6 -6', 'M6 11l6 -6'],
   snu: ['M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4', 'M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4'],
 }
 const closeIcon = () => icon('fjern', DRAWN.fjern)
@@ -386,13 +385,9 @@ function segments(list, links = true) {
 
 const rich = (text, links) => segments(inline(text), links)
 
-/** The web goes to the browser. In the user guide an #anchor scrolls within it; in content a link goes to a tab or a place in one. */
+/** The web goes to the browser; any other link goes to a tab or a place in one. */
 function follow(link, href) {
-  if (/^https?:/.test(href)) return invoke('open_url', { url: href })
-  if (!link.closest('#user-guide')) return followContent(link, href)
-  const target = link.closest('article')?.querySelector(`#${CSS.escape(href.slice(1))}`)
-  target?.scrollIntoView()
-  target?.focus({ preventScroll: true })
+  return /^https?:/.test(href) ? invoke('open_url', { url: href }) : followContent(link, href)
 }
 
 // Links between tabs: each leaves a mark on the trail, and «Tilbake til …» restores what it holds.
@@ -480,7 +475,7 @@ function renderReturn() {
 function blocks(list, level) {
   return list.map(b => {
     if (b.type === 'p') return h('p', {}, rich(b.text))
-    if (b.type === 'h') return h(`h${b.level ?? level}`, { class: 'subheading', id: b.id, tabindex: b.id && -1, 'data-anchor': slug(b.text) }, rich(b.text))
+    if (b.type === 'h') return h(`h${level}`, { class: 'subheading', 'data-anchor': slug(b.text) }, rich(b.text))
     if (b.type === 'table') {
       return h('table', {},
         h('thead', {}, h('tr', {}, b.head.map((c, i) => tableCell('th', c, b.align[i])))),
@@ -676,42 +671,11 @@ own.listen('preview', async ({ payload: setup }) => {
 // «Tilpass» closed, saved or not: the files decide again.
 own.listen('restore', () => { state.setupOpen = false; load() })
 
-// Brukerveiledning: BRUKERVEILEDNING.md as built into the app, in place of the tabs.
-
-/** Shows «Til toppen» once the contents list has scrolled out of view. */
-const tocWatch = new IntersectionObserver(([e]) => $('to-top')?.classList.toggle('shown', !e.isIntersecting && e.boundingClientRect.top < 0))
-
-async function openUserGuide() {
+/** The file in the app, in the user's own editor. */
+function openUserGuide() {
   closeMenu()
-  const doc = parseDocument(await invoke('read_guide'))
-  const sections = doc.filter(b => b.level === 2)
-  const toc = h('nav', { class: 'toc' }, h('ol', { class: 'card' }, sections.map(b =>
-    h('li', {}, h('a', { href: `#${b.id}`, onclick: e => { e.preventDefault(); follow(e.currentTarget, `#${b.id}`) } }, plain(b.text))))))
-  const first = doc.indexOf(sections[0])
-  const body = blocks(doc.map(b => (b.level === 1 ? { ...b, id: 'user-guide-title' } : b)))
-  $('user-guide').replaceChildren(
-    h('article', { class: 'guide' },
-      h('button', { class: 'back-link', onclick: closeUserGuide }, backIcon(), t('tilbake')),
-      body.slice(0, first), toc, body.slice(first)),
-    h('button', {
-      class: 'icon-button to-top', id: 'to-top', 'aria-label': t('til toppen'), title: t('til toppen'),
-      onclick: () => { $('user-guide').scrollTo({ top: 0 }); $('user-guide-title')?.focus({ preventScroll: true }) },
-    }, icon('til toppen', DRAWN['til toppen'])))
-  tocWatch.observe(toc)
-  $('tabpanel').hidden = true
-  document.querySelector('.bar').hidden = true
-  $('user-guide').hidden = false
-  $('user-guide').scrollTop = 0
-  $('user-guide-title')?.focus()
-}
-
-function closeUserGuide() {
-  tocWatch.disconnect()
-  $('user-guide').hidden = true
-  $('user-guide').replaceChildren()
-  $('tabpanel').hidden = false
-  document.querySelector('.bar').hidden = false
-  $('more').focus()
+  state.error = ''
+  invoke('open_guide').then(render, error => fail(String(error)))
 }
 
 function closeEditor() {
@@ -834,7 +798,7 @@ function finishImport() {
 // A file dropped on a tab goes into that tab; anywhere else, into the tab shown.
 const dropTab = e => e.target.closest?.('[role="tab"]')
 const dropping = e => e.dataTransfer?.types.includes('Files')
-const canDrop = () => current() && !state.editing && !$('import-dialog').open && $('user-guide').hidden
+const canDrop = () => current() && !state.editing && !$('import-dialog').open
 
 function markDrop(el) {
   document.querySelectorAll('.drop-target').forEach(x => { if (x !== el) x.classList.remove('drop-target') })
@@ -983,10 +947,6 @@ document.addEventListener('keydown', e => {
   if (state.editing) {
     if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); saveEdit() }
     else if (e.key === 'Escape') { e.preventDefault(); cancelEdit() }
-    return
-  }
-  if (!$('user-guide').hidden) {
-    if (e.key === 'Escape') { e.preventDefault(); closeUserGuide() }
     return
   }
   if (mod && /^[1-9]$/.test(e.key)) { e.preventDefault(); selectTab(Number(e.key) - 1) }
