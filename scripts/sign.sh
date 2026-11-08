@@ -22,12 +22,42 @@ if [ -n "$IDENTITY" ]; then
   xcrun stapler staple "$APP"
 fi
 
-# The disk image shows the app beside a link to Applications (Finder: the user's language), to drag it there, and the user guide
+# The disk image shows the app left of a link to Applications (Finder: the user's language), to drag it there, and the user guide below
+VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -n 1)
 STAGE=$(mktemp -d)
 ditto "$APP" "$STAGE/Trix.app"
 ln -s /Applications "$STAGE/Applications"
 ditto "$APP/Contents/Resources/BRUKERVEILEDNING.md" "$STAGE/BRUKERVEILEDNING.md"
-hdiutil create -volname "Trix" -srcfolder "$STAGE" -format UDZO -ov "$DMG"
+RW="$STAGE.dmg"
+hdiutil create -volname "Trix $VERSION" -srcfolder "$STAGE" -format UDRW -ov "$RW"
+MOUNT=$(hdiutil attach -readwrite -noverify -noautoopen "$RW" | sed -n 's|.*\(/Volumes/.*\)$|\1|p')
+# Finder writes the window's layout to .DS_Store in the image
+osascript - "$MOUNT" <<'EOF'
+on run argv
+  tell application "Finder"
+    set d to (POSIX file (item 1 of argv)) as alias
+    open d
+    set w to container window of d
+    set current view of w to icon view
+    set bounds of w to {200, 120, 800, 680}
+    set o to icon view options of w
+    set arrangement of o to not arranged
+    set icon size of o to 128
+    set text size of o to 14
+    set position of item "Trix.app" of d to {170, 130}
+    set position of item "Applications" of d to {430, 130}
+    set position of item "BRUKERVEILEDNING.md" of d to {300, 320}
+    update d without registering applications
+    delay 2
+    close w
+  end tell
+end run
+EOF
+# Hidden, but shown where Finder shows hidden files
+rm -rf "$MOUNT/.fseventsd"
+sync
+hdiutil detach "$MOUNT"
+hdiutil convert "$RW" -format UDZO -ov -o "$DMG"
 if [ -n "$IDENTITY" ]; then
   codesign --timestamp --sign "$IDENTITY" "$DMG"
   notarize "$DMG"

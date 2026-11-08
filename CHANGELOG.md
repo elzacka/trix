@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- macOS: the disk image opens with the app on the left and Applications on the right, large icons, the user guide below; the volume is named `Trix <version>`
+
 ## 2.2.0 - 2026-11-07
 
 - «Brukerveiledning» in the menu opens `BRUKERVEILEDNING.md` in the default text app. The file comes with the app, the dmg and the zip, and a new version replaces it. A setup that names the text or icon `til toppen` reads without a warning
