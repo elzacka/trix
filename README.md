@@ -34,6 +34,9 @@ src-tauri/icons/tray.png`, keep the files `tauri.conf.json` lists, and build.
 Name and identifier: `productName`, `identifier` in
 [tauri.conf.json](src-tauri/tauri.conf.json).
 
+The disk image window's arrow: [assets/dmg-background.tiff](assets/dmg-background.tiff),
+drawn by `swift scripts/dmg-background.swift`; positions match `sign.sh`.
+
 ## Develop
 
 1. Change, then `npm test` and `TRIX_DATA_DIR=/tmp/trix npm run dev`.

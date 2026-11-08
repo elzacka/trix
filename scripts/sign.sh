@@ -22,15 +22,18 @@ if [ -n "$IDENTITY" ]; then
   xcrun stapler staple "$APP"
 fi
 
-# The disk image shows the app left of a link to Applications (Finder: the user's language), to drag it there
+# The disk image shows the app left of a link to Applications (Finder: the user's language), an arrow between them: drag it there
 VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -n 1)
 STAGE=$(mktemp -d)
 ditto "$APP" "$STAGE/Trix.app"
 ln -s /Applications "$STAGE/Applications"
+mkdir "$STAGE/.background"
+ditto assets/dmg-background.tiff "$STAGE/.background/background.tiff"
 RW="$STAGE.dmg"
-hdiutil create -volname "Trix $VERSION" -srcfolder "$STAGE" -format UDRW -ov "$RW"
+hdiutil create -volname "Trix $VERSION" -srcfolder "$STAGE" -fs HFS+ -format UDRW -ov "$RW"
 MOUNT=$(hdiutil attach -readwrite -noverify -noautoopen "$RW" | sed -n 's|.*\(/Volumes/.*\)$|\1|p')
-# Finder writes the window's layout to .DS_Store in the image
+# Finder writes the window's layout to .DS_Store in the image. HFS+, the picture on the volume and set last:
+# else Finder shows no background on older macOS (Apple DTS, developer.apple.com/forums/thread/836253)
 osascript - "$MOUNT" <<'EOF'
 on run argv
   tell application "Finder"
@@ -45,6 +48,11 @@ on run argv
     set text size of o to 14
     set position of item "Trix.app" of d to {170, 130}
     set position of item "Applications" of d to {430, 130}
+    -- Below the window, where Finder shows hidden files
+    try
+      set position of item ".background" of d to {300, 500}
+    end try
+    set background picture of o to file ".background:background.tiff" of d
     update d without registering applications
     delay 2
     close w
