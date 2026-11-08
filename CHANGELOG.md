@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- macOS: the disk image opens with the app on the left and Applications on the right, large icons, the user guide below; the volume is named `Trix <version>`
+- macOS: the disk image opens with the app on the left and Applications on the right, large icons; the user guide opens from the app menu, so the image holds only the app; the volume is named `Trix <version>`
 
 ## 2.2.0 - 2026-11-07
 

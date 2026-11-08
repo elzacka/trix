@@ -299,9 +299,9 @@ test('every link from INSTALLERING.md to a place in the user guide names a headi
   assert.deepEqual(anchors.filter(a => !guideIds.has(a)), [])
 })
 
-test('the user guide comes with the app, the disk image and the zip', () => {
+test('the user guide comes with the app and the zip; the disk image holds only the app', () => {
   assert.equal(JSON.parse(read('../src-tauri/tauri.conf.json')).bundle.resources['../BRUKERVEILEDNING.md'], 'BRUKERVEILEDNING.md')
-  assert.match(read('../scripts/sign.sh'), /ditto "\$APP\/Contents\/Resources\/BRUKERVEILEDNING\.md" "\$STAGE\/BRUKERVEILEDNING\.md"/)
+  assert.doesNotMatch(read('../scripts/sign.sh'), /\$STAGE\/BRUKERVEILEDNING/)
   assert.match(read('../.github/workflows/build.yml'), /Copy-Item BRUKERVEILEDNING\.md "dist\/Trix\/BRUKERVEILEDNING\.md"/)
 })
 
