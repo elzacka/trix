@@ -34,8 +34,9 @@ src-tauri/icons/tray.png`, keep the files `tauri.conf.json` lists, and build.
 Name and identifier: `productName`, `identifier` in
 [tauri.conf.json](src-tauri/tauri.conf.json).
 
-The disk image window's arrow: [assets/dmg-background.tiff](assets/dmg-background.tiff),
-drawn by `swift scripts/dmg-background.swift`; positions match `sign.sh`.
+The disk image window's arrow: [assets/dmg-background.svg](assets/dmg-background.svg),
+positions as in `sign.sh`. `rsvg-convert` it to 600×400 and 1200×800 PNGs, then
+`tiffutil -cathidpicheck <1x> <2x> -out assets/dmg-background.tiff`.
 
 ## Develop
 

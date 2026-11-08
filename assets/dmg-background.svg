@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+  <!-- The disk image window: an arrow from the app to Applications, positions as in scripts/sign.sh. Grey 3.3:1 on white -->
+  <rect width="600" height="400" fill="#fff"/>
+  <path d="M262 130H338M327 119L338 130L327 141" fill="none" stroke="#8a8a8e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
