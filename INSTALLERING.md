@@ -2,7 +2,7 @@
 
 | | Mac | Windows |
 |---|---|---|
-| Krav | macOS 15 eller nyere | Windows 10 eller 11 |
+| Krav | macOS 27 eller nyere | Windows 11 versjon 25H2 eller nyere |
 | Last ned | [Trix-macOS.dmg](https://github.com/elzacka/trix/releases/latest/download/Trix-macOS.dmg) | [Trix-Windows.zip](https://github.com/elzacka/trix/releases/latest/download/Trix-Windows.zip) |
 | Installer | Dobbeltklikk på dmg-fila. Dra «Trix» til «Apper» | Høyreklikk på zip-fila, velg «Pakk ut alle» |
 | Start | Åpne appen fra «Apper». Velg «Åpne» når macOS spør om appen fra internett. Apple har sjekket den | Åpne `Trix\Trix.exe`. Første gang: «Mer info», så «Kjør likevel», fordi appen ikke er signert |

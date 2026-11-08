@@ -38,7 +38,7 @@ jobs:
           path: dist/Trix-Windows.zip
 
   macos:
-    runs-on: macos-latest
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -60,7 +60,7 @@ jobs:
   sign:
     needs: macos
     if: github.ref == 'refs/heads/main'
-    runs-on: macos-latest
+    runs-on: xcode-27
     # Notarization takes 1-2 min; a hung one ran 6 h until GitHub's default cut it
     timeout-minutes: 30
     # Its secrets reach only this job, and only on main (the environment's branch policy)

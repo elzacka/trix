@@ -32,8 +32,8 @@ ditto assets/dmg-background.tiff "$STAGE/.background/background.tiff"
 RW="$STAGE.dmg"
 hdiutil create -volname "Trix $VERSION" -srcfolder "$STAGE" -fs HFS+ -format UDRW -ov "$RW"
 MOUNT=$(hdiutil attach -readwrite -noverify -noautoopen "$RW" | sed -n 's|.*\(/Volumes/.*\)$|\1|p')
-# Finder writes the window's layout to .DS_Store in the image. HFS+, the picture on the volume and set last:
-# else Finder shows no background on older macOS (Apple DTS, developer.apple.com/forums/thread/836253)
+# Finder writes the window's layout to .DS_Store in the image. HFS+, the picture on the volume and set last,
+# as Apple DTS advises for the background (developer.apple.com/forums/thread/836253)
 osascript - "$MOUNT" <<'EOF'
 on run argv
   tell application "Finder"

@@ -299,6 +299,11 @@ test('every link from INSTALLERING.md to a place in the user guide names a headi
   assert.deepEqual(anchors.filter(a => !guideIds.has(a)), [])
 })
 
+test('INSTALLERING.md names the macOS version the app requires', () => {
+  const major = JSON.parse(read('../src-tauri/tauri.conf.json')).bundle.macOS.minimumSystemVersion.split('.')[0]
+  assert.match(read('../INSTALLERING.md'), new RegExp(`\\| Krav \\| macOS ${major} eller nyere \\|`))
+})
+
 test('the user guide comes with the app and the zip; the disk image holds only the app', () => {
   assert.equal(JSON.parse(read('../src-tauri/tauri.conf.json')).bundle.resources['../BRUKERVEILEDNING.md'], 'BRUKERVEILEDNING.md')
   assert.doesNotMatch(read('../scripts/sign.sh'), /\$STAGE\/BRUKERVEILEDNING/)
