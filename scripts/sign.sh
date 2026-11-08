@@ -22,11 +22,12 @@ if [ -n "$IDENTITY" ]; then
   xcrun stapler staple "$APP"
 fi
 
-# The disk image shows the app left of a link to Applications (Finder: the user's language), an arrow between them: drag it there
+# The disk image shows the app left of a link to Applications, an arrow between them: drag it there.
+# Finder shows a link by its own name, so it has the app's language
 VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -n 1)
 STAGE=$(mktemp -d)
 ditto "$APP" "$STAGE/Trix.app"
-ln -s /Applications "$STAGE/Applications"
+ln -s /Applications "$STAGE/Apper"
 mkdir "$STAGE/.background"
 ditto assets/dmg-background.tiff "$STAGE/.background/background.tiff"
 RW="$STAGE.dmg"
@@ -47,7 +48,7 @@ on run argv
     set icon size of o to 128
     set text size of o to 14
     set position of item "Trix.app" of d to {170, 130}
-    set position of item "Applications" of d to {430, 130}
+    set position of item "Apper" of d to {430, 130}
     -- Below the window, where Finder shows hidden files
     try
       set position of item ".background" of d to {300, 500}

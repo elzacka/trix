@@ -1,9 +1,9 @@
 # Changelog
 
-## Unreleased
+## 3.0.0 - 2026-11-08
 
 - Requires macOS 27 or Windows 11 version 25H2 or newer
-- macOS: the disk image opens with the app on the left and Applications on the right, large icons and a grey arrow between them; the user guide opens from the app menu, so the image holds only the app; the volume is named `Trix <version>`
+- macOS: the disk image opens with the app on the left and a link to Applications, «Apper», on the right, large icons and a grey arrow between them; the user guide opens from the app menu, so the image holds only the app; the volume is named `Trix <version>`
 
 ## 2.2.0 - 2026-11-07
 

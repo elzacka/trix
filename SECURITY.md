@@ -10,7 +10,7 @@ Report a vulnerability: hei@tazk.no.
 | Risks | [OWASP Top 10:2025](https://owasp.org/Top10/2025/) |
 | Build and release | [OWASP Top 10 CI/CD Security Risks](https://owasp.org/www-project-top-10-ci-cd-security-risks/) |
 
-Last review: 2026-11-07, the changes since release 2.1.0, with its fixes; the whole app 2026-11-03. The mitigations below are their result.
+Last review: 2026-11-08, the build and release changes since 2.2.0; 2026-11-07, the app changes since 2.1.0, with its fixes; the whole app 2026-11-03. The mitigations below are their result.
 
 ## Threat model
 
