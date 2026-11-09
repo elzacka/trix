@@ -10,7 +10,7 @@
   IgnorableNamespaces="uap uap10 rescap virtualization">
   <Identity Name="PartnerCenter.IdentityName" Publisher="CN=PartnerCenterPublisher" Version="0.0.0.0" ProcessorArchitecture="x64" />
   <Properties>
-    <DisplayName>Trix</DisplayName>
+    <DisplayName>Trix for Windows</DisplayName>
     <PublisherDisplayName>elzacka</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
     <!-- The data folder stays %APPDATA%\Trix, as for the zip: Explorer and text apps see it, and it outlives an uninstall -->
@@ -28,7 +28,7 @@
   </Resources>
   <Applications>
     <Application Id="Trix" Executable="Trix.exe" uap10:RuntimeBehavior="packagedClassicApp" uap10:TrustLevel="mediumIL">
-      <uap:VisualElements DisplayName="Trix" Description="Oppslag i egne hurtigtaster, notater, kort og veiledninger"
+      <uap:VisualElements DisplayName="Trix for Windows" Description="Oppslag i egne hurtigtaster, notater, kort og veiledninger"
         BackgroundColor="transparent" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" />
     </Application>
   </Applications>
