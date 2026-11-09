@@ -7,6 +7,9 @@
 | Installer | Dobbeltklikk på dmg-fila. Dra «Trix» til «Apper» | Høyreklikk på zip-fila, velg «Pakk ut alle» |
 | Start | Åpne appen fra «Apper». Velg «Åpne» når macOS spør om appen fra internett. Apple har sjekket den | Åpne `Trix\Trix.exe`. Første gang: «Mer info», så «Kjør likevel», fordi appen ikke er signert |
 
+Windows viser ikke «Kjør likevel» hvis IT har stengt for det på PC-en. Be IT om å
+installere Trix for deg.
+
 Lenkene går alltid til siste versjon.
 
 Første oppstart:
