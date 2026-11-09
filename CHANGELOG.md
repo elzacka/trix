@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.1.0 - 2026-11-10
 
 - Windows: a package for the Microsoft Store, signed by Microsoft. The data folder stays `%APPDATA%\Trix`
 - Privacy statement: `PERSONVERN.md`
