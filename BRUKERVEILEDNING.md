@@ -209,7 +209,7 @@ Datamappen er skjult som standard.
 
 ## Del med andre
 
-Flere kan bruke det samme innholdet og oppsettet hvis de åpner appen fra en felles mappe.
+Flere kan bruke det samme innholdet og oppsettet hvis de åpner appen fra en felles mappe. Bruk appen fra GitHub. Appen fra Microsoft Store kan ikke ligge i en delt mappe.
 
 1. Legg appen i en mappe som alle har tilgang til, for eksempel en delt mappe på nettverket. På Windows er appen mappa `Trix`, så du legger hele mappa der.
 2. Lag en mappe med navnet `Trix-data` i samme mappe som appen. På Windows lager du den inne i mappa `Trix`, ved siden av `Trix.exe`. Appen bruker `Trix-data` i stedet for datamappen.
@@ -220,6 +220,10 @@ Flere kan bruke det samme innholdet og oppsettet hvis de åpner appen fra en fel
 
 ## Ny versjon
 
+Windows oppdaterer Trix selv hvis du har installert appen fra Microsoft Store.
+
+Slik installerer du en ny versjon fra GitHub:
+
 1. Avslutt appen.
 2. Last ned siste versjon, se [Last ned og installer](https://github.com/elzacka/trix/blob/main/INSTALLERING.md).
 3. Mac: Dobbeltklikk på dmg-fila, dra «Trix» til «Apper» og velg «Erstatt». Windows: Pakk ut zip-fila og erstatt `Trix.exe` og `BRUKERVEILEDNING.md` i mappa `Trix`.
@@ -229,5 +233,5 @@ Filene og innstillingene dine blir liggende. Den nye brukerveiledningen erstatte
 ## Avinstaller
 
 1. Avslutt appen.
-2. Mac: Flytt «Trix» fra «Apper» til papirkurven. Windows: Slett mappa `Trix`. `Trix-data` blir slettet sammen med den hvis den ligger der.
+2. Mac: Flytt «Trix» fra «Apper» til papirkurven. Windows: Slett mappa `Trix`. `Trix-data` blir slettet sammen med den hvis den ligger der. Microsoft Store: Høyreklikk på Trix i Start-menyen og velg «Avinstaller».
 3. Filene dine blir liggende. Slett datamappen hvis du vil fjerne dem, se [Filene](#filene). Eksporter først det du vil beholde.

@@ -304,6 +304,16 @@ test('INSTALLERING.md names the macOS version the app requires', () => {
   assert.match(read('../INSTALLERING.md'), new RegExp(`\\| Krav \\| macOS ${major} eller nyere \\|`))
 })
 
+test('the Store package: Windows build and data folder as for the zip, version and contents from the build', () => {
+  const manifest = read('../store/AppxManifest.xml')
+  assert.match(read('../INSTALLERING.md'), /\| Windows 11 versjon 25H2 eller nyere \|/)
+  assert.match(manifest, /MinVersion="10\.0\.26200\.0"/) // 25H2
+  assert.match(read('../src-tauri/src/main.rs'), /var_os\("APPDATA"\)[^\n]*\.join\("Trix"\)/)
+  assert.match(manifest, /\$\(KnownFolder:RoamingAppData\)\\Trix</)
+  assert.match(manifest, /Version="0\.0\.0\.0"/)
+  assert.match(read('../.github/workflows/build.yml'), /Copy-Item dist\/Trix\/\* dist\/msix/)
+})
+
 test('the user guide comes with the app and the zip; the disk image holds only the app', () => {
   assert.equal(JSON.parse(read('../src-tauri/tauri.conf.json')).bundle.resources['../BRUKERVEILEDNING.md'], 'BRUKERVEILEDNING.md')
   assert.doesNotMatch(read('../scripts/sign.sh'), /\$STAGE\/BRUKERVEILEDNING/)

@@ -36,6 +36,52 @@ jobs:
         with:
           name: windows
           path: dist/Trix-Windows.zip
+      - name: Store package
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path src-tauri/Cargo.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
+          New-Item -ItemType Directory -Force dist/msix/Assets | Out-Null
+          Copy-Item dist/Trix/* dist/msix
+          npx tauri icon assets/icon.svg -o "$env:RUNNER_TEMP/icons"
+          foreach ($logo in 'Square44x44Logo', 'Square150x150Logo', 'StoreLogo') { Copy-Item "$env:RUNNER_TEMP/icons/$logo.png" dist/msix/Assets }
+          (Get-Content store/AppxManifest.xml -Raw).Replace('Version="0.0.0.0"', "Version=`"$version.0`"") | Set-Content dist/msix/AppxManifest.xml -Encoding utf8
+          $makeappx = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\makeappx.exe" | Sort-Object FullName | Select-Object -Last 1
+          & $makeappx.FullName pack /d dist/msix /p dist/Trix.msix /o
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Store package starts, with the data folder outside the package
+        shell: pwsh
+        run: |
+          # A copy that installs on the runner's Windows Server, an older build than the app requires; unsigned, so in developer mode
+          Copy-Item dist/msix "$env:RUNNER_TEMP/msix" -Recurse
+          $manifest = "$env:RUNNER_TEMP/msix/AppxManifest.xml"
+          (Get-Content $manifest -Raw) -replace 'MinVersion="[^"]+"', "MinVersion=`"10.0.$([Environment]::OSVersion.Version.Build).0`"" | Set-Content $manifest -Encoding utf8
+          reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock /v AllowDevelopmentWithoutDevLicense /t REG_DWORD /d 1 /f
+          Add-AppxPackage -Register $manifest
+          $package = Get-AppxPackage -Name ([xml](Get-Content $manifest -Raw)).Package.Identity.Name
+          Start-Process explorer.exe "shell:AppsFolder\$($package.PackageFamilyName)!Trix"
+          $setup = "$env:APPDATA\Trix\Oppsett.md"
+          for ($i = 0; $i -lt 60 -and -not (Test-Path $setup); $i++) { Start-Sleep 1 }
+          $private = "$env:LOCALAPPDATA\Packages\$($package.PackageFamilyName)\LocalCache"
+          if (-not (Test-Path $setup)) { Get-ChildItem -Recurse $private -ErrorAction SilentlyContinue | Select-Object -First 20 FullName; throw "No $setup" }
+          if (Test-Path "$private\Roaming\Trix") { throw "Files in $private\Roaming\Trix" }
+          # A second start shows the panel: a screenshot for the Store listing
+          Start-Process explorer.exe "shell:AppsFolder\$($package.PackageFamilyName)!Trix"
+          Start-Sleep 5
+          try {
+            Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+            $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $image = New-Object System.Drawing.Bitmap $screen.Width, $screen.Height
+            [System.Drawing.Graphics]::FromImage($image).CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
+            $image.Save("$PWD/dist/Trix-Store-screenshot.png")
+          } catch { Write-Warning "No screenshot: $_" }
+          Stop-Process -Name Trix
+          Remove-AppxPackage $package.PackageFullName
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: store
+          path: |
+            dist/Trix.msix
+            dist/Trix-Store-screenshot.png
 
   macos:
     runs-on: xcode-27

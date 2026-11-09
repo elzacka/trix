@@ -11,7 +11,7 @@ An app shell for quick reference on Windows and macOS:
 - Your own content in plain Markdown files, one per tab, written by hand or
   imported from Word, RTF, Excel or CSV, also by dropping a file on a tab
 
-No installer, no network.
+No network. Windows: a portable folder or the Microsoft Store.
 
 ## Use
 
@@ -65,4 +65,12 @@ goes out:
 Developer ID in the keychain and notarized with the `notarytool` profile
 `trix`, else ad hoc.
 
+The Windows job also builds `Trix.msix` from
+[store/AppxManifest.xml](store/AppxManifest.xml), starts it once on the runner
+to check that the data folder stays `%APPDATA%\Trix` (`unvirtualizedResources`),
+and keeps it with a screenshot as the artifact `store`. Upload it by hand in
+Partner Center; the Store signs it. Privacy policy URL: `PERSONVERN.md` on
+GitHub.
+
 Credits: [TREDJEPART.md](TREDJEPART.md). Security: [SECURITY.md](SECURITY.md).
+Privacy (nb): [PERSONVERN.md](PERSONVERN.md).

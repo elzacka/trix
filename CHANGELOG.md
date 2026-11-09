@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Windows: a package for the Microsoft Store, signed by Microsoft. The data folder stays `%APPDATA%\Trix`
+- Privacy statement: `PERSONVERN.md`
+
 ## 3.0.0 - 2026-11-08
 
 - Requires macOS 27 or Windows 11 version 25H2 or newer
