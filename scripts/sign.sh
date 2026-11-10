@@ -63,7 +63,9 @@ EOF
 # Hidden, but shown where Finder shows hidden files
 rm -rf "$MOUNT/.fseventsd"
 sync
-hdiutil detach "$MOUNT"
+# Finder can still hold the volume after the layout script: retry, then force
+for _ in 1 2 3 4 5; do hdiutil detach "$MOUNT" && break; sleep 2; done
+[ -d "$MOUNT" ] && hdiutil detach -force "$MOUNT"
 hdiutil convert "$RW" -format UDZO -ov -o "$DMG"
 if [ -n "$IDENTITY" ]; then
   codesign --timestamp --sign "$IDENTITY" "$DMG"

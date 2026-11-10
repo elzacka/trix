@@ -72,7 +72,7 @@ jobs:
             Add-Type -AssemblyName System.Drawing
             Add-Type -Namespace Win32 -Name User -MemberDefinition '[DllImport("user32.dll")] public static extern System.IntPtr FindWindow(string c, string t); [DllImport("user32.dll")] public static extern bool GetWindowRect(System.IntPtr h, out RECT r); public struct RECT { public int Left, Top, Right, Bottom; }'
             $rect = New-Object Win32.User+RECT
-            if (-not [Win32.User]::GetWindowRect([Win32.User]::FindWindow($null, 'Trix'), [ref]$rect)) { throw 'No Trix window' }
+            if (-not [Win32.User]::GetWindowRect([Win32.User]::FindWindow([NullString]::Value, 'Trix'), [ref]$rect)) { throw 'No Trix window' }
             $width = $rect.Right - $rect.Left; $height = $rect.Bottom - $rect.Top
             if ($width -lt 300 -or $height -lt 400 -or $width -gt 1366 -or $height -gt 768) { throw "Trix window $width x $height" }
             $image = New-Object System.Drawing.Bitmap 1366, 768
