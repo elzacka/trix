@@ -64,15 +64,22 @@ jobs:
           $private = "$env:LOCALAPPDATA\Packages\$($package.PackageFamilyName)\LocalCache"
           if (-not (Test-Path $setup)) { Get-ChildItem -Recurse $private -ErrorAction SilentlyContinue | Select-Object -First 20 FullName; throw "No $setup" }
           if (Test-Path "$private\Roaming\Trix") { throw "Files in $private\Roaming\Trix" }
-          # A second start shows the panel: a screenshot for the Store listing
+          # A second start shows the panel: the Store screenshot, the panel alone on a 1366x768 background
+          (New-Object -ComObject Shell.Application).MinimizeAll()
           Start-Process explorer.exe "shell:AppsFolder\$($package.PackageFamilyName)!Trix"
           Start-Sleep 5
           try {
-            Add-Type -AssemblyName System.Windows.Forms, System.Drawing
-            $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-            $image = New-Object System.Drawing.Bitmap $screen.Width, $screen.Height
-            [System.Drawing.Graphics]::FromImage($image).CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
-            $image.Save("$PWD/dist/Trix-Store-screenshot.png")
+            Add-Type -AssemblyName System.Drawing
+            Add-Type -Namespace Win32 -Name User -MemberDefinition '[DllImport("user32.dll")] public static extern System.IntPtr FindWindow(string c, string t); [DllImport("user32.dll")] public static extern bool GetWindowRect(System.IntPtr h, out RECT r); public struct RECT { public int Left, Top, Right, Bottom; }'
+            $rect = New-Object Win32.User+RECT
+            if (-not [Win32.User]::GetWindowRect([Win32.User]::FindWindow($null, 'Trix'), [ref]$rect)) { throw 'No Trix window' }
+            $width = $rect.Right - $rect.Left; $height = $rect.Bottom - $rect.Top
+            if ($width -lt 300 -or $height -lt 400 -or $width -gt 1366 -or $height -gt 768) { throw "Trix window $width x $height" }
+            $image = New-Object System.Drawing.Bitmap 1366, 768
+            $graphics = [System.Drawing.Graphics]::FromImage($image)
+            $graphics.Clear([System.Drawing.Color]::FromArgb(220, 227, 236))
+            $graphics.CopyFromScreen($rect.Left, $rect.Top, [int]((1366 - $width) / 2), [int]((768 - $height) / 2), (New-Object System.Drawing.Size $width, $height))
+            $image.Save("$PWD/dist/Trix-Store-1366x768.png")
           } catch { Write-Warning "No screenshot: $_" }
           Stop-Process -Name Trix
           Remove-AppxPackage $package.PackageFullName
@@ -81,7 +88,7 @@ jobs:
           name: store
           path: |
             dist/Trix.msix
-            dist/Trix-Store-screenshot.png
+            dist/Trix-Store-1366x768.png
 
   macos:
     runs-on: xcode-27
